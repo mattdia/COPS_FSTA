@@ -1,6 +1,6 @@
 function [Parameters] = FindParameters2D_v5(parameters_path)
 
-% upgraded for single loop (SmartScan) (SOMETHING)
+% upgraded for single loop (SmartScan)
 % upgraded for Zurich Instrument Lock-In data  - Gael 5/6/2014
 %Upgraded for 6D scans. 8/7/2014
 
