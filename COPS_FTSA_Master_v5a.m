@@ -5,6 +5,9 @@
     %Setting the frequency axis of the FFT used to be wrong, by a pixel or two, but is now corrected. (Might have even been wrong by more than that, in fact...)
     %Separate frequency axes are defined for S1 and for S2. This is necessary because of the asymmetric conventions for fftshift.
     %Now includes an option to start at t != 0, for local oscillator measurements.
+%Version 5a:
+    %Modifying this to allow limited segments of t and tau.
+    %Modifying to allow easier view of 3d scans.
 
 clear all; clc; %clf;% Clear variables, close MuPad engine, clear command window.
 speedC = 2.99709e+5; % nm/ps, speed of light in air.
