@@ -17,7 +17,7 @@ ref_freq = speedC/(851.85); % THz
 dir_path = ['E:/Data/2017/2017_04/2017_04_29'];
 %dir_path = ['/Users/Chris2/Desktop/Data/2015/2015_12/2017_04_25'];
 %dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_04/2017_04_29 incomplete'];
-scan_num = '08';
+scan_num = '09';
 Delay_t0_um = 40; %um. Use this for Local oscillator measurement.
 isFFTshift = 0;
 isPadding = 2; %Pad with zeros up to numpad if set to 1. Pad by factor of 2 if set to 2.
@@ -32,6 +32,7 @@ CrtlFlags = [2,0,2,0,0,0];
     %Value of 2 means plot frequency domain for S1/S2.
     %Value of 3 means plot S3 (only for T)
     %Value of 4 means ZeroQuantum (only for T)
+PlotIndx = [1,1,1,1,1,1]; %Flags correspond to the slice number extracted for elements of CrtlFlags that are not plotted.
 
 % Eliminate the dialog box below in favor of hard-coding the values.
 % isub = [d(:).isdir];
@@ -126,7 +127,6 @@ aux = transpose(((aux_init:aux_stepsize:((NumSteps_aux-1)* aux_stepsize+aux_init
 if(m==0)
    bias = V_init; 
 end
-Plotindx = [1,1,1];
        
 %% Remaking of the function ArbAxisPlot (v4).
 
@@ -263,8 +263,16 @@ end
 
 %% Plot the figure.
 
-Z1plot = ZS1;
-Z1plot = Z1plot(:,:,:,Plotindx(1),Plotindx(2),Plotindx(3));
+if (CrtlFlags(1) ~= 0) & (CrtlFlags(3) ~= 0)
+    Z1plot = ZS1(:,PlotIndx(2),:,PlotIndx(4),PlotIndx(5),PlotIndx(6));
+    Z4plot = ZS4(:,PlotIndx(2),:,PlotIndx(4),PlotIndx(5),PlotIndx(6));
+elseif (CrtlFlags(2) ~= 0) & (CrtlFlags(3) ~= 0)
+    Z1plot = ZS1(PlotIndx(1),:,:,PlotIndx(4),PlotIndx(5),PlotIndx(6));
+    Z4plot = ZS4(PlotIndx(1),:,:,PlotIndx(4),PlotIndx(5),PlotIndx(6));
+elseif (CrtlFlags(1) ~= 0) & (CrtlFlags(2) ~= 0)
+    Z1plot = ZS1(:,:,PlotIndx(3),PlotIndx(4),PlotIndx(5),PlotIndx(6));
+    Z4plot = ZS4(:,:,PlotIndx(3),PlotIndx(4),PlotIndx(5),PlotIndx(6));
+end
 Z1plot = squeeze(Z1plot);
 if CrtlFlags(3) == 2
     Delay_t0 = Delay_t0_um * 2e+3/speedC;
@@ -273,14 +281,12 @@ if CrtlFlags(3) == 2
     [pp,qq] = size(Z1plot);
     Z1plot = Z1plot .* repmat(PhaseAdjustment_t0,pp,1);
 end
-Z4plot = ZS4;
-Z4plot = Z4plot(:,:,:,Plotindx(1),Plotindx(2),Plotindx(3));
 Z4plot = squeeze(Z4plot);
 
 Z1procc{1} = Z1plot;
 Z4procc{1} = Z4plot;
-VmaxZ1 = (max(max(abs(Z1plot))));
-VminZ1 = (min(min(abs(Z1plot))));
+VmaxZ1 = max(max(abs(Z1plot)));
+VminZ1 = min(min(abs(Z1plot)));
 VmaxZ4 = max(max(abs(Z4plot)));
 VminZ4 = min(min(abs(Z4plot)));
 axis1 = axis{1};
