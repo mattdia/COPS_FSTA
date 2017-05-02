@@ -37,10 +37,7 @@ PlotIndx = [1,1,1,1,1,1]; %Flags correspond to the slice number extracted for el
 
 StepLimit = [0,0,0];
     %Step limit for [tau, T, t] 0 leaves them unchanged.
-ScanInterrupted = [0,1,0,0,0,0];
-    %Scan interrupted for [tau, T, t, V, aux, aux2] 0 leaves them
-    %unchanged, 1 tells the code that particular axis was interrupted
-    %during a scan.
+
 
 
     
@@ -86,19 +83,19 @@ NumSteps3d = [];
 
 for (i= 1:6)
    if i<=3
-        if StepLimit(i)==0 && ScanInterrupted(i) == 0
-            NumSteps3d(i) = parameters(6+i,:);
-        elseif StepLimit(i)~=0 && ScanInterrupted(i) == 0
+        if StepLimit(i)==0
+            NumSteps3d(i) = size(MatrixX1,i);
             
+        elseif StepLimit(i)~=0 
             NumSteps3d(i) = StepLimit(i);
 
         elseif ScanInterrupted(i)~=0
             NumSteps3d(i) = size(MatrixX1,i);
         end
-   elseif i>3 && ScanInterrupted(i) ==1
+   elseif i>3 && size(MatrixX1,i)~=1
        NumSteps3d(i) = size(MatrixX1,i);
        
-   elseif i>3 && ScanInterrupted(i)==0
+   elseif i>3
       NumSteps3d(4) =  parameters(28,:);
       NumSteps3d(5) =  parameters(31,:);
       NumSteps3d(6) =  parameters(31,:);
