@@ -16,8 +16,8 @@ planck = 4.135667662e-3;  % eV*ps, or eV/THz, from NIST. Uncertainty is in the l
 ref_freq = speedC/(851.85); % THz
 %dir_path = ['E:/Data/2017/2017_04/2017_04_29'];
 %dir_path = ['/Users/Chris2/Desktop/Data/2015/2015_12/2017_04_25'];
-dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_04/2017_04_29 incomplete'];
-scan_num = '05';
+%dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_04/2017_04_29 incomplete'];
+scan_num = '13';
 
 Delay_t0_um = 40; %um. Use this for Local oscillator measurement.
 isFFTshift = 0;
@@ -34,9 +34,7 @@ CrtlFlags = [2,0,2,0,0,0];
     %Value of 3 means plot S3 (only for T)
     %Value of 4 means ZeroQuantum (only for T)
 PlotIndx = [1,1,1,1,1,1]; %Flags correspond to the slice number extracted for elements of CrtlFlags that are not plotted.
-
-StepLimit = [0,0,0];
-%Step limit for [tau, T, t] 0 leaves them unchanged.
+StepLimit = [0,0,0]; %Step limit for [tau, T, t]. Entering 0 leaves them at full length.
     
 % Eliminate the dialog box below in favor of hard-coding the values.
 % isub = [d(:).isdir];
@@ -67,14 +65,10 @@ parameters_path = [file_path 'MD_parameters.txt'];
 %Call data from PrepDataF_v8 reading in all demodulators at once.
 [MatrixX1,MatrixY1,MatrixX2,MatrixY2,MatrixX3,MatrixY3,MatrixX4,MatrixY4,MatrixX5,MatrixY5,MatrixX6,MatrixY6] = PrepDataF_v8(file_path);
 parameters = FindParameters2D_v5(parameters_path); %NB! This also gets executed internally in PrepData above. Not sure if could be faster. I think PrepData does not need to be a separate function.
-
 NumSteps_pwr = 1;        
-
-
 
 %Define Number of Steps
 NumSteps3d = [];
-
 for (i= 1:3)
     if StepLimit(i)==0
         NumSteps3d(i) = parameters(6+i,:);
@@ -82,19 +76,15 @@ for (i= 1:3)
         NumSteps3d(i) = StepLimit(i);
     end
 end
-
 NumSteps_tau = NumSteps3d(1); 
 NumSteps_T = NumSteps3d(2); 
 NumSteps_t = NumSteps3d(3);
-
 %NumSteps_tau = parameters(7,:); 
 %NumSteps_T = parameters(8,:); 
 %NumSteps_t = parameters(9,:);
 NumSteps_V = parameters(28,:);
 NumSteps_aux = parameters(31,:);
 NumSteps_aux2 = parameters(34,:);
-
-
 %Define StepSize
 tau_stepsize = abs(parameters(4,1));
 T_stepsize = abs(parameters(5,1));
@@ -106,10 +96,8 @@ V_init = parameters(26,1);
 aux_init = parameters(29,1);
 %Cut data to fit the step limit
 
-
 ZS1_m = complex(MatrixX1(1:NumSteps_tau,1:NumSteps_T,1:NumSteps_t,:,:,:),MatrixY1(1:NumSteps_tau,1:NumSteps_T,1:NumSteps_t,:,:,:));
 ZS4_m = complex(MatrixX4(1:NumSteps_tau,1:NumSteps_T,1:NumSteps_t,:,:,:),MatrixY4(1:NumSteps_tau,1:NumSteps_T,1:NumSteps_t,:,:,:));
-
 
 %Define StepMatrix
 StepMatrix = [NumSteps_tau,NumSteps_T,NumSteps_t,NumSteps_V,NumSteps_aux,NumSteps_pwr];    
@@ -343,7 +331,7 @@ else
 end
 title('S1 abs')
 colormap(jet)
-x = linspace(axis2(1),axis2(end),20); y = x; line(x,y,'Color','White')%,'LineStyle', ':','MarkerSize',16)
+x = linspace(axis2(1),axis2(end),20); y = -x; line(x,y,'Color','White')%,'LineStyle', ':','MarkerSize',16)
 colorbar();
 ylabel('${\hbar\omega_{\tau}}$', 'interpreter','latex','FontSize',18)
 xlabel('${\hbar\omega_{t}}$', 'interpreter','latex','FontSize',18)
@@ -353,7 +341,7 @@ if(isContourPlot)
 else
     hFigReal = imagesc(axis2(xlim_min:xlim_max),axis1(ylim_min:ylim_max),real(Z1plot(ylim_min:ylim_max,xlim_min:xlim_max)),[-VmaxZ1,VmaxZ1]); set(gca,'Ydir','Normal'); 
 end
-x = linspace(axis2(1),axis2(end),20); y = x; line(x,y,'Color','Black','LineStyle', ':')%,'MarkerSize',16)
+x = linspace(axis2(1),axis2(end),20); y = -x; line(x,y,'Color','Black','LineStyle', ':')%,'MarkerSize',16)
 colorbar(); 
 % xlim([1450,1480])
 % ylim([-1480,-1450])
