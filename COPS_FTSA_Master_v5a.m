@@ -16,8 +16,8 @@ planck = 4.135667662e-3;  % eV*ps, or eV/THz, from NIST. Uncertainty is in the l
 ref_freq = speedC/(851.85); % THz
 %dir_path = ['E:/Data/2017/2017_04/2017_04_29'];
 %dir_path = ['/Users/Chris2/Desktop/Data/2015/2015_12/2017_04_25'];
-dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_04/2017_04_29'];
-scan_num = '10';
+dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_05/2017_05_02'];
+scan_num = '08';
 
 Delay_t0_um = 40; %um. Use this for Local oscillator measurement.
 isFFTshift = 0;
@@ -26,7 +26,7 @@ numpad = 1024;  %fft prefers 2^n points
 Undersample_win = 0;
 isContourPlot = 0;
 NbContours=15;  %Sets the number of contours if using contour plots.
-CrtlFlags = [2,0,2,0,0,0]; 
+CrtlFlags = [1,0,1,0,0,0]; 
     %Flags correspond to [tau,T,t,V,aux,pwr] 
     %Value of 0 means do nothing                        
     %Value of 1 means plot time domain
