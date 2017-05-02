@@ -16,8 +16,8 @@ planck = 4.135667662e-3;  % eV*ps, or eV/THz, from NIST. Uncertainty is in the l
 ref_freq = speedC/(851.85); % THz
 %dir_path = ['E:/Data/2017/2017_04/2017_04_29'];
 %dir_path = ['/Users/Chris2/Desktop/Data/2015/2015_12/2017_04_25'];
-dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_04/2017_04_29'];
-scan_num = '09';
+dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_05/2017_05_02'];
+scan_num = '08';
 
 Delay_t0_um = 40; %um. Use this for Local oscillator measurement.
 isFFTshift = 0;
@@ -26,7 +26,7 @@ numpad = 1024;  %fft prefers 2^n points
 Undersample_win = 0;
 isContourPlot = 0;
 NbContours=15;  %Sets the number of contours if using contour plots.
-CrtlFlags = [2,0,2,0,0,0]; 
+CrtlFlags = [1,0,1,0,0,0]; 
     %Flags correspond to [tau,T,t,V,aux,pwr] 
     %Value of 0 means do nothing                        
     %Value of 1 means plot time domain
@@ -65,27 +65,53 @@ parameters_path = [file_path 'MD_parameters.txt'];
 
 %Call data from PrepDataF_v8 reading in all demodulators at once.
 [MatrixX1,MatrixY1,MatrixX2,MatrixY2,MatrixX3,MatrixY3,MatrixX4,MatrixY4,MatrixX5,MatrixY5,MatrixX6,MatrixY6] = PrepDataF_v8(file_path);
+
+
 parameters = FindParameters2D_v5(parameters_path); %NB! This also gets executed internally in PrepData above. Not sure if could be faster. I think PrepData does not need to be a separate function.
 NumSteps_pwr = 1;        
 
-%Define Number of Steps
+
+
+
+%Define Number of Steps, allow for both scan limiting and interrupted scans
+%in time axes and scan limiting in all six axes.
 NumSteps3d = [];
-for (i= 1:3)
-    if StepLimit(i)==0
-        NumSteps3d(i) = parameters(6+i,:);
-    else
-        NumSteps3d(i) = StepLimit(i);
-    end
+
+for (i= 1:6)
+   if i<=3
+        if StepLimit(i)==0
+            NumSteps3d(i) = size(MatrixX1,i);
+            
+        elseif StepLimit(i)~=0 
+            NumSteps3d(i) = StepLimit(i);
+
+        elseif ScanInterrupted(i)~=0
+            NumSteps3d(i) = size(MatrixX1,i);
+        end
+   elseif i>3 && size(MatrixX1,i)~=1
+       NumSteps3d(i) = size(MatrixX1,i);
+       
+   elseif i>3
+      NumSteps3d(4) =  parameters(28,:);
+      NumSteps3d(5) =  parameters(31,:);
+      NumSteps3d(6) =  parameters(31,:);
+      
+   end    
 end
+
+
 NumSteps_tau = NumSteps3d(1); 
 NumSteps_T = NumSteps3d(2); 
 NumSteps_t = NumSteps3d(3);
+NumSteps_V = NumSteps3d(4);
+NumSteps_aux = NumSteps3d(6);
+NumSteps_aux2 = NumSteps3d(5);
 %NumSteps_tau = parameters(7,:); 
 %NumSteps_T = parameters(8,:); 
 %NumSteps_t = parameters(9,:);
-NumSteps_V = parameters(28,:);
-NumSteps_aux = parameters(31,:);
-NumSteps_aux2 = parameters(34,:);
+%NumSteps_V = parameters(28,:);
+%NumSteps_aux = parameters(31,:);
+%NumSteps_aux2 = parameters(34,:);
 %Define StepSize
 tau_stepsize = abs(parameters(4,1));
 T_stepsize = abs(parameters(5,1));
@@ -116,7 +142,7 @@ end
 end
 end
 end
-           
+     
 % ZS1_m = abs(ZS1_m).*exp(complex(0,1)*ZS1_phase);
 % ZS4_m = abs(ZS4_m).*exp(complex(0,1)*ZS4_phase);
 

@@ -117,7 +117,7 @@ DATA_SIZE_tau_T_t=size(ZMatrixX1);
 
 %Here I define the Data matrices that will be used.
 i=1;
-while (i<=NumSteps_scan)
+while (i<= NumSteps_scan)
     MatrixX1(coordinates(i,1),coordinates(i,2),coordinates(i,3),coordinates(i,4),coordinates(i,5),coordinates(i,6),coordinates(i,7)) = X1(i);
     MatrixY1(coordinates(i,1),coordinates(i,2),coordinates(i,3),coordinates(i,4),coordinates(i,5),coordinates(i,6),coordinates(i,7)) = Y1(i);
     MatrixX2(coordinates(i,1),coordinates(i,2),coordinates(i,3),coordinates(i,4),coordinates(i,5),coordinates(i,6),coordinates(i,7)) = X2(i);
@@ -130,7 +130,15 @@ while (i<=NumSteps_scan)
     MatrixY5(coordinates(i,1),coordinates(i,2),coordinates(i,3),coordinates(i,4),coordinates(i,5),coordinates(i,6),coordinates(i,7)) = Y5(i);
     MatrixX6(coordinates(i,1),coordinates(i,2),coordinates(i,3),coordinates(i,4),coordinates(i,5),coordinates(i,6),coordinates(i,7)) = X6(i);
     MatrixY6(coordinates(i,1),coordinates(i,2),coordinates(i,3),coordinates(i,4),coordinates(i,5),coordinates(i,6),coordinates(i,7)) = Y6(i);
+    if i>= m;
+        
+            if i<NumSteps_scan
+                disp('Incomplete scan detected.')
+            end
+       break
+    end
     i=i+1;
+
 end
 
 %End User has to load in the parameters to reshape the data matrices using
