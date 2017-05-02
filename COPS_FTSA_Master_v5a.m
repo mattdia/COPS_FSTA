@@ -26,7 +26,7 @@ numpad = 1024;  %fft prefers 2^n points
 Undersample_win = 0;
 isContourPlot = 0;
 NbContours=15;  %Sets the number of contours if using contour plots.
-CrtlFlags = [1,0,1,0,0,0]; 
+CrtlFlags = [2,0,2,0,0,0]; 
     %Flags correspond to [tau,T,t,V,aux,pwr] 
     %Value of 0 means do nothing                        
     %Value of 1 means plot time domain
@@ -35,7 +35,7 @@ CrtlFlags = [1,0,1,0,0,0];
     %Value of 4 means ZeroQuantum (only for T)
 PlotIndx = [1,1,1,1,1,1]; %Flags correspond to the slice number extracted for elements of CrtlFlags that are not plotted.
 StepLimit = [0,0,0]; %Step limit for [tau, T, t]. Entering 0 leaves them at full length.
-isSaveProcessedData = 0; %Set to 1 to save processed data.
+isSaveProcessedData = 1; %Set to 1 to save processed data.
     
 % Eliminate the dialog box below in favor of hard-coding the values.
 % isub = [d(:).isdir];
@@ -278,11 +278,13 @@ if((CrtlFlags(6) == 1) & (i < 3))
 end
 
 if isSaveProcessedData
-    dlmwrite('ZS1Real.txt',real(ZS1));
-    dlmwrite('ZS1Imag.txt',Imag(ZS1));
-    dlmwrite('ZS4Real.txt',real(ZS4));
-    dlmwrite('ZS4Imag.txt',Imag(ZS4));
+    dlmwrite([file_path 'ZS1Real.txt'],real(ZS1));
+    dlmwrite([file_path 'ZS1Imag.txt'],imag(ZS1));
+    dlmwrite([file_path 'ZS4Real.txt'],real(ZS4));
+    dlmwrite([file_path 'ZS4Imag.txt'],imag(ZS4));
 end
+
+
 
 %% Plot the figure.
 
