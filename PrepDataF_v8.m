@@ -131,9 +131,11 @@ while (i<= NumSteps_scan)
     MatrixX6(coordinates(i,1),coordinates(i,2),coordinates(i,3),coordinates(i,4),coordinates(i,5),coordinates(i,6),coordinates(i,7)) = X6(i);
     MatrixY6(coordinates(i,1),coordinates(i,2),coordinates(i,3),coordinates(i,4),coordinates(i,5),coordinates(i,6),coordinates(i,7)) = Y6(i);
     if i>= m;
-        disp('Interrupted/Incomplete scan detected.')
-        break
         
+            if i<NumSteps_scan
+                disp('Incomplete scan detected.')
+            end
+       break
     end
     i=i+1;
 
