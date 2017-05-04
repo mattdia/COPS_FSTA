@@ -16,17 +16,17 @@ planck = 4.135667662e-3;  % eV*ps, or eV/THz, from NIST. Uncertainty is in the l
 ref_freq = speedC/(851.85); % THz
 %dir_path = ['E:/Data/2017/2017_04/2017_04_29'];
 %dir_path = ['/Users/Chris2/Desktop/Data/2015/2015_12/2017_04_25'];
-dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_05/2017_05_02'];
-scan_num = '08';
+dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_04/2017_04_29'];
+scan_num = '04';
 
-Delay_t0_um = 40; %um. Use this for Local oscillator measurement.
+Delay_t0_um = 30; %um. Use this for Local oscillator measurement.
 isFFTshift = 0;
 isPadding = 2; %Pad with zeros up to numpad if set to 1. Pad by factor of 2 if set to 2.
 numpad = 1024;  %fft prefers 2^n points
 Undersample_win = 0;
 isContourPlot = 0;
 NbContours=15;  %Sets the number of contours if using contour plots.
-CrtlFlags = [1,0,1,0,0,0]; 
+CrtlFlags = [2,0,2,0,0,0]; 
     %Flags correspond to [tau,T,t,V,aux,pwr] 
     %Value of 0 means do nothing                        
     %Value of 1 means plot time domain
@@ -303,14 +303,6 @@ if((CrtlFlags(6) == 1) & (i < 3))
     i=i+1;
 end
 
-if isSaveProcessedData
-    dlmwrite([file_path 'ZS1Real.txt'],real(ZS1));
-    dlmwrite([file_path 'ZS1Imag.txt'],imag(ZS1));
-    dlmwrite([file_path 'ZS4Real.txt'],real(ZS4));
-    dlmwrite([file_path 'ZS4Imag.txt'],imag(ZS4));
-end
-
-
 
 %% Plot the figure.
 
@@ -409,3 +401,15 @@ colorbar();
 ylabel('${\hbar\omega_{\tau}}$', 'interpreter','latex','FontSize',18)
 xlabel('${\hbar\omega_{t}}$', 'interpreter','latex','FontSize',18)
 title('linear re')
+
+%% Save Processed data
+
+if isSaveProcessedData
+    dlmwrite([file_path 'ZS1Real.txt'],real(ZS1));
+    dlmwrite([file_path 'ZS1Imag.txt'],imag(ZS1));
+    dlmwrite([file_path 'ZS4Real.txt'],real(ZS4));
+    dlmwrite([file_path 'ZS4Imag.txt'],imag(ZS4));
+    dlmwrite([file_path 'axis1.txt'], axis1');
+    dlmwrite([file_path 'axis2.txt'], axis2');
+    dlmwrite([file_path 'axis3.txt'], axis3');
+end
