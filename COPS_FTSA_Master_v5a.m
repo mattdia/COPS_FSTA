@@ -350,7 +350,7 @@ end
 fig8 = figure(8);
 set( gcf, 'Color', 'White', 'Unit', 'Normalized', ...
 'Position', [0.1,0.1,.8,.8] ) ;
-subplot(2,2,1)
+subplot(3,2,1)
 xlim_min = 1;
 xlim_max = n;
 ylim_min = 1;
@@ -371,7 +371,7 @@ x = linspace(axis2(1),axis2(end),20); y = -x; line(x,y,'Color','White')%,'LineSt
 colorbar();
 ylabel('${\hbar\omega_{\tau}}$', 'interpreter','latex','FontSize',18)
 xlabel('${\hbar\omega_{t}}$', 'interpreter','latex','FontSize',18)
-subplot(2,2,2)
+subplot(3,2,2)
 if(isContourPlot)
     contourf(axis2(1:n),axis1(1:m),real(Z1plot)/VmaxZ1,linspace(-1,1,NbContours),'linestyle','none');
 else
@@ -385,7 +385,24 @@ colorbar();
 ylabel('${\hbar\omega_{\tau}}$', 'interpreter','latex','FontSize',18)
 xlabel('${\hbar\omega_{t}}$', 'interpreter','latex','FontSize',18) 
 title('S1 re')
-subplot(2,2,3)
+
+
+subplot(3,2,3)
+if(isContourPlot)
+    contourf(axis2(1:n),axis1(1:m),real(Z1plot)/VmaxZ1,linspace(-1,1,NbContours),'linestyle','none');
+else
+    hFigReal = imagesc(axis2(xlim_min:xlim_max),axis1(ylim_min:ylim_max),real(Z1plot(ylim_min:ylim_max,xlim_min:xlim_max)),[-VmaxZ1,VmaxZ1]); set(gca,'Ydir','Normal'); 
+end
+x = linspace(axis2(1),axis2(end),20); y = -x; line(x,y,'Color','Black','LineStyle', ':')%,'MarkerSize',16)
+colorbar(); 
+% xlim([1450,1480])
+% ylim([-1480,-1450])
+% line(x,y,'Color','White','MarkerSize',16)
+ylabel('${\hbar\omega_{\tau}}$', 'interpreter','latex','FontSize',18)
+xlabel('${\hbar\omega_{t}}$', 'interpreter','latex','FontSize',18) 
+title('S1 re')
+
+subplot(3,2,5)
 if(isContourPlot)
     %contourf(axis2(1:n),-axis1(1:m),flipud(abs(Z4plot))/VmaxZ4,linspace(-1,1,NbContours),'linestyle','none')
     contourf(axis2(1:n),axis1(1:m),(abs(Z4plot))/VmaxZ4,linspace(-1,1,NbContours),'linestyle','none')
@@ -397,7 +414,7 @@ colorbar();
 ylabel('${\hbar\omega_{\tau}}$', 'interpreter','latex','FontSize',18)
 xlabel('${\hbar\omega_{t}}$', 'interpreter','latex','FontSize',18)
 title('linear abs')
-subplot(2,2,4)
+subplot(3,2,6)
 if(isContourPlot)
     %contourf(axis2(1:n),-axis1(1:m),flipud(real(Z4plot))/VmaxZ4,linspace(-1,1,NbContours),'linestyle','none')
     contourf(axis2(1:n),axis1(1:m),(real(Z4plot))/VmaxZ4,linspace(-1,1,NbContours),'linestyle','none')
