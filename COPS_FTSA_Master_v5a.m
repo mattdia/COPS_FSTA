@@ -34,7 +34,7 @@ CrtlFlags = [2,0,2,0,0,0];
     %Value of 3 means plot S3 (only for T)
     %Value of 4 means ZeroQuantum (only for T)
 PlotIndx = [1,1,1,1,1,1]; %Flags correspond to the slice number extracted for elements of CrtlFlags that are not plotted.
-StepLimit = [0,0,0]; %Step limit for [tau, T, t]. Entering 0 leaves them at full length.
+StepLimit = [25,0,25]; %Step limit for [tau, T, t]. Entering 0 leaves them at full length.
 isSaveProcessedData = 1; %Set to 1 to save processed data.
     
 % Eliminate the dialog box below in favor of hard-coding the values.
