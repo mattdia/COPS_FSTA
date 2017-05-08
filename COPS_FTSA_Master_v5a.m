@@ -17,7 +17,7 @@ ref_freq = speedC/(851.85); % THz
 %dir_path = ['E:/Data/2017/2017_04/2017_04_29'];
 %dir_path = ['/Users/Chris2/Desktop/Data/2015/2015_12/2017_04_25'];
 dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_05/2017_05_07'];
-scan_num = '03';
+scan_num = '04';
 
 Delay_t0_um = 40; %um. Use this for Local oscillator measurement.
 isFFTshift = 0;
@@ -34,7 +34,7 @@ CrtlFlags = [2,0,2,0,0,0];
     %Value of 3 means plot S3 (only for T)
     %Value of 4 means ZeroQuantum (only for T)
 PlotIndx = [1,1,1,1,1,1]; %Flags correspond to the slice number extracted for elements of CrtlFlags that are not plotted.
-StepLimit = [25,0,25]; %Step limit for [tau, T, t]. Entering 0 leaves them at full length.
+StepLimit = [0,0,0]; %Step limit for [tau, T, t]. Entering 0 leaves them at full length.
 isSaveProcessedData = 1; %Set to 1 to save processed data.
     
 % Eliminate the dialog box below in favor of hard-coding the values.
@@ -247,6 +247,7 @@ end
 i=1;  
 if(CrtlFlags(1) == 1)
     axis{1} = tau;
+    axis{3} = tau;
     i = i+1;
 elseif(CrtlFlags(1) == 2)
     axis{1} = E_tauS1;
@@ -342,8 +343,12 @@ VmaxZ4 = max(max(abs(Z4plot)));
 VminZ4 = min(min(abs(Z4plot)));
 axis1 = axis{1};
 axis2 = axis{2};
+
+
 if CrtlFlags(1) == 2
     axis1alt = axis{3};
+elseif CrtlFlags(1)==1
+    axis1alt = axis{1};  
 end
 [m,n] = size(Z1plot);
 
