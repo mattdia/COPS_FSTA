@@ -17,7 +17,7 @@ ref_freq = speedC/(851.85); % THz
 %dir_path = ['E:/Data/2017/2017_04/2017_04_29'];
 %dir_path = ['/Users/Chris2/Desktop/Data/2015/2015_12/2017_04_25'];
 dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_05/2017_05_07'];
-scan_num = '04';
+scan_num = '05';
 
 Delay_t0_um = 40; %um. Use this for Local oscillator measurement.
 isFFTshift = 0;
@@ -247,7 +247,6 @@ end
 i=1;  
 if(CrtlFlags(1) == 1)
     axis{1} = tau;
-    axis{3} = tau;
     i = i+1;
 elseif(CrtlFlags(1) == 2)
     axis{1} = E_tauS1;
