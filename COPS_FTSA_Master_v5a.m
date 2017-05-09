@@ -16,10 +16,10 @@ planck = 4.135667662e-3;  % eV*ps, or eV/THz, from NIST. Uncertainty is in the l
 ref_freq = speedC/(851.85); % THz
 %dir_path = ['E:/Data/2017/2017_04/2017_04_29'];
 %dir_path = ['/Users/Chris2/Desktop/Data/2015/2015_12/2017_04_25'];
-dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_05/2017_05_07'];
-scan_num = '05';
+dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_04/2017_04_29'];
+scan_num = '04';
 
-Delay_t0_um = 40; %um. Use this for Local oscillator measurement.
+Delay_t0_um = 30; %um. Use this for Local oscillator measurement.
 isFFTshift = 0;
 isPadding = 2; %Pad with zeros up to numpad if set to 1. Pad by factor of 2 if set to 2.
 numpad = 1024;  %fft prefers 2^n points
@@ -303,14 +303,6 @@ if((CrtlFlags(6) == 1) & (i < 3))
     i=i+1;
 end
 
-if isSaveProcessedData
-    dlmwrite([file_path 'ZS1Real.txt'],real(ZS1));
-    dlmwrite([file_path 'ZS1Imag.txt'],imag(ZS1));
-    dlmwrite([file_path 'ZS4Real.txt'],real(ZS4));
-    dlmwrite([file_path 'ZS4Imag.txt'],imag(ZS4));
-end
-
-
 
 %% Plot the figure.
 
@@ -342,18 +334,17 @@ VmaxZ4 = max(max(abs(Z4plot)));
 VminZ4 = min(min(abs(Z4plot)));
 axis1 = axis{1};
 axis2 = axis{2};
-
-
 if CrtlFlags(1) == 2
     axis1alt = axis{3};
 elseif CrtlFlags(1)==1
-    axis1alt = axis{1};  
+    axis1alt = axis{1};
 end
 [m,n] = size(Z1plot);
 
 fig8 = figure(8);
 set( gcf, 'Color', 'White', 'Unit', 'Normalized', ...
 'Position', [0.1,0.1,.8,.8] ) ;
+
 subplot(2,2,1)
 xlim_min = 1;
 xlim_max = n;
@@ -390,7 +381,6 @@ ylabel('${\hbar\omega_{\tau}}$', 'interpreter','latex','FontSize',18)
 xlabel('${\hbar\omega_{t}}$', 'interpreter','latex','FontSize',18) 
 title('S1 re')
 
-
 subplot(2,2,3)
 if(isContourPlot)
     hFig = contourf(axis2(1:n),axis1alt(1:m),abs(Z4plot),linspace(0,VmaxZ4,NbContours),'linestyle','none');
@@ -420,7 +410,6 @@ ylabel('${\hbar\omega_{\tau}}$', 'interpreter','latex','FontSize',18)
 xlabel('${\hbar\omega_{t}}$', 'interpreter','latex','FontSize',18) 
 title('S2 re')
 
-
 %% Extra linear plots
 % subplot(3,2,5)
 % if(isContourPlot)
@@ -446,3 +435,17 @@ title('S2 re')
 % ylabel('${\hbar\omega_{\tau}}$', 'interpreter','latex','FontSize',18)
 % xlabel('${\hbar\omega_{t}}$', 'interpreter','latex','FontSize',18)
 % title('linear re')
+
+%% Save Processed data
+
+if isSaveProcessedData
+    OutDataPath = strcat(file_path, 'Output/');
+    if ~isdir(OutDataPath) mkdir(file_path, 'Output'); end
+    dlmwrite([OutDataPath 'ZS1Real.txt'],real(ZS1));
+    dlmwrite([OutDataPath 'ZS1Imag.txt'],imag(ZS1));
+    dlmwrite([OutDataPath 'ZS4Real.txt'],real(ZS4));
+    dlmwrite([OutDataPath 'ZS4Imag.txt'],imag(ZS4));
+    dlmwrite([OutDataPath 'axis1.txt'], axis1');
+    dlmwrite([OutDataPath 'axis2.txt'], axis2');
+    dlmwrite([OutDataPath 'axis1alt.txt'], axis1alt');
+end
