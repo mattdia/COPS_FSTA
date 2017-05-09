@@ -336,12 +336,15 @@ axis1 = axis{1};
 axis2 = axis{2};
 if CrtlFlags(1) == 2
     axis1alt = axis{3};
+elseif CrtlFlags(1)==1
+    axis1alt = axis{1};
 end
 [m,n] = size(Z1plot);
 
 fig8 = figure(8);
 set( gcf, 'Color', 'White', 'Unit', 'Normalized', ...
 'Position', [0.1,0.1,.8,.8] ) ;
+
 subplot(2,2,1)
 xlim_min = 1;
 xlim_max = n;
@@ -377,30 +380,61 @@ colorbar();
 ylabel('${\hbar\omega_{\tau}}$', 'interpreter','latex','FontSize',18)
 xlabel('${\hbar\omega_{t}}$', 'interpreter','latex','FontSize',18) 
 title('S1 re')
+
 subplot(2,2,3)
 if(isContourPlot)
-    %contourf(axis2(1:n),-axis1(1:m),flipud(abs(Z4plot))/VmaxZ4,linspace(-1,1,NbContours),'linestyle','none')
-    contourf(axis2(1:n),axis1(1:m),(abs(Z4plot))/VmaxZ4,linspace(-1,1,NbContours),'linestyle','none')
+    hFig = contourf(axis2(1:n),axis1alt(1:m),abs(Z4plot),linspace(0,VmaxZ4,NbContours),'linestyle','none');
 else
+    %hFig = imagesc(axis2(ylim_min:ylim_max),axis1(xlim_min:xlim_max),abs(Z1plot(ylim_min:ylim_max,xlim_min:xlim_max))); set(gca,'Ydir','Normal');
+    hFig = imagesc(axis2(xlim_min:xlim_max),axis1alt(ylim_min:ylim_max),abs(Z4plot(ylim_min:ylim_max,xlim_min:xlim_max))); set(gca,'Ydir','Normal');
 end
-colorbar(); 
-% ylim([1450,1480])
-% %xlim([1450,1480])
+title('S2 abs')
+colormap(jet)
+x = linspace(axis2(1),axis2(end),20); y = x; line(x,y,'Color','White')%,'LineStyle', ':','MarkerSize',16)
+colorbar();
 ylabel('${\hbar\omega_{\tau}}$', 'interpreter','latex','FontSize',18)
 xlabel('${\hbar\omega_{t}}$', 'interpreter','latex','FontSize',18)
-title('linear abs')
+
 subplot(2,2,4)
 if(isContourPlot)
-    %contourf(axis2(1:n),-axis1(1:m),flipud(real(Z4plot))/VmaxZ4,linspace(-1,1,NbContours),'linestyle','none')
-    contourf(axis2(1:n),axis1(1:m),(real(Z4plot))/VmaxZ4,linspace(-1,1,NbContours),'linestyle','none')
+    contourf(axis2(1:n),axis1alt(1:m),real(Z4plot)/VmaxZ4,linspace(-1,1,NbContours),'linestyle','none');
 else
+    hFigReal = imagesc(axis2(xlim_min:xlim_max),axis1alt(ylim_min:ylim_max),real(Z4plot(ylim_min:ylim_max,xlim_min:xlim_max)),[-VmaxZ1,VmaxZ1]); set(gca,'Ydir','Normal'); 
 end
-colorbar();
-% ylim([1450,1480])
-% %xlim([1450,1480])
+x = linspace(axis2(1),axis2(end),20); y = x; line(x,y,'Color','Black','LineStyle', ':')%,'MarkerSize',16)
+colorbar(); 
+% xlim([1450,1480])
+% ylim([-1480,-1450])
+% line(x,y,'Color','White','MarkerSize',16)
 ylabel('${\hbar\omega_{\tau}}$', 'interpreter','latex','FontSize',18)
-xlabel('${\hbar\omega_{t}}$', 'interpreter','latex','FontSize',18)
-title('linear re')
+xlabel('${\hbar\omega_{t}}$', 'interpreter','latex','FontSize',18) 
+title('S2 re')
+
+%% Extra linear plots
+% subplot(3,2,5)
+% if(isContourPlot)
+%     %contourf(axis2(1:n),-axis1(1:m),flipud(abs(Z4plot))/VmaxZ4,linspace(-1,1,NbContours),'linestyle','none')
+%     contourf(axis2(1:n),axis1(1:m),(abs(Z4plot))/VmaxZ4,linspace(-1,1,NbContours),'linestyle','none')
+% else
+% end
+% colorbar(); 
+% % ylim([1450,1480])
+% % %xlim([1450,1480])
+% ylabel('${\hbar\omega_{\tau}}$', 'interpreter','latex','FontSize',18)
+% xlabel('${\hbar\omega_{t}}$', 'interpreter','latex','FontSize',18)
+% title('linear abs')
+% subplot(3,2,6)
+% if(isContourPlot)
+%     %contourf(axis2(1:n),-axis1(1:m),flipud(real(Z4plot))/VmaxZ4,linspace(-1,1,NbContours),'linestyle','none')
+%     contourf(axis2(1:n),axis1(1:m),(real(Z4plot))/VmaxZ4,linspace(-1,1,NbContours),'linestyle','none')
+% else
+% end
+% colorbar();
+% % ylim([1450,1480])
+% % %xlim([1450,1480])
+% ylabel('${\hbar\omega_{\tau}}$', 'interpreter','latex','FontSize',18)
+% xlabel('${\hbar\omega_{t}}$', 'interpreter','latex','FontSize',18)
+% title('linear re')
 
 %% Save Processed data
 
