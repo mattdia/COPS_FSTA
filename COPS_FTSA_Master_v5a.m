@@ -65,41 +65,28 @@ parameters_path = [file_path 'MD_parameters.txt'];
 
 %Call data from PrepDataF_v8 reading in all demodulators at once.
 [MatrixX1,MatrixY1,MatrixX2,MatrixY2,MatrixX3,MatrixY3,MatrixX4,MatrixY4,MatrixX5,MatrixY5,MatrixX6,MatrixY6] = PrepDataF_v8(file_path);
-
-
 parameters = FindParameters2D_v5(parameters_path); %NB! This also gets executed internally in PrepData above. Not sure if could be faster. I think PrepData does not need to be a separate function.
 NumSteps_pwr = 1;        
-
-
-
-
 %Define Number of Steps, allow for both scan limiting and interrupted scans
 %in time axes and scan limiting in all six axes.
 NumSteps3d = [];
-
 for (i= 1:6)
    if i<=3
         if StepLimit(i)==0
-            NumSteps3d(i) = size(MatrixX1,i);
-            
+            NumSteps3d(i) = size(MatrixX1,i);           
         elseif StepLimit(i)~=0 
             NumSteps3d(i) = StepLimit(i);
-
         elseif ScanInterrupted(i)~=0
             NumSteps3d(i) = size(MatrixX1,i);
         end
    elseif i>3 && size(MatrixX1,i)~=1
-       NumSteps3d(i) = size(MatrixX1,i);
-       
+       NumSteps3d(i) = size(MatrixX1,i);       
    elseif i>3
       NumSteps3d(4) =  parameters(28,:);
       NumSteps3d(5) =  parameters(31,:);
-      NumSteps3d(6) =  parameters(31,:);
-      
+      NumSteps3d(6) =  parameters(31,:); 
    end    
 end
-
-
 NumSteps_tau = NumSteps3d(1); 
 NumSteps_T = NumSteps3d(2); 
 NumSteps_t = NumSteps3d(3);
@@ -335,9 +322,9 @@ VminZ4 = min(min(abs(Z4plot)));
 axis1 = axis{1};
 axis2 = axis{2};
 if CrtlFlags(1) == 2
-    axis1alt = axis{3};
+    axis1S2 = axis{3};
 elseif CrtlFlags(1)==1
-    axis1alt = axis{1};
+    axis1S2 = axis{1};
 end
 [m,n] = size(Z1plot);
 
@@ -383,10 +370,10 @@ title('S1 re')
 
 subplot(2,2,3)
 if(isContourPlot)
-    hFig = contourf(axis2(1:n),axis1alt(1:m),abs(Z4plot),linspace(0,VmaxZ4,NbContours),'linestyle','none');
+    hFig = contourf(axis2(1:n),axis1S2(1:m),abs(Z4plot),linspace(0,VmaxZ4,NbContours),'linestyle','none');
 else
     %hFig = imagesc(axis2(ylim_min:ylim_max),axis1(xlim_min:xlim_max),abs(Z1plot(ylim_min:ylim_max,xlim_min:xlim_max))); set(gca,'Ydir','Normal');
-    hFig = imagesc(axis2(xlim_min:xlim_max),axis1alt(ylim_min:ylim_max),abs(Z4plot(ylim_min:ylim_max,xlim_min:xlim_max))); set(gca,'Ydir','Normal');
+    hFig = imagesc(axis2(xlim_min:xlim_max),axis1S2(ylim_min:ylim_max),abs(Z4plot(ylim_min:ylim_max,xlim_min:xlim_max))); set(gca,'Ydir','Normal');
 end
 title('S2 abs')
 colormap(jet)
@@ -397,9 +384,9 @@ xlabel('${\hbar\omega_{t}}$', 'interpreter','latex','FontSize',18)
 
 subplot(2,2,4)
 if(isContourPlot)
-    contourf(axis2(1:n),axis1alt(1:m),real(Z4plot)/VmaxZ4,linspace(-1,1,NbContours),'linestyle','none');
+    contourf(axis2(1:n),axis1S2(1:m),real(Z4plot)/VmaxZ4,linspace(-1,1,NbContours),'linestyle','none');
 else
-    hFigReal = imagesc(axis2(xlim_min:xlim_max),axis1alt(ylim_min:ylim_max),real(Z4plot(ylim_min:ylim_max,xlim_min:xlim_max)),[-VmaxZ1,VmaxZ1]); set(gca,'Ydir','Normal'); 
+    hFigReal = imagesc(axis2(xlim_min:xlim_max),axis1S2(ylim_min:ylim_max),real(Z4plot(ylim_min:ylim_max,xlim_min:xlim_max)),[-VmaxZ1,VmaxZ1]); set(gca,'Ydir','Normal'); 
 end
 x = linspace(axis2(1),axis2(end),20); y = x; line(x,y,'Color','Black','LineStyle', ':')%,'MarkerSize',16)
 colorbar(); 
@@ -411,6 +398,7 @@ xlabel('${\hbar\omega_{t}}$', 'interpreter','latex','FontSize',18)
 title('S2 re')
 
 %% Extra linear plots
+
 % subplot(3,2,5)
 % if(isContourPlot)
 %     %contourf(axis2(1:n),-axis1(1:m),flipud(abs(Z4plot))/VmaxZ4,linspace(-1,1,NbContours),'linestyle','none')
@@ -447,5 +435,5 @@ if isSaveProcessedData
     dlmwrite([OutDataPath 'ZS4Imag.txt'],imag(ZS4));
     dlmwrite([OutDataPath 'axis1.txt'], axis1');
     dlmwrite([OutDataPath 'axis2.txt'], axis2');
-    dlmwrite([OutDataPath 'axis1alt.txt'], axis1alt');
+    dlmwrite([OutDataPath 'axis1S2.txt'], axis1S2');
 end
