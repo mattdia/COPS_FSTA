@@ -335,7 +335,7 @@ VminZ4 = min(min(abs(Z4plot)));
 axis1 = axis{1};
 axis2 = axis{2};
 if CrtlFlags(1) == 2
-    axis3 = axis{3};
+    axis1alt = axis{3};
 end
 [m,n] = size(Z1plot);
 
@@ -405,11 +405,13 @@ title('linear re')
 %% Save Processed data
 
 if isSaveProcessedData
-    dlmwrite([file_path 'ZS1Real.txt'],real(ZS1));
-    dlmwrite([file_path 'ZS1Imag.txt'],imag(ZS1));
-    dlmwrite([file_path 'ZS4Real.txt'],real(ZS4));
-    dlmwrite([file_path 'ZS4Imag.txt'],imag(ZS4));
-    dlmwrite([file_path 'axis1.txt'], axis1');
-    dlmwrite([file_path 'axis2.txt'], axis2');
-    dlmwrite([file_path 'axis3.txt'], axis3');
+    OutDataPath = strcat(file_path, 'Output/');
+    if ~isdir(OutDataPath) mkdir(file_path, 'Output'); end
+    dlmwrite([OutDataPath 'ZS1Real.txt'],real(ZS1));
+    dlmwrite([OutDataPath 'ZS1Imag.txt'],imag(ZS1));
+    dlmwrite([OutDataPath 'ZS4Real.txt'],real(ZS4));
+    dlmwrite([OutDataPath 'ZS4Imag.txt'],imag(ZS4));
+    dlmwrite([OutDataPath 'axis1.txt'], axis1');
+    dlmwrite([OutDataPath 'axis2.txt'], axis2');
+    dlmwrite([OutDataPath 'axis1alt.txt'], axis1alt');
 end
