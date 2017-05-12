@@ -16,10 +16,11 @@ planck = 4.135667662e-3;  % eV*ps, or eV/THz, from NIST. Uncertainty is in the l
 ref_freq = speedC/(851.85); % THz
 %dir_path = ['E:/Data/2017/2017_04/2017_04_29'];
 %dir_path = ['/Users/Chris2/Desktop/Data/2015/2015_12/2017_04_25'];
-dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_04/2017_04_29'];
-scan_num = '04';
+%dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_05/2017_05_10'];
+dir_path = ['R:/COPS/Data/2017/2017_05/2017_05_10 incomplete'];
+scan_num = '09';
 
-Delay_t0_um = 30; %um. Use this for Local oscillator measurement.
+Delay_t0_um = 60; %um. Use this for Local oscillator measurement.
 isFFTshift = 0;
 isPadding = 2; %Pad with zeros up to numpad if set to 1. Pad by factor of 2 if set to 2.
 numpad = 1024;  %fft prefers 2^n points
@@ -33,7 +34,7 @@ CrtlFlags = [2,0,2,0,0,0];
     %Value of 2 means plot frequency domain for S1/S2.
     %Value of 3 means plot S3 (only for T)
     %Value of 4 means ZeroQuantum (only for T)
-PlotIndx = [1,1,1,1,1,1]; %Flags correspond to the slice number extracted for elements of CrtlFlags that are not plotted.
+PlotIndx = [1,11,1,1,1,1]; %Flags correspond to the slice number extracted for elements of CrtlFlags that are not plotted.
 StepLimit = [0,0,0]; %Step limit for [tau, T, t]. Entering 0 leaves them at full length.
 isSaveProcessedData = 1; %Set to 1 to save processed data.
     
