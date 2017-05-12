@@ -144,11 +144,11 @@ end
 %End User has to load in the parameters to reshape the data matrices using
 %the reshape() command.
  
-save_varstr = {MatrixX1,MatrixY1,MatrixX2,MatrixY2,MatrixX3,MatrixY3,MatrixX4,MatrixY4,MatrixX5,MatrixY5,MatrixX6,MatrixY6};
-save_string = {[file_path 'MatrixX1.txt'],[file_path 'MatrixY1.txt'],[file_path 'MatrixX2.txt'],[file_path 'MatrixY2.txt'],[file_path 'MatrixX3.txt'],[file_path 'MatrixY3.txt'],[file_path 'MatrixX4.txt'],[file_path 'MatrixY4.txt'],[file_path 'MatrixX5.txt'],[file_path 'MatrixY5.txt'],[file_path 'MatrixX6.txt'],[file_path 'MatrixY6.txt']};
+%save_varstr = {MatrixX1,MatrixY1,MatrixX2,MatrixY2,MatrixX3,MatrixY3,MatrixX4,MatrixY4,MatrixX5,MatrixY5,MatrixX6,MatrixY6};
+%save_string = {[file_path 'MatrixX1.txt'],[file_path 'MatrixY1.txt'],[file_path 'MatrixX2.txt'],[file_path 'MatrixY2.txt'],[file_path 'MatrixX3.txt'],[file_path 'MatrixY3.txt'],[file_path 'MatrixX4.txt'],[file_path 'MatrixY4.txt'],[file_path 'MatrixX5.txt'],[file_path 'MatrixY5.txt'],[file_path 'MatrixX6.txt'],[file_path 'MatrixY6.txt']};
 
-[m n] = size(save_varstr);
-for(i=1:1:n)
-    dlmwrite(save_string{i},save_varstr{i})
-end
+%[m n] = size(save_varstr);
+%for(i=1:1:n)
+%    dlmwrite(save_string{i},save_varstr{i})
+%end
 end

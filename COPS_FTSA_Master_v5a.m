@@ -13,11 +13,11 @@ clear all; clc; %clf;% Clear variables, close MuPad engine, clear command window
 speedC = 2.99709e+5; % nm/ps, speed of light in air.
 planck = 4.135667662e-3;  % eV*ps, or eV/THz, from NIST. Uncertainty is in the last 2 digits.
 
-ref_freq = speedC/(851.85); % THz
+ref_freq = speedC/(850); % THz
 %dir_path = ['E:/Data/2017/2017_04/2017_04_29'];
 %dir_path = ['/Users/Chris2/Desktop/Data/2015/2015_12/2017_04_25'];
-%dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_05/2017_05_10'];
-dir_path = ['R:/COPS/Data/2017/2017_05/2017_05_10 incomplete'];
+dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_05/2017_05_10 incomplete'];
+%dir_path = ['R:/COPS/Data/2017/2017_05/2017_05_10 incomplete'];
 scan_num = '09';
 
 Delay_t0_um = 60; %um. Use this for Local oscillator measurement.
@@ -210,7 +210,7 @@ Zero_flag = (CrtlFlags(2)==4);
 axisflag= [S3_flag,Zero_flag];
 
 %The following section deals with generating the relevant axis for plot.
-%Note that separate S1 and S2 conventions seem to be necessary because of MatLab's annoying FFTshift conventions.
+%The separate S1 and S2 conventions seem to be necessary because of MatLab's annoying FFTshift conventions.
 if isPadding == 2
     numpad = 2*length(t);
 end
@@ -428,8 +428,8 @@ title('S2 re')
 %% Save Processed data
 
 if isSaveProcessedData
-    OutDataPath = strcat(file_path, 'Output/');
-    if ~isdir(OutDataPath) mkdir(file_path, 'Output'); end
+    OutDataPath = strcat(file_path, 'Processed_Output/');
+    if ~isdir(OutDataPath) mkdir(file_path, 'Processed_Output'); end
     dlmwrite([OutDataPath 'ZS1Real.txt'],real(ZS1));
     dlmwrite([OutDataPath 'ZS1Imag.txt'],imag(ZS1));
     dlmwrite([OutDataPath 'ZS4Real.txt'],real(ZS4));
