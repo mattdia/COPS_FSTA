@@ -6,8 +6,11 @@
     %Separate frequency axes are defined for S1 and for S2. This is necessary because of the asymmetric conventions for fftshift.
     %Now includes an option to start at t != 0, for local oscillator measurements.
 %Version 5a:
-    %Modifying this to allow limited segments of t and tau.
-    %Modifying to allow easier view of 3d scans.
+    %Modified to allow limited segments of t and tau.
+    %Modified to allow easier view of 3d scans.
+    %Modified for better view of zero-quantum scans.
+    %Modified to allow viewing simultaneous functions of S1 and S2.
+%Renamed as 
 
 clear all; clc; %clf;% Clear variables, close MuPad engine, clear command window.
 speedC = 2.99709e+5; % nm/ps, speed of light in air.
