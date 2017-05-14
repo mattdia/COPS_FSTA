@@ -34,7 +34,7 @@ CrtlFlags = [2,0,2,0,0,0];
     %Value of 2 means plot frequency domain for S1/S2.
     %Value of 3 means plot S3 (only for T)
     %Value of 4 means ZeroQuantum (only for T)
-PlotIndx = [1,11,1,1,1,1]; %Flags correspond to the slice number extracted for elements of CrtlFlags that are not plotted.
+PlotIndx = [1,1,1,1,1,1]; %Flags correspond to the slice number extracted for elements of CrtlFlags that are not plotted.
 StepLimit = [0,0,0]; %Step limit for [tau, T, t]. Entering 0 leaves them at full length.
 isSaveProcessedData = 1; %Set to 1 to save processed data.
     
@@ -178,7 +178,7 @@ if isPadding
         a = p;
     end
     %Determine if T should be padded
-    if(CrtlFlags(2) ==2 | CrtlFlags(2) == 3)
+    if(CrtlFlags(2) ==2 | CrtlFlags(2) == 3 | CrtlFlags(2) == 4)
         if isPadding == 1
             b = numpad;
         elseif isPadding == 2
@@ -209,7 +209,7 @@ S3_flag = (CrtlFlags(2)==3);
 Zero_flag = (CrtlFlags(2)==4);
 axisflag= [S3_flag,Zero_flag];
 
-%The following section deals with generating the relevant axis for plot.
+%Generate plot axes.
 %The separate S1 and S2 conventions seem to be necessary because of MatLab's annoying FFTshift conventions.
 if isPadding == 2
     numpad = 2*length(t);
@@ -231,10 +231,11 @@ end
    
        
 %% Determine Axis to use  
-% Slightly different from the way that Travis and Gael wrote it.
+
 i=1;  
 if(CrtlFlags(1) == 1)
     axis{1} = tau;
+    axislabel{1} = '\tau (ps)';
     i = i+1;
 elseif(CrtlFlags(1) == 2)
     axis{1} = E_tauS1;
@@ -246,13 +247,17 @@ elseif(CrtlFlags(1) == 2)
         ZS1 = fft(ZS1,[],1);
         ZS4 = fft(ZS4,[],1);
     end
+    %axislabel{1} = 'E_\tau (meV)';
+    axislabel{1} = 'Excitation frequency (meV)';
     i = i+1;
 end
 if(CrtlFlags(2) == 1)
     axis{i} = T;
+    axislabel{i} = 'T (ps)';
     i=i+1;
 elseif(CrtlFlags(2) == 2 | CrtlFlags(2) == 3)
     axis{i} = E_T;
+    axislabel{i} = 'E_T (meV)';
     if isFFTshift
         ZS1 = fftshift(fft(ZS1,[],2),2);
         ZS4 = fftshift(fft(ZS4,[],2),2);
@@ -261,12 +266,20 @@ elseif(CrtlFlags(2) == 2 | CrtlFlags(2) == 3)
         ZS4 = fft(ZS4,[],2);
     end
     i=i+1;
+elseif(CrtlFlags(2) == 4) %Always FFTshift for zero-quantum.
+    axis{i} = E_T;
+    axislabel{i} = 'Zero-quantum frequency (meV)';
+    ZS1 = fftshift(fft(ZS1,[],2),2);
+    ZS4 = fftshift(fft(ZS4,[],2),2);
+    i=i+1;
 end
 if((CrtlFlags(3) == 1) & (i < 3))
     axis{i} = t;
+    axislabel{i} = 't (ps)';
     i=i+1;
 elseif((CrtlFlags(3) == 2) & (i < 3))
     axis{i} = E_t;
+    axislabel{i} = 'Detection frequency (meV)';
     if isFFTshift
         ZS1 = fftshift(fft(ZS1,[],3),3);    
         ZS4 = fftshift(fft(ZS4,[],3),3);
@@ -278,16 +291,19 @@ elseif((CrtlFlags(3) == 2) & (i < 3))
 end
 if((CrtlFlags(4) == 1) & (i < 3))
     axis{i} = bias;
+    axislabel{i} = 'Bias';
     i=i+1;
 end
 if((CrtlFlags(5) == 1) & (i < 3))
 %Calibration for angle axis after spectra. First degree should be 14.1842 degrees.
     axis{i} = atan( (aux) / (.05*10^6))*(180/pi) +14.1842-6.788;
+    axislabel{i} = 'angle';
     %axis{i} = aux;
     i=i+1;
 end  
 if((CrtlFlags(6) == 1) & (i < 3))
     axis{i} = pwr;
+    axislabel{i} = 'Power';
     i=i+1;
 end
 
@@ -321,10 +337,12 @@ VminZ1 = min(min(abs(Z1plot)));
 VmaxZ4 = max(max(abs(Z4plot)));
 VminZ4 = min(min(abs(Z4plot)));
 axis1 = axis{1};
+axis1label = axislabel{1};
 axis2 = axis{2};
+axis2label = axislabel{2};
 if CrtlFlags(1) == 2
     axis1S2 = axis{3};
-elseif CrtlFlags(1)==1
+elseif CrtlFlags(1) == 1
     axis1S2 = axis{1};
 end
 [m,n] = size(Z1plot);
@@ -338,9 +356,9 @@ xlim_min = 1;
 xlim_max = n;
 ylim_min = 1;
 ylim_max = m;
-% xlim_min = 80;
-% xlim_max = 159;
-% ylim_min = 1; %actually the y-axis
+% xlim_min = 5;
+% xlim_max = 44;
+% ylim_min = 40;
 % ylim_max = 80;
 if(isContourPlot)
     hFig = contourf(axis2(1:n),axis1(1:m),abs(Z1plot),linspace(0,VmaxZ1,NbContours),'linestyle','none');
@@ -348,26 +366,32 @@ else
     %hFig = imagesc(axis2(ylim_min:ylim_max),axis1(xlim_min:xlim_max),abs(Z1plot(ylim_min:ylim_max,xlim_min:xlim_max))); set(gca,'Ydir','Normal');
     hFig = imagesc(axis2(xlim_min:xlim_max),axis1(ylim_min:ylim_max),abs(Z1plot(ylim_min:ylim_max,xlim_min:xlim_max))); set(gca,'Ydir','Normal');
 end
-title('S1 abs')
+title('S1 Absolute Value')
 colormap(jet)
-x = linspace(axis2(1),axis2(end),20); y = -x; line(x,y,'Color','White')%,'LineStyle', ':','MarkerSize',16)
+if (CrtlFlags(1) == 2) & (CrtlFlags(3) == 2) 
+    x = linspace(axis2(1),axis2(end),20); y = -x; line(x,y,'Color','White')%,'LineStyle', ':','MarkerSize',16)
+end
 colorbar();
-ylabel('${\hbar\omega_{\tau}}$', 'interpreter','latex','FontSize',18)
-xlabel('${\hbar\omega_{t}}$', 'interpreter','latex','FontSize',18)
+% ylabel('${\hbar\omega_{\tau}}$', 'interpreter','latex','FontSize',18)
+% xlabel('${\hbar\omega_{t}}$', 'interpreter','latex','FontSize',18)
+ylabel(axis1label, 'FontSize',12)
+xlabel(axis2label,'FontSize',12)
+
 subplot(2,2,2)
 if(isContourPlot)
     contourf(axis2(1:n),axis1(1:m),real(Z1plot)/VmaxZ1,linspace(-1,1,NbContours),'linestyle','none');
 else
     hFigReal = imagesc(axis2(xlim_min:xlim_max),axis1(ylim_min:ylim_max),real(Z1plot(ylim_min:ylim_max,xlim_min:xlim_max)),[-VmaxZ1,VmaxZ1]); set(gca,'Ydir','Normal'); 
 end
-x = linspace(axis2(1),axis2(end),20); y = -x; line(x,y,'Color','Black','LineStyle', ':')%,'MarkerSize',16)
-colorbar(); 
+title('S1 Real part')
+if (CrtlFlags(1) == 2) & (CrtlFlags(3) == 2) 
+    x = linspace(axis2(1),axis2(end),20); y = -x; line(x,y,'Color','Black','LineStyle', ':')%,'MarkerSize',16)
+end
+colorbar();
 % xlim([1450,1480])
 % ylim([-1480,-1450])
-% line(x,y,'Color','White','MarkerSize',16)
-ylabel('${\hbar\omega_{\tau}}$', 'interpreter','latex','FontSize',18)
-xlabel('${\hbar\omega_{t}}$', 'interpreter','latex','FontSize',18) 
-title('S1 re')
+ylabel(axis1label, 'FontSize',12)
+xlabel(axis2label,'FontSize',12)
 
 subplot(2,2,3)
 if(isContourPlot)
@@ -376,12 +400,12 @@ else
     %hFig = imagesc(axis2(ylim_min:ylim_max),axis1(xlim_min:xlim_max),abs(Z1plot(ylim_min:ylim_max,xlim_min:xlim_max))); set(gca,'Ydir','Normal');
     hFig = imagesc(axis2(xlim_min:xlim_max),axis1S2(ylim_min:ylim_max),abs(Z4plot(ylim_min:ylim_max,xlim_min:xlim_max))); set(gca,'Ydir','Normal');
 end
-title('S2 abs')
+title('S2 Absolute Value')
 colormap(jet)
 x = linspace(axis2(1),axis2(end),20); y = x; line(x,y,'Color','White')%,'LineStyle', ':','MarkerSize',16)
 colorbar();
-ylabel('${\hbar\omega_{\tau}}$', 'interpreter','latex','FontSize',18)
-xlabel('${\hbar\omega_{t}}$', 'interpreter','latex','FontSize',18)
+ylabel(axis1label, 'FontSize',12)
+xlabel(axis2label,'FontSize',12)
 
 subplot(2,2,4)
 if(isContourPlot)
@@ -389,14 +413,12 @@ if(isContourPlot)
 else
     hFigReal = imagesc(axis2(xlim_min:xlim_max),axis1S2(ylim_min:ylim_max),real(Z4plot(ylim_min:ylim_max,xlim_min:xlim_max)),[-VmaxZ1,VmaxZ1]); set(gca,'Ydir','Normal'); 
 end
+title('S2 Real Part')
 x = linspace(axis2(1),axis2(end),20); y = x; line(x,y,'Color','Black','LineStyle', ':')%,'MarkerSize',16)
-colorbar(); 
-% xlim([1450,1480])
-% ylim([-1480,-1450])
-% line(x,y,'Color','White','MarkerSize',16)
-ylabel('${\hbar\omega_{\tau}}$', 'interpreter','latex','FontSize',18)
-xlabel('${\hbar\omega_{t}}$', 'interpreter','latex','FontSize',18) 
-title('S2 re')
+colorbar();
+ylabel(axis1label, 'FontSize',12)
+xlabel(axis2label,'FontSize',12) 
+
 
 %% Extra linear plots
 
@@ -436,5 +458,7 @@ if isSaveProcessedData
     dlmwrite([OutDataPath 'ZS4Imag.txt'],imag(ZS4));
     dlmwrite([OutDataPath 'axis1.txt'], axis1');
     dlmwrite([OutDataPath 'axis2.txt'], axis2');
-    dlmwrite([OutDataPath 'axis1S2.txt'], axis1S2');
+    if CrtlFlags(1) == 1 || CrtlFlags(1) == 2
+        dlmwrite([OutDataPath 'axis1S2.txt'], axis1S2');
+    end
 end

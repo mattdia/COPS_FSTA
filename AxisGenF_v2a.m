@@ -11,7 +11,7 @@ else
 end
 Fs = speedC / ( 2e+3*t_stepsize ); %THz
 NumPnts = length(tpad);
-if isFFTshift
+if isFFTshift | Zero_flag == 1
     freq_t = (-floor(NumPnts/2):ceil(NumPnts/2)-1)*Fs/NumPnts; %THz. See MatLab help examples for FFTshift. Also, note that this should work for both odd-length and even-length arrays, unlike the MatLab example. 
 else
     freq_t = (0:NumPnts-1)*Fs/NumPnts;
