@@ -8,9 +8,11 @@
 %Version 5a:
     %Modified to allow limited segments of t and tau.
     %Modified to allow easier view of 3d scans.
-    %Modified for better view of zero-quantum scans.
+    %Modified for better view of zero-quantum scans -> FFTshift is always on for zero-quantum.
     %Modified to allow viewing simultaneous functions of S1 and S2.
-%Renamed as 
+    %Improved axis labels.
+    %Added a folder to set dir_path locally, for when the script is saved locally as well.
+%Version 5b:
 
 clear all; clc; %clf;% Clear variables, close MuPad engine, clear command window.
 speedC = 2.99709e+5; % nm/ps, speed of light in air.
@@ -21,7 +23,8 @@ ref_freq = speedC/(850); % THz
 %dir_path = ['/Users/Chris2/Desktop/Data/2015/2015_12/2017_04_25'];
 dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_05/2017_05_10 incomplete'];
 %dir_path = ['R:/COPS/Data/2017/2017_05/2017_05_10 incomplete'];
-scan_num = '09';
+%dir_path = pwd;
+scan_num = '25';
 
 Delay_t0_um = 60; %um. Use this for Local oscillator measurement.
 isFFTshift = 0;
@@ -228,7 +231,7 @@ end
 if isFFTshift
     [ E_tauS1,freq_tauS1,lambda_tauS1] = AxisGenF_v2a(tau,isPadding,numpad,isFFTshift,StepSizeMatrix(1),-ref_freq,Undersample_win,[0,0]);
 else
-    [ E_tauS1,freq_tauS1,lambda_tauS1] = AxisGenF_v2a(tau,isPadding,numpad,isFFTshift,StepSizeMatrix(1),-ref_freq-speedC/(2e+3*t_stepsize),Undersample_win,[0,0]);
+    [ E_tauS1,freq_tauS1,lambda_tauS1] = AxisGenF_v2a(tau,isPadding,numpad,isFFTshift,StepSizeMatrix(1),-ref_freq-speedC/(2e+3*tau_stepsize),Undersample_win,[0,0]);
 end
 [ E_tauS2,freq_tauS2,lambda_tauS2] = AxisGenF_v2a(tau,isPadding,numpad,isFFTshift,StepSizeMatrix(1),ref_freq,Undersample_win,[0,0]); 
    
