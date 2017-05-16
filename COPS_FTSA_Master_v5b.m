@@ -13,6 +13,7 @@
     %Improved axis labels.
     %Added a folder to set dir_path locally, for when the script is saved locally as well.
 %Version 5b:
+    %Implemented an option for windowing using a Tukey function.
 
 clear all; clc; %clf;% Clear variables, close MuPad engine, clear command window.
 speedC = 2.99709e+5; % nm/ps, speed of light in air.
@@ -42,9 +43,13 @@ CrtlFlags = [2,0,2,0,0,0];
     %Value of 4 means ZeroQuantum (only for T)
 PlotIndx = [1,1,1,1,1,1]; %Flags correspond to the slice number extracted for elements of CrtlFlags that are not plotted.
 StepLimit = [0,0,0]; %Step limit for [tau, T, t]. Entering 0 leaves them at full length.
-isWindowFunction1 = 0; %Axis1 window function?
-isWindowFunction2 = 0; %Axis2 window function?
-isSaveProcessedData = 1; %Set to 1 to save processed data.
+isWindowFunction_tau = 0; %Enter 1 to window along the tau axis.
+isWindowFunction_T = 0; %Enter 1 to window along the T axis.
+isWindowFunction_t = 0; %Enter 1 to window along the t axis.
+TukeyAlpha_tau = 0.25;     % Select a decimal between 0 (no window) and 1 (Hanning window).
+TukeyAlpha_T = 0.25;     % Select a decimal between 0 (no window) and 1 (Hanning window).
+TukeyAlpha_t = 0.25;     % Select a decimal between 0 (no window) and 1 (Hanning window).
+isSaveProcessedData = 0; %Set to 1 to save processed data.
 
 % Eliminate the dialog box below in favor of hard-coding the values.
 % isub = [d(:).isdir];
@@ -171,6 +176,46 @@ end
 pwr = 1;
 ZS1_m1 = ZS1_m(:,:,:,:,:,:);
 ZS4_m1 = ZS4_m(:,:,:,:,:,:);
+
+if isWindowFunction_tau 
+    alpha = TukeyAlpha_tau;
+    alphaStepMatrix = round(alpha*StepMatrix(1));
+    WindowFunc_tau(1:alphaStepMatrix) = 0.5*(1+cos(pi*(2*(0:alphaStepMatrix-1)/2/alphaStepMatrix-1)));
+    WindowFunc_tau(alphaStepMatrix+1:StepMatrix(1)) = 1;
+    WindowFunc_tau = flipud(transpose(WindowFunc_tau));
+else
+    WindowFunc_tau = ones(StepMatrix(1),1);
+end
+if isWindowFunction_T
+    alpha = TukeyAlpha_T;
+    alphaStepMatrix = round(alpha*StepMatrix(2));
+    WindowFunc_T(1:alphaStepMatrix) = 0.5*(1+cos(pi*(2*(0:alphaStepMatrix-1)/2/alphaStepMatrix-1)));
+    WindowFunc_T(alphaStepMatrix+1:StepMatrix(3)) = 1;
+    WindowFunc_T = flipud(transpose(WindowFunc_T));
+else
+    WindowFunc_T = ones(StepMatrix(2),1);
+end
+if isWindowFunction_t
+    alpha = TukeyAlpha_t;
+    alphaStepMatrix = round(alpha*StepMatrix(3));
+    WindowFunc_t(1:alphaStepMatrix) = 0.5*(1+cos(pi*(2*(0:alphaStepMatrix-1)/2/alphaStepMatrix-1)));
+    WindowFunc_t(alphaStepMatrix+1:StepMatrix(3)) = 1;
+    WindowFunc_t = flipud(transpose(WindowFunc_t));
+else
+    WindowFunc_t = ones(StepMatrix(3),1);
+end
+pp = 1:StepMatrix(1);
+qq = 1:StepMatrix(2);
+rr = 1:StepMatrix(3);
+for(pp=1:1:StepMatrix(1));
+for(qq=1:1:StepMatrix(2));
+for(rr=1:1:StepMatrix(3));
+    WindowFunc(pp,qq,rr,:,:,:) = WindowFunc_tau(pp)*WindowFunc_T(qq)*WindowFunc_t(rr);
+end
+end
+end
+ZS1_m1 = ZS1_m1 .* WindowFunc;
+ZS4_m1 = ZS4_m1 .* WindowFunc;
 
 [p,o,u,y,r] = size(ZS1_m1);
 Pad = zeros(StepMatrix(1),StepMatrix(2),StepMatrix(3),StepMatrix(4),StepMatrix(5),StepMatrix(6));
