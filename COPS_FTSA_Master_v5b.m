@@ -42,8 +42,10 @@ CrtlFlags = [2,0,2,0,0,0];
     %Value of 4 means ZeroQuantum (only for T)
 PlotIndx = [1,1,1,1,1,1]; %Flags correspond to the slice number extracted for elements of CrtlFlags that are not plotted.
 StepLimit = [0,0,0]; %Step limit for [tau, T, t]. Entering 0 leaves them at full length.
+isWindowFunction1 = 0; %Axis1 window function?
+isWindowFunction2 = 0; %Axis2 window function?
 isSaveProcessedData = 1; %Set to 1 to save processed data.
-    
+
 % Eliminate the dialog box below in favor of hard-coding the values.
 % isub = [d(:).isdir];
 % nameFolds = {d(isub).name}';
