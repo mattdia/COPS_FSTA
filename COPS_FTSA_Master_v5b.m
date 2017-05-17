@@ -13,6 +13,7 @@
     %Improved axis labels.
     %Added a folder to set dir_path locally, for when the script is saved locally as well.
 %Version 5b:
+    %Implemented an option for windowing using a Tukey function.
 
 clear all; clc; %clf;% Clear variables, close MuPad engine, clear command window.
 speedC = 2.99709e+5; % nm/ps, speed of light in air.
@@ -24,7 +25,9 @@ ref_freq = speedC/(850); % THz
 dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_03/2017_03_15'];
 %dir_path = ['R:/COPS/Data/2017/2017_05/2017_05_10 incomplete'];
 %dir_path = pwd;
-scan_num = '03';
+
+scan_num = '29';
+
 
 Delay_t0_um = 60; %um. Use this for Local oscillator measurement.
 isFFTshift = 0;
@@ -33,7 +36,7 @@ numpad = 1024;  %fft prefers 2^n points
 Undersample_win = 0;
 isContourPlot = 0;
 NbContours=15;  %Sets the number of contours if using contour plots.
-CrtlFlags = [2,0,2,0,0,0]; 
+CrtlFlags = [1,0,1,0,0,0]; 
     %Flags correspond to [tau,T,t,V,aux,pwr] 
     %Value of 0 means do nothing                        
     %Value of 1 means plot time domain
@@ -42,8 +45,14 @@ CrtlFlags = [2,0,2,0,0,0];
     %Value of 4 means ZeroQuantum (only for T)
 PlotIndx = [1,1,1,1,1,1]; %Flags correspond to the slice number extracted for elements of CrtlFlags that are not plotted.
 StepLimit = [0,0,0]; %Step limit for [tau, T, t]. Entering 0 leaves them at full length.
+isWindowFunction_tau = 0; %Enter 1 to window along the tau axis.
+isWindowFunction_T = 0; %Enter 1 to window along the T axis.
+isWindowFunction_t = 0; %Enter 1 to window along the t axis.
+TukeyAlpha_tau = 0.25;     % Select a decimal between 0 (no window) and 1 (Hanning window).
+TukeyAlpha_T = 0.25;     % Select a decimal between 0 (no window) and 1 (Hanning window).
+TukeyAlpha_t = 0.25;     % Select a decimal between 0 (no window) and 1 (Hanning window).
 isSaveProcessedData = 1; %Set to 1 to save processed data.
-    
+
 % Eliminate the dialog box below in favor of hard-coding the values.
 % isub = [d(:).isdir];
 % nameFolds = {d(isub).name}';
@@ -155,9 +164,9 @@ StepMatrix = [NumSteps_tau,NumSteps_T,NumSteps_t,NumSteps_V,NumSteps_aux,NumStep
 
 %%Define Time/freq etc Axis assuming steps stepped correctly;
 StepSizeMatrix = [tau_stepsize,T_stepsize,t_stepsize,V_stepsize,aux_stepsize];
-t = (10^3)*2/speedC*(-Delay_t0_um:t_stepsize:(NumSteps_t-1)*t_stepsize-Delay_t0_um)'; %ps. %Funny conventions for sign of Delay_t0_um because negative delay = positive time.
-tau = (10^3)*2/speedC*(0:tau_stepsize:(NumSteps_tau-1)*tau_stepsize)';
-T = (10^3)*2/speedC*(0:T_stepsize:(NumSteps_T-1)*T_stepsize)';
+t = (10^3)*2/speedC*(-Delay_t0_um:t_stepsize:(NumSteps_t-1)*t_stepsize-Delay_t0_um); %ps. %Funny conventions for sign of Delay_t0_um because negative delay = positive time.
+tau = (10^3)*2/speedC*(0:tau_stepsize:(NumSteps_tau-1)*tau_stepsize);
+T = (10^3)*2/speedC*(0:T_stepsize:(NumSteps_T-1)*T_stepsize);
 bias = transpose(((V_init:V_stepsize:((NumSteps_V-1)*V_stepsize+V_init))));
 aux = transpose(((aux_init:aux_stepsize:((NumSteps_aux-1)* aux_stepsize+aux_init))));
 [m ,n] = size(bias);
@@ -191,6 +200,46 @@ ZS4_m = complex(MatrixX4(1:NumSteps_tau,1:NumSteps_T,1:NumSteps_t,:,:,:),MatrixY
 pwr = 1;
 ZS1_m1 = ZS1_m(:,:,:,:,:,:);
 ZS4_m1 = ZS4_m(:,:,:,:,:,:);
+
+if isWindowFunction_tau 
+    alpha = TukeyAlpha_tau;
+    alphaStepMatrix = round(alpha*StepMatrix(1));
+    WindowFunc_tau(1:alphaStepMatrix) = 0.5*(1+cos(pi*(2*(0:alphaStepMatrix-1)/2/alphaStepMatrix-1)));
+    WindowFunc_tau(alphaStepMatrix+1:StepMatrix(1)) = 1;
+    WindowFunc_tau = flipud(transpose(WindowFunc_tau));
+else
+    WindowFunc_tau = ones(StepMatrix(1),1);
+end
+if isWindowFunction_T
+    alpha = TukeyAlpha_T;
+    alphaStepMatrix = round(alpha*StepMatrix(2));
+    WindowFunc_T(1:alphaStepMatrix) = 0.5*(1+cos(pi*(2*(0:alphaStepMatrix-1)/2/alphaStepMatrix-1)));
+    WindowFunc_T(alphaStepMatrix+1:StepMatrix(3)) = 1;
+    WindowFunc_T = flipud(transpose(WindowFunc_T));
+else
+    WindowFunc_T = ones(StepMatrix(2),1);
+end
+if isWindowFunction_t
+    alpha = TukeyAlpha_t;
+    alphaStepMatrix = round(alpha*StepMatrix(3));
+    WindowFunc_t(1:alphaStepMatrix) = 0.5*(1+cos(pi*(2*(0:alphaStepMatrix-1)/2/alphaStepMatrix-1)));
+    WindowFunc_t(alphaStepMatrix+1:StepMatrix(3)) = 1;
+    WindowFunc_t = flipud(transpose(WindowFunc_t));
+else
+    WindowFunc_t = ones(StepMatrix(3),1);
+end
+pp = 1:StepMatrix(1);
+qq = 1:StepMatrix(2);
+rr = 1:StepMatrix(3);
+for(pp=1:1:StepMatrix(1));
+for(qq=1:1:StepMatrix(2));
+for(rr=1:1:StepMatrix(3));
+    WindowFunc(pp,qq,rr,:,:,:) = WindowFunc_tau(pp)*WindowFunc_T(qq)*WindowFunc_t(rr);
+end
+end
+end
+ZS1_m1 = ZS1_m1 .* WindowFunc;
+ZS4_m1 = ZS4_m1 .* WindowFunc;
 
 [p,o,u,y,r] = size(ZS1_m1);
 Pad = zeros(StepMatrix(1),StepMatrix(2),StepMatrix(3),StepMatrix(4),StepMatrix(5),StepMatrix(6));
