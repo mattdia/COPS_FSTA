@@ -22,10 +22,12 @@ planck = 4.135667662e-3;  % eV*ps, or eV/THz, from NIST. Uncertainty is in the l
 ref_freq = speedC/(850); % THz
 %dir_path = ['E:/Data/2017/2017_04/2017_04_29'];
 %dir_path = ['/Users/Chris2/Desktop/Data/2015/2015_12/2017_04_25'];
-dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_05/2017_05_10 incomplete'];
+dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_03/2017_03_15'];
 %dir_path = ['R:/COPS/Data/2017/2017_05/2017_05_10 incomplete'];
 %dir_path = pwd;
+
 scan_num = '29';
+
 
 Delay_t0_um = 60; %um. Use this for Local oscillator measurement.
 isFFTshift = 0;
@@ -124,40 +126,41 @@ V_init = parameters(26,1);
 aux_init = parameters(29,1);
 %Cut data to fit the step limit
 
-ZS1_m = complex(MatrixX1(1:NumSteps_tau,1:NumSteps_T,1:NumSteps_t,:,:,:),MatrixY1(1:NumSteps_tau,1:NumSteps_T,1:NumSteps_t,:,:,:));
-ZS4_m = complex(MatrixX4(1:NumSteps_tau,1:NumSteps_T,1:NumSteps_t,:,:,:),MatrixY4(1:NumSteps_tau,1:NumSteps_T,1:NumSteps_t,:,:,:));
-
 %Define StepMatrix
 StepMatrix = [NumSteps_tau,NumSteps_T,NumSteps_t,NumSteps_V,NumSteps_aux,NumSteps_pwr];    
 
-%Remove Phase offset
-ZS1_phase = angle(ZS1_m);
-ZS4_phase = angle(ZS4_m);      
-for(l=1:1:NumSteps_aux2)
-for(m=1:1:NumSteps_pwr)
-for(j=1:1:NumSteps_aux)
-for(i=1:1:NumSteps_V)
-    ZS1_phase(:,:,:,i,m,j,l) = mod(ZS1_phase(:,:,:,i,m,j,l) - ZS1_phase(1,1,1,i,m,j,l)+3*pi,2*pi) - pi;
-    ZS4_phase(:,:,:,i,m,j,l) = mod(ZS4_phase(:,:,:,i,m,j,l) - ZS4_phase(1,1,1,i,m,j,l)+3*pi,2*pi) - pi;
-end
-end
-end
-end
+%old phase correction. Discarded in favor of phase correction which uses
+%correct time zero
+% ZS1_m = complex(MatrixX1(1:NumSteps_tau,1:NumSteps_T,1:NumSteps_t,:,:,:),MatrixY1(1:NumSteps_tau,1:NumSteps_T,1:NumSteps_t,:,:,:));
+% ZS4_m = complex(MatrixX4(1:NumSteps_tau,1:NumSteps_T,1:NumSteps_t,:,:,:),MatrixY4(1:NumSteps_tau,1:NumSteps_T,1:NumSteps_t,:,:,:));
+
+% ZS1_phase = angle(ZS1_m);
+% ZS4_phase = angle(ZS4_m);      
+% for(l=1:1:NumSteps_aux2)
+% for(m=1:1:NumSteps_pwr)
+% for(j=1:1:NumSteps_aux)
+% for(i=1:1:NumSteps_V)
+%     ZS1_phase(:,:,:,i,m,j,l) = mod(ZS1_phase(:,:,:,i,m,j,l) - ZS1_phase(1,1,3,i,m,j,l)+3*pi,2*pi) - pi;
+%     ZS4_phase(:,:,:,i,m,j,l) = mod(ZS4_phase(:,:,:,i,m,j,l) - ZS4_phase(1,1,3,i,m,j,l)+3*pi,2*pi) - pi;
+% end
+% end
+% end
+% end
      
-% ZS1_m = abs(ZS1_m).*exp(complex(0,1)*ZS1_phase);
-% ZS4_m = abs(ZS4_m).*exp(complex(0,1)*ZS4_phase);
+%ZS1_m = abs(ZS1_m).*exp(complex(0,1)*ZS1_phase);
+%ZS4_m = abs(ZS4_m).*exp(complex(0,1)*ZS4_phase);
 
 %Re-insert correct phase
-i=1;
-while (i<=numel(ZS1_m))
-    if ZS1_m(i) ~= 0
-       ZS1_m(i) = abs(ZS1_m(i)).*exp(complex(0,1).*ZS1_phase(i));
-    end
-    if ZS4_m(i) ~= 0
-       ZS4_m(i) = abs(ZS4_m(i)).*exp(complex(0,1).*ZS4_phase(i));
-    end
-    i=i+1;
-end
+% i=1;
+% while (i<=numel(ZS1_m))
+%     if ZS1_m(i) ~= 0
+%        ZS1_m(i) = abs(ZS1_m(i)).*exp(complex(0,1).* ZS1_phase(i));
+%     end
+%     if ZS4_m(i) ~= 0
+%        ZS4_m(i) = abs(ZS4_m(i)).*exp(complex(0,1).* ZS4_phase(i));
+%     end
+%     i=i+1;
+% end
 
 %%Define Time/freq etc Axis assuming steps stepped correctly;
 StepSizeMatrix = [tau_stepsize,T_stepsize,t_stepsize,V_stepsize,aux_stepsize];
@@ -170,6 +173,27 @@ aux = transpose(((aux_init:aux_stepsize:((NumSteps_aux-1)* aux_stepsize+aux_init
 if(m==0)
    bias = V_init; 
 end
+
+%Set global phase using phase at time zero by taking the input data into
+%polar coordinates and finding the phase of tau=t=0.
+
+[d1_theta,d1_r] = cart2pol(MatrixX1,MatrixY1);
+[d4_theta,d4_r] = cart2pol(MatrixX4,MatrixY4);
+[t_zero,idx_t_zero] = min(abs(t));
+[tau_zero,idx_tau_zero] = min(abs(tau));
+d1_phase_offset = d1_theta(idx_tau_zero,:,idx_t_zero);
+d1_theta = d1_theta-d1_phase_offset;
+d4_phase_offset = d4_theta(idx_tau_zero,:,idx_t_zero);
+d4_theta = d4_theta-d4_phase_offset;
+
+[MatrixX1,MatrixY1]=pol2cart(d1_theta,d1_r);
+[MatrixX4,MatrixY4]=pol2cart(d4_theta,d4_r);
+
+ZS1_m = complex(MatrixX1(1:NumSteps_tau,1:NumSteps_T,1:NumSteps_t,:,:,:),MatrixY1(1:NumSteps_tau,1:NumSteps_T,1:NumSteps_t,:,:,:));
+ZS4_m = complex(MatrixX4(1:NumSteps_tau,1:NumSteps_T,1:NumSteps_t,:,:,:),MatrixY4(1:NumSteps_tau,1:NumSteps_T,1:NumSteps_t,:,:,:));
+
+
+
        
 %% Remaking of the function ArbAxisPlot (v4).
 
@@ -434,7 +458,8 @@ subplot(2,2,2)
 if(isContourPlot)
     contourf(axis2(1:n),axis1(1:m),real(Z1plot)/VmaxZ1,linspace(-1,1,NbContours),'linestyle','none');
 else
-    hFigReal = imagesc(axis2(xlim_min:xlim_max),axis1(ylim_min:ylim_max),real(Z1plot(ylim_min:ylim_max,xlim_min:xlim_max)),[-VmaxZ1,VmaxZ1]); set(gca,'Ydir','Normal'); 
+    %hFigReal = imagesc(axis2(xlim_min:xlim_max),axis1(ylim_min:ylim_max),angle(Z1plot(ylim_min:ylim_max,xlim_min:xlim_max))); %set(gca,'Ydir','Normal');
+    hFigReal = imagesc(axis2(xlim_min:xlim_max),axis1(ylim_min:ylim_max)',real(Z1plot(ylim_min:ylim_max,xlim_min:xlim_max)),[-VmaxZ1,VmaxZ1]); set(gca,'Ydir','Normal');
 end
 title('S1 Real part')
 if (CrtlFlags(1) == 2) & (CrtlFlags(3) == 2) 
