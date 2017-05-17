@@ -25,7 +25,7 @@ ref_freq = speedC/(850); % THz
 dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_05/2017_05_10 incomplete'];
 %dir_path = ['R:/COPS/Data/2017/2017_05/2017_05_10 incomplete'];
 %dir_path = pwd;
-scan_num = '25';
+scan_num = '29';
 
 Delay_t0_um = 60; %um. Use this for Local oscillator measurement.
 isFFTshift = 0;
@@ -34,7 +34,7 @@ numpad = 1024;  %fft prefers 2^n points
 Undersample_win = 0;
 isContourPlot = 0;
 NbContours=15;  %Sets the number of contours if using contour plots.
-CrtlFlags = [2,0,2,0,0,0]; 
+CrtlFlags = [1,0,1,0,0,0]; 
     %Flags correspond to [tau,T,t,V,aux,pwr] 
     %Value of 0 means do nothing                        
     %Value of 1 means plot time domain
@@ -49,7 +49,7 @@ isWindowFunction_t = 0; %Enter 1 to window along the t axis.
 TukeyAlpha_tau = 0.25;     % Select a decimal between 0 (no window) and 1 (Hanning window).
 TukeyAlpha_T = 0.25;     % Select a decimal between 0 (no window) and 1 (Hanning window).
 TukeyAlpha_t = 0.25;     % Select a decimal between 0 (no window) and 1 (Hanning window).
-isSaveProcessedData = 0; %Set to 1 to save processed data.
+isSaveProcessedData = 1; %Set to 1 to save processed data.
 
 % Eliminate the dialog box below in favor of hard-coding the values.
 % isub = [d(:).isdir];
@@ -161,9 +161,9 @@ end
 
 %%Define Time/freq etc Axis assuming steps stepped correctly;
 StepSizeMatrix = [tau_stepsize,T_stepsize,t_stepsize,V_stepsize,aux_stepsize];
-t = (10^3)*2/speedC*(-Delay_t0_um:t_stepsize:(NumSteps_t-1)*t_stepsize-Delay_t0_um)'; %ps. %Funny conventions for sign of Delay_t0_um because negative delay = positive time.
-tau = (10^3)*2/speedC*(0:tau_stepsize:(NumSteps_tau-1)*tau_stepsize)';
-T = (10^3)*2/speedC*(0:T_stepsize:(NumSteps_T-1)*T_stepsize)';
+t = (10^3)*2/speedC*(-Delay_t0_um:t_stepsize:(NumSteps_t-1)*t_stepsize-Delay_t0_um); %ps. %Funny conventions for sign of Delay_t0_um because negative delay = positive time.
+tau = (10^3)*2/speedC*(0:tau_stepsize:(NumSteps_tau-1)*tau_stepsize);
+T = (10^3)*2/speedC*(0:T_stepsize:(NumSteps_T-1)*T_stepsize);
 bias = transpose(((V_init:V_stepsize:((NumSteps_V-1)*V_stepsize+V_init))));
 aux = transpose(((aux_init:aux_stepsize:((NumSteps_aux-1)* aux_stepsize+aux_init))));
 [m ,n] = size(bias);
