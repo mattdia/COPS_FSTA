@@ -14,6 +14,7 @@
     %Added a folder to set dir_path locally, for when the script is saved locally as well.
 %Version 5b:
     %Implemented an option for windowing using a Tukey function.
+    %Improved the methodology for correcting phase using time0.
 
 clear all; clc; %clf;% Clear variables, close MuPad engine, clear command window.
 speedC = 2.99709e+5; % nm/ps, speed of light in air.
@@ -22,12 +23,11 @@ planck = 4.135667662e-3;  % eV*ps, or eV/THz, from NIST. Uncertainty is in the l
 ref_freq = speedC/(850); % THz
 %dir_path = ['E:/Data/2017/2017_04/2017_04_29'];
 %dir_path = ['/Users/Chris2/Desktop/Data/2015/2015_12/2017_04_25'];
-%dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_03/2017_03_15'];
-dir_path = ['R:/COPS/Data/2017/2017_05/2017_05_10 incomplete'];
+dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_05/2017_05_10 DQW 5nm'];
+%dir_path = ['R:/COPS/Data/2017/2017_05/2017_05_10 DQW 5nm'];
+%dir_path = ['.'];
 %dir_path = pwd;
-
-scan_num = '31';
-
+scan_num = '09 - 3D 5uW';
 
 Delay_t0_um = 60; %um. Use this for Local oscillator measurement.
 isFFTshift = 0;
@@ -36,7 +36,7 @@ numpad = 1024;  %fft prefers 2^n points
 Undersample_win = 0;
 isContourPlot = 0;
 NbContours=15;  %Sets the number of contours if using contour plots.
-CrtlFlags = [1,0,1,0,0,0]; 
+CrtlFlags = [2,0,2,0,0,0]; 
     %Flags correspond to [tau,T,t,V,aux,pwr] 
     %Value of 0 means do nothing                        
     %Value of 1 means plot time domain
