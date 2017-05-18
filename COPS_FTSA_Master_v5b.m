@@ -22,11 +22,11 @@ planck = 4.135667662e-3;  % eV*ps, or eV/THz, from NIST. Uncertainty is in the l
 ref_freq = speedC/(850); % THz
 %dir_path = ['E:/Data/2017/2017_04/2017_04_29'];
 %dir_path = ['/Users/Chris2/Desktop/Data/2015/2015_12/2017_04_25'];
-dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_03/2017_03_15'];
-%dir_path = ['R:/COPS/Data/2017/2017_05/2017_05_10 incomplete'];
+%dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_03/2017_03_15'];
+dir_path = ['R:/COPS/Data/2017/2017_05/2017_05_10 incomplete'];
 %dir_path = pwd;
 
-scan_num = '29';
+scan_num = '31';
 
 
 Delay_t0_um = 60; %um. Use this for Local oscillator measurement.
@@ -181,9 +181,9 @@ end
 [d4_theta,d4_r] = cart2pol(MatrixX4,MatrixY4);
 [t_zero,idx_t_zero] = min(abs(t));
 [tau_zero,idx_tau_zero] = min(abs(tau));
-d1_phase_offset = d1_theta(idx_tau_zero,:,idx_t_zero);
+d1_phase_offset = d1_theta(idx_tau_zero,PlotIndx(2),idx_t_zero);
 d1_theta = d1_theta-d1_phase_offset;
-d4_phase_offset = d4_theta(idx_tau_zero,:,idx_t_zero);
+d4_phase_offset = d4_theta(idx_tau_zero,PlotIndx(2),idx_t_zero);
 d4_theta = d4_theta-d4_phase_offset;
 
 [MatrixX1,MatrixY1]=pol2cart(d1_theta,d1_r);
