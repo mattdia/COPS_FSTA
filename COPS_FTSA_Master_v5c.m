@@ -12,10 +12,9 @@
     %Modified to allow viewing simultaneous functions of S1 and S2.
     %Improved axis labels.
     %Added a folder to set dir_path locally, for when the script is saved locally as well.
-%Version 5b:
+%Version 5b/5c:
     %Implemented an option for windowing using a Tukey function.
     %Improved the methodology for correcting phase using time0.
-%Version 5c:
 
 clear all; clc; %clf;% Clear variables, close MuPad engine, clear command window.
 speedC = 2.99709e+5; % nm/ps, speed of light in air.
@@ -46,6 +45,7 @@ CrtlFlags = [2,0,2,0,0,0];
     %Value of 4 means ZeroQuantum (only for T)
 PlotIndx = [1,1,1,1,1,1]; %Flags correspond to the slice number extracted for elements of CrtlFlags that are not plotted.
 StepLimit = [0,0,0]; %Step limit for [tau, T, t]. Entering 0 leaves them at full length.
+isCorrectOverallPhase = 0; %Enter 1 to correct everything by initial Tstep, 2 to correct each Tstep independently, 0 for no correction.
 isWindowFunction_tau = 0; %Enter 1 to window along the tau axis.
 isWindowFunction_T = 0; %Enter 1 to window along the T axis.
 isWindowFunction_t = 0; %Enter 1 to window along the t axis.
@@ -177,24 +177,28 @@ end
 
 %Set global phase using phase at time zero by taking the input data into
 %polar coordinates and finding the phase of tau=t=0.
-
 [d1_theta,d1_r] = cart2pol(MatrixX1,MatrixY1);
 [d4_theta,d4_r] = cart2pol(MatrixX4,MatrixY4);
 [t_zero,idx_t_zero] = min(abs(t));
 [tau_zero,idx_tau_zero] = min(abs(tau));
-d1_phase_offset = d1_theta(idx_tau_zero,PlotIndx(2),idx_t_zero);
-d1_theta = d1_theta-d1_phase_offset;
-d4_phase_offset = d4_theta(idx_tau_zero,PlotIndx(2),idx_t_zero);
-d4_theta = d4_theta-d4_phase_offset;
-
+if isCorrectOverallPhase == 2
+    for q=1:StepMatrix(2)
+        d1_phase_offset = d1_theta(idx_tau_zero,q,idx_t_zero); %Correct each value of T independently.
+        d1_theta(:,q,:) = d1_theta(:,q,:)-d1_phase_offset;
+        d4_phase_offset = d4_theta(idx_tau_zero,q,idx_t_zero);
+        d4_theta(:,q,:) = d4_theta(:,q,:)-d4_phase_offset;
+    end
+elseif isCorrectOverallPhase == 1
+    d1_phase_offset = d1_theta(idx_tau_zero,1,idx_t_zero); %Correct the first point. Apply globally.
+    d1_theta = d1_theta-d1_phase_offset;
+    d4_phase_offset = d4_theta(idx_tau_zero,1,idx_t_zero);
+    d4_theta = d4_theta-d4_phase_offset;
+end
 [MatrixX1,MatrixY1]=pol2cart(d1_theta,d1_r);
 [MatrixX4,MatrixY4]=pol2cart(d4_theta,d4_r);
 
 ZS1_m = complex(MatrixX1(1:NumSteps_tau,1:NumSteps_T,1:NumSteps_t,:,:,:),MatrixY1(1:NumSteps_tau,1:NumSteps_T,1:NumSteps_t,:,:,:));
 ZS4_m = complex(MatrixX4(1:NumSteps_tau,1:NumSteps_T,1:NumSteps_t,:,:,:),MatrixY4(1:NumSteps_tau,1:NumSteps_T,1:NumSteps_t,:,:,:));
-
-
-
        
 %% Remaking of the function ArbAxisPlot (v4).
 
@@ -358,12 +362,18 @@ if((CrtlFlags(3) == 1) & (i < 3))
 elseif((CrtlFlags(3) == 2) & (i < 3))
     axis{i} = E_t;
     axislabel{i} = 'Detection frequency (meV)';
+    ZS1 = fft(ZS1,[],3);    
+    ZS4 = fft(ZS4,[],3);
+    Delay_t0 = Delay_t0_um * 2e+3/speedC;
+    ReducedFreq = freq_t - ref_freq;
+    PhaseAdjustment_t0 = exp( complex(0,1)*2*pi*ReducedFreq*Delay_t0 );
+    for r=1:length(PhaseAdjustment_t0)
+        ZS1(:,:,r) = ZS1(:,:,r) * PhaseAdjustment_t0(r);
+        ZS4(:,:,r) = ZS4(:,:,r) * PhaseAdjustment_t0(r);
+    end
     if isFFTshift
-        ZS1 = fftshift(fft(ZS1,[],3),3);    
-        ZS4 = fftshift(fft(ZS4,[],3),3);
-    else
-        ZS1 = fft(ZS1,[],3);    
-        ZS4 = fft(ZS4,[],3);
+        ZS1 = fftshift(ZS1,3);    
+        ZS4 = fftshift(ZS4,3);
     end
     i=i+1;
 end
@@ -399,15 +409,7 @@ elseif (CrtlFlags(1) ~= 0) & (CrtlFlags(2) ~= 0)
     Z4plot = ZS4(:,:,PlotIndx(3),PlotIndx(4),PlotIndx(5),PlotIndx(6));
 end
 Z1plot = squeeze(Z1plot);
-if CrtlFlags(3) == 2
-    Delay_t0 = Delay_t0_um * 2e+3/speedC;
-    ReducedFreq = freq_t - ref_freq;
-    PhaseAdjustment_t0 = exp( complex(0,1)*2*pi*ReducedFreq*Delay_t0 );
-    [pp,qq] = size(Z1plot);
-    Z1plot = Z1plot .* repmat(PhaseAdjustment_t0,pp,1);
-end
 Z4plot = squeeze(Z4plot);
-
 Z1procc{1} = Z1plot;
 Z4procc{1} = Z4plot;
 VmaxZ1 = max(max(abs(Z1plot)));
