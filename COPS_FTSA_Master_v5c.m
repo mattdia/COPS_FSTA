@@ -45,7 +45,8 @@ CrtlFlags = [2,0,2,0,0,0];
     %Value of 4 means ZeroQuantum (only for T)
 PlotIndx = [1,1,1,1,1,1]; %Flags correspond to the slice number extracted for elements of CrtlFlags that are not plotted.
 StepLimit = [0,0,0]; %Step limit for [tau, T, t]. Entering 0 leaves them at full length.
-isCorrectOverallPhase = 0; %Enter 1 to correct everything by initial Tstep, 2 to correct each Tstep independently, 0 for no correction.
+isCorrectOverallPhase = 1; %Enter 1 to correct everything by the Tstep specified by PhaseCorrectionIndx, 2 to correct each Tstep independently, 0 for no correction.
+PhaseCorrectionIndx = 1;
 isWindowFunction_tau = 0; %Enter 1 to window along the tau axis.
 isWindowFunction_T = 0; %Enter 1 to window along the T axis.
 isWindowFunction_t = 0; %Enter 1 to window along the t axis.
@@ -189,9 +190,9 @@ if isCorrectOverallPhase == 2
         d4_theta(:,q,:) = d4_theta(:,q,:)-d4_phase_offset;
     end
 elseif isCorrectOverallPhase == 1
-    d1_phase_offset = d1_theta(idx_tau_zero,1,idx_t_zero); %Correct the first point. Apply globally.
+    d1_phase_offset = d1_theta(idx_tau_zero,PhaseCorrectionIndx,idx_t_zero); %Correct by the specified index point. Apply globally.
     d1_theta = d1_theta-d1_phase_offset;
-    d4_phase_offset = d4_theta(idx_tau_zero,1,idx_t_zero);
+    d4_phase_offset = d4_theta(idx_tau_zero,PhaseCorrectionIndx,idx_t_zero);
     d4_theta = d4_theta-d4_phase_offset;
 end
 [MatrixX1,MatrixY1]=pol2cart(d1_theta,d1_r);
