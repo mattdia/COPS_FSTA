@@ -36,7 +36,7 @@ numpad = 1024;  %fft prefers 2^n points
 Undersample_win = 0;
 isContourPlot = 0;
 NbContours=25;  %Sets the number of contours if using contour plots.
-CrtlFlags = [1,0,1,0,0,0]; 
+CrtlFlags = [2,0,2,0,0,0]; 
     %Flags correspond to [tau,T,t,V,aux,pwr] 
     %Value of 0 means do nothing                        
     %Value of 1 means plot time domain
@@ -58,9 +58,9 @@ isSaveProcessedData = 0; %Set to 1 to save processed data.
 
 %Photon Echo windowing
 WindowPhotonEcho =1;
-stdev_window = 5;
-pix_slope = (19/20);
-pix_offs = -4;
+stdev_window = 4;
+pix_slope = (1);
+pix_offs = -3;
 
 
 
