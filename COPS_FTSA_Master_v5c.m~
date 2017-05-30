@@ -29,21 +29,21 @@ dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_05/2017_05_26 in progress'];
 %dir_path = pwd;
 scan_num = '06';
 
-Delay_t0_um = 120; %um. Use this for Local oscillator measurement.
+Delay_t0_um = 60; %um. Use this for Local oscillator measurement.
 isFFTshift = 1;
-isPadding = 1; %Pad with zeros up to numpad if set to 1. Pad by factor of 2 if set to 2.
+isPadding = 2; %Pad with zeros up to numpad if set to 1. Pad by factor of 2 if set to 2.
 numpad = 1024;  %fft prefers 2^n points
 Undersample_win = 0;
 isContourPlot = 0;
-NbContours=25;  %Sets the number of contours if using contour plots.
-CrtlFlags = [1,0,1,0,0,0]; 
+NbContours=15;  %Sets the number of contours if using contour plots.
+CrtlFlags = [2,0,2,0,0,0]; 
     %Flags correspond to [tau,T,t,V,aux,pwr] 
     %Value of 0 means do nothing                        
     %Value of 1 means plot time domain
     %Value of 2 means plot frequency domain for S1/S2.
     %Value of 3 means plot S3 (only for T)
     %Value of 4 means ZeroQuantum (only for T)
-PlotIndx = [1,1,1,1,1,1]; %Flags correspond to the slice number extracted for elements of CrtlFlags that are not plotted.
+PlotIndx = [1,25,1,1,1,1]; %Flags correspond to the slice number extracted for elements of CrtlFlags that are not plotted.
 StepLimit = [0,0,0]; %Step limit for [tau, T, t]. Entering 0 leaves them at full length.
 isCorrectOverallPhase = 1; %Enter 1 to correct everything by the Tstep specified by PhaseCorrectionIndx, 2 to correct each Tstep independently, 0 for no correction.
 PhaseCorrectionIndx = 1;
@@ -53,16 +53,7 @@ isWindowFunction_t = 0; %Enter 1 to window along the t axis.
 TukeyAlpha_tau = 0.25;     % Select a decimal between 0 (no window) and 1 (Hanning window).
 TukeyAlpha_T = 0.25;     % Select a decimal between 0 (no window) and 1 (Hanning window).
 TukeyAlpha_t = 0.25;     % Select a decimal between 0 (no window) and 1 (Hanning window).
-isSaveProcessedData = 0; %Set to 1 to save processed data.
-
-
-%Photon Echo windowing
-WindowPhotonEcho =1;
-stdev_window = 5;
-pix_slope = (19/20);
-pix_offs = -4;
-
-
+isSaveProcessedData = 1; %Set to 1 to save processed data.
 
 % Eliminate the dialog box below in favor of hard-coding the values.
 % isub = [d(:).isdir];
@@ -207,25 +198,9 @@ end
 [MatrixX1,MatrixY1]=pol2cart(d1_theta,d1_r);
 [MatrixX4,MatrixY4]=pol2cart(d4_theta,d4_r);
 
-
-
-
 ZS1_m = complex(MatrixX1(1:NumSteps_tau,1:NumSteps_T,1:NumSteps_t,:,:,:),MatrixY1(1:NumSteps_tau,1:NumSteps_T,1:NumSteps_t,:,:,:));
 ZS4_m = complex(MatrixX4(1:NumSteps_tau,1:NumSteps_T,1:NumSteps_t,:,:,:),MatrixY4(1:NumSteps_tau,1:NumSteps_T,1:NumSteps_t,:,:,:));
-
-if WindowPhotonEcho ==1
-    for k = 1:NumSteps_T
-        for j = 1:NumSteps_t
-            offs(j) = round(pix_slope*j)+pix_offs;
-            for i =1:NumSteps_tau
-                ZS1_m(i,k,j) = ZS1_m(i,k,j)*exp(-(i-offs(j))^2/(2*stdev_window^2));
-            end
-        end
-    end
-clear offs i j k 
-end
-
-
+       
 %% Remaking of the function ArbAxisPlot (v4).
 
 pwr = 1;
@@ -488,7 +463,7 @@ if(isContourPlot)
     contourf(axis2(1:n),axis1(1:m),real(Z1plot)/VmaxZ1,linspace(-1,1,NbContours),'linestyle','none');
 else
     %hFigReal = imagesc(axis2(xlim_min:xlim_max),axis1(ylim_min:ylim_max),angle(Z1plot(ylim_min:ylim_max,xlim_min:xlim_max))); %set(gca,'Ydir','Normal');
-    hFigReal = imagesc(axis2(xlim_min:xlim_max),axis1(ylim_min:ylim_max),real(Z1plot(ylim_min:ylim_max,xlim_min:xlim_max)),[-VmaxZ1,VmaxZ1]); set(gca,'Ydir','Normal');
+    hFigReal = imagesc(axis2(xlim_min:xlim_max),axis1(ylim_min:ylim_max)',real(Z1plot(ylim_min:ylim_max,xlim_min:xlim_max)),[-VmaxZ1,VmaxZ1]); set(gca,'Ydir','Normal');
 end
 title('S1 Real part')
 if (CrtlFlags(1) == 2) & (CrtlFlags(3) == 2) 
