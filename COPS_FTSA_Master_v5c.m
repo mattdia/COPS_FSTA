@@ -20,23 +20,23 @@ clear all; clc; %clf;% Clear variables, close MuPad engine, clear command window
 speedC = 2.99709e+5; % nm/ps, speed of light in air.
 planck = 4.135667662e-3;  % eV*ps, or eV/THz, from NIST. Uncertainty is in the last 2 digits.
 
-ref_freq = speedC/(738.8); % THz
+ref_freq = speedC/(738.8-0.25); % c/(wavelength in nm). Answer is in THz.
 %dir_path = ['E:/Data/2017/2017_05/2017_05_30'];
 %dir_path = ['/Users/Chris2/Desktop/Data/2015/2015_12/2017_04_25'];
 %dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_05/2017_05_10 DQW 5nm'];
 dir_path = ['R:/COPS/Data/2017/2017_05/2017_05_30 in progress'];
 %dir_path = ['.'];
 %dir_path = pwd;
-scan_num = '05';
+scan_num = '07';
 
-Delay_t0_um = 60; %um. Use this for Local oscillator measurement.
+Delay_t0_um = 120; %um. Use this for Local oscillator measurement.
 isFFTshift = 0;
 isPadding = 2; %Pad with zeros up to numpad if set to 1. Pad by factor of 2 if set to 2.
 numpad = 1024;  %fft prefers 2^n points
 Undersample_win = 0;
 isContourPlot = 0;
 NbContours=15;  %Sets the number of contours if using contour plots.
-CrtlFlags = [1,0,1,0,0,0]; 
+CrtlFlags = [2,0,2,0,0,0]; 
     %Flags correspond to [tau,T,t,V,aux,pwr] 
     %Value of 0 means do nothing                        
     %Value of 1 means plot time domain
