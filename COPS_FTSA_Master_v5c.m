@@ -20,7 +20,7 @@ clear all; clc; %clf;% Clear variables, close MuPad engine, clear command window
 speedC = 2.99709e+5; % nm/ps, speed of light in air.
 planck = 4.135667662e-3;  % eV*ps, or eV/THz, from NIST. Uncertainty is in the last 2 digits.
 
-ref_freq = speedC/(738.8-0.25); % c/(wavelength in nm). Answer is in THz.
+ref_freq = speedC/(738.74-0.25); % c/(wavelength in nm). Answer is in THz.
 %dir_path = ['E:/Data/2017/2017_05/2017_05_30'];
 %dir_path = ['/Users/Chris2/Desktop/Data/2015/2015_12/2017_04_25'];
 %dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_05/2017_05_10 DQW 5nm'];
@@ -50,9 +50,9 @@ PhaseCorrectionIndx = 1;
 isWindowFunction_tau = 1; %Enter 1 to window along the tau axis.
 isWindowFunction_T = 0; %Enter 1 to window along the T axis.
 isWindowFunction_t = 1; %Enter 1 to window along the t axis.
-TukeyAlpha_tau = 0.25;     % Select a decimal between 0 (no window) and 1 (Hanning window).
-TukeyAlpha_T = 0.25;     % Select a decimal between 0 (no window) and 1 (Hanning window).
-TukeyAlpha_t = 0.25;     % Select a decimal between 0 (no window) and 1 (Hanning window).
+TukeyAlpha_tau = 1;     % Select a decimal between 0 (no window) and 1 (Hanning window).
+TukeyAlpha_T = 1;     % Select a decimal between 0 (no window) and 1 (Hanning window).
+TukeyAlpha_t = 1;     % Select a decimal between 0 (no window) and 1 (Hanning window).
 isSaveProcessedData = 0; %Set to 1 to save processed data.
 
 % Eliminate the dialog box below in favor of hard-coding the values.
@@ -446,6 +446,7 @@ if(isContourPlot)
 else
     %hFig = imagesc(axis2(ylim_min:ylim_max),axis1(xlim_min:xlim_max),abs(Z1plot(ylim_min:ylim_max,xlim_min:xlim_max))); set(gca,'Ydir','Normal');
     hFig = imagesc(axis2(xlim_min:xlim_max),axis1(ylim_min:ylim_max),abs(Z1plot(ylim_min:ylim_max,xlim_min:xlim_max))); set(gca,'Ydir','Normal');
+    %hFig = surf(axis2(xlim_min:xlim_max),axis1(ylim_min:ylim_max),abs(Z1plot(ylim_min:ylim_max,xlim_min:xlim_max)),'EdgeColor','none'); set(gca,'Ydir','Normal');
 end
 title('S1 Absolute Value')
 colormap(jet)
