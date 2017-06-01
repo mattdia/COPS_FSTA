@@ -23,15 +23,15 @@ planck = 4.135667662e-3;  % eV*ps, or eV/THz, from NIST. Uncertainty is in the l
 ref_freq = speedC/(737.2); % THz
 %dir_path = ['E:/Data/2017/2017_04/2017_04_29'];
 %dir_path = ['/Users/Chris2/Desktop/Data/2015/2015_12/2017_04_25'];
-dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_05/2017_05_26 in progress'];
+dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_05/2017_05_30 in progress'];
 %dir_path = ['R:/COPS/Data/2017/2017_05/2017_05_10 DQW 5nm'];
 %dir_path = ['.'];
 %dir_path = pwd;
-scan_num = '06';
+scan_num = '07';
 
 Delay_t0_um = 120; %um. Use this for Local oscillator measurement.
-isFFTshift = 1;
-isPadding = 1; %Pad with zeros up to numpad if set to 1. Pad by factor of 2 if set to 2.
+isFFTshift = 0;
+isPadding = 2; %Pad with zeros up to numpad if set to 1. Pad by factor of 2 if set to 2.
 numpad = 1024;  %fft prefers 2^n points
 Undersample_win = 0;
 isContourPlot = 0;
@@ -47,20 +47,20 @@ PlotIndx = [1,1,1,1,1,1]; %Flags correspond to the slice number extracted for el
 StepLimit = [0,0,0]; %Step limit for [tau, T, t]. Entering 0 leaves them at full length.
 isCorrectOverallPhase = 1; %Enter 1 to correct everything by the Tstep specified by PhaseCorrectionIndx, 2 to correct each Tstep independently, 0 for no correction.
 PhaseCorrectionIndx = 1;
-isWindowFunction_tau = 0; %Enter 1 to window along the tau axis.
-isWindowFunction_T = 0; %Enter 1 to window along the T axis.
-isWindowFunction_t = 0; %Enter 1 to window along the t axis.
-TukeyAlpha_tau = 0.25;     % Select a decimal between 0 (no window) and 1 (Hanning window).
-TukeyAlpha_T = 0.25;     % Select a decimal between 0 (no window) and 1 (Hanning window).
-TukeyAlpha_t = 0.25;     % Select a decimal between 0 (no window) and 1 (Hanning window).
-isSaveProcessedData = 0; %Set to 1 to save processed data.
+isWindowFunction_tau = 1; %Enter 1 to window along the tau axis.
+isWindowFunction_T = 1; %Enter 1 to window along the T axis.
+isWindowFunction_t = 1; %Enter 1 to window along the t axis.
+TukeyAlpha_tau = 1;     % Select a decimal between 0 (no window) and 1 (Hanning window).
+TukeyAlpha_T =1;     % Select a decimal between 0 (no window) and 1 (Hanning window).
+TukeyAlpha_t = 1;     % Select a decimal between 0 (no window) and 1 (Hanning window).
+isSaveProcessedData = 1; %Set to 1 to save processed data.
 
 
 %Photon Echo windowing
 WindowPhotonEcho =1;
 stdev_window = 4;
 pix_slope = (1);
-pix_offs = -3;
+pix_offs = -2;
 
 
 
