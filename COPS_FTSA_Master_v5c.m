@@ -20,14 +20,16 @@ clear all; clc; %clf;% Clear variables, close MuPad engine, clear command window
 speedC = 2.99709e+5; % nm/ps, speed of light in air.
 planck = 4.135667662e-3;  % eV*ps, or eV/THz, from NIST. Uncertainty is in the last 2 digits.
 
-ref_freq = speedC/(737.2); % THz
-%dir_path = ['E:/Data/2017/2017_04/2017_04_29'];
+
+ref_freq = speedC/(738.8); % THz
+%dir_path = ['E:/Data/2017/2017_05/2017_05_30'];
 %dir_path = ['/Users/Chris2/Desktop/Data/2015/2015_12/2017_04_25'];
-dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_05/2017_05_30 in progress'];
-%dir_path = ['R:/COPS/Data/2017/2017_05/2017_05_10 DQW 5nm'];
+%dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_05/2017_05_10 DQW 5nm'];
+dir_path = ['R:/COPS/Data/2017/2017_05/2017_05_30 in progress'];
 %dir_path = ['.'];
 %dir_path = pwd;
-scan_num = '07';
+scan_num = '05';
+
 
 Delay_t0_um = 120; %um. Use this for Local oscillator measurement.
 isFFTshift = 0;
@@ -35,8 +37,10 @@ isPadding = 2; %Pad with zeros up to numpad if set to 1. Pad by factor of 2 if s
 numpad = 1024;  %fft prefers 2^n points
 Undersample_win = 0;
 isContourPlot = 0;
+
 NbContours=25;  %Sets the number of contours if using contour plots.
 CrtlFlags = [2,0,2,0,0,0]; 
+
     %Flags correspond to [tau,T,t,V,aux,pwr] 
     %Value of 0 means do nothing                        
     %Value of 1 means plot time domain
@@ -48,12 +52,13 @@ StepLimit = [0,0,0]; %Step limit for [tau, T, t]. Entering 0 leaves them at full
 isCorrectOverallPhase = 1; %Enter 1 to correct everything by the Tstep specified by PhaseCorrectionIndx, 2 to correct each Tstep independently, 0 for no correction.
 PhaseCorrectionIndx = 1;
 isWindowFunction_tau = 1; %Enter 1 to window along the tau axis.
-isWindowFunction_T = 1; %Enter 1 to window along the T axis.
+isWindowFunction_T = 0; %Enter 1 to window along the T axis.
 isWindowFunction_t = 1; %Enter 1 to window along the t axis.
-TukeyAlpha_tau = 1;     % Select a decimal between 0 (no window) and 1 (Hanning window).
-TukeyAlpha_T =1;     % Select a decimal between 0 (no window) and 1 (Hanning window).
-TukeyAlpha_t = 1;     % Select a decimal between 0 (no window) and 1 (Hanning window).
-isSaveProcessedData = 1; %Set to 1 to save processed data.
+TukeyAlpha_tau = 0.25;     % Select a decimal between 0 (no window) and 1 (Hanning window).
+TukeyAlpha_T = 0.25;     % Select a decimal between 0 (no window) and 1 (Hanning window).
+TukeyAlpha_t = 0.25;     % Select a decimal between 0 (no window) and 1 (Hanning window).
+isSaveProcessedData = 0; %Set to 1 to save processed data.
+
 
 
 %Photon Echo windowing
@@ -474,8 +479,11 @@ else
 end
 title('S1 Absolute Value')
 colormap(jet)
+%colormap(parula)
+%colormap(gray)
+%colormap(flipud(gray))
 if (CrtlFlags(1) == 2) & (CrtlFlags(3) == 2) 
-    x = linspace(axis2(1),axis2(end),20); y = -x; line(x,y,'Color','White')%,'LineStyle', ':','MarkerSize',16)
+%    x = linspace(axis2(1),axis2(end),20); y = -x; line(x,y,'Color','White')%,'LineStyle', ':','MarkerSize',16)
 end
 colorbar();
 % ylabel('${\hbar\omega_{\tau}}$', 'interpreter','latex','FontSize',18)
@@ -508,7 +516,6 @@ else
     hFig = imagesc(axis2(xlim_min:xlim_max),axis1S2(ylim_min:ylim_max),abs(Z4plot(ylim_min:ylim_max,xlim_min:xlim_max))); set(gca,'Ydir','Normal');
 end
 title('S2 Absolute Value')
-colormap(jet)
 x = linspace(axis2(1),axis2(end),20); y = x; line(x,y,'Color','White')%,'LineStyle', ':','MarkerSize',16)
 colorbar();
 ylabel(axis1label, 'FontSize',12)
@@ -518,7 +525,7 @@ subplot(2,2,4)
 if(isContourPlot)
     contourf(axis2(1:n),axis1S2(1:m),real(Z4plot)/VmaxZ4,linspace(-1,1,NbContours),'linestyle','none');
 else
-    hFigReal = imagesc(axis2(xlim_min:xlim_max),axis1S2(ylim_min:ylim_max),real(Z4plot(ylim_min:ylim_max,xlim_min:xlim_max)),[-VmaxZ1,VmaxZ1]); set(gca,'Ydir','Normal'); 
+    hFigReal = imagesc(axis2(xlim_min:xlim_max),axis1S2(ylim_min:ylim_max),real(Z4plot(ylim_min:ylim_max,xlim_min:xlim_max)),[-VmaxZ4,VmaxZ4]); set(gca,'Ydir','Normal'); 
 end
 title('S2 Real Part')
 x = linspace(axis2(1),axis2(end),20); y = x; line(x,y,'Color','Black','LineStyle', ':')%,'MarkerSize',16)
