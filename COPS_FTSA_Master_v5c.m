@@ -24,11 +24,11 @@ planck = 4.135667662e-3;  % eV*ps, or eV/THz, from NIST. Uncertainty is in the l
 ref_freq = speedC/(738.74-0.25); % c/(wavelength in nm). Answer is in THz.
 %dir_path = ['E:/Data/2017/2017_05/2017_05_30'];
 %dir_path = ['/Users/Chris2/Desktop/Data/2015/2015_12/2017_04_25'];
-%dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_05/2017_05_10 DQW 5nm'];
-dir_path = ['R:/COPS/Data/2017/2017_05/2017_05_30 in progress'];
+dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_05/2017_05_30 in progress'];
+%dir_path = ['R:/COPS/Data/2017/2017_05/2017_05_30 in progress'];
 %dir_path = ['.'];
 %dir_path = pwd;
-scan_num = '07';
+scan_num = '12';
 
 Delay_t0_um = 120; %um. Use this for Local oscillator measurement.
 isFFTshift = 0;
@@ -38,7 +38,7 @@ Undersample_win = 0;
 isContourPlot = 0;
 
 NbContours=15;  %Sets the number of contours if using contour plots.
-CrtlFlags = [2,0,2,0,0,0]; 
+CrtlFlags = [1,0,1,0,0,0]; 
 
     %Flags correspond to [tau,T,t,V,aux,pwr] 
     %Value of 0 means do nothing                        
@@ -50,9 +50,9 @@ PlotIndx = [1,1,1,1,1,1]; %Flags correspond to the slice number extracted for el
 StepLimit = [0,0,0]; %Step limit for [tau, T, t]. Entering 0 leaves them at full length.
 isCorrectOverallPhase = 1; %Enter 1 to correct everything by the Tstep specified by PhaseCorrectionIndx, 2 to correct each Tstep independently, 0 for no correction.
 PhaseCorrectionIndx = 1;
-isWindowFunction_tau = 1; %Enter 1 to window along the tau axis.
+isWindowFunction_tau = 0; %Enter 1 to window along the tau axis.
 isWindowFunction_T = 0; %Enter 1 to window along the T axis.
-isWindowFunction_t = 1; %Enter 1 to window along the t axis.
+isWindowFunction_t = 0; %Enter 1 to window along the t axis.
 TukeyAlpha_tau = 1;     % Select a decimal between 0 (no window) and 1 (Hanning window).
 TukeyAlpha_T = 1;     % Select a decimal between 0 (no window) and 1 (Hanning window).
 TukeyAlpha_t = 1;     % Select a decimal between 0 (no window) and 1 (Hanning window).
@@ -62,9 +62,9 @@ isSaveProcessedData = 0; %Set to 1 to save processed data.
 
 %Photon Echo windowing
 WindowPhotonEcho =1;
-stdev_window = 4;
-pix_slope = (1);
-pix_offs = -2;
+stdev_window_time = .5; %in ps, t axis;
+time_slope = 1; %in ps
+time_offset = -.5; %in ps 
 
 
 
@@ -144,6 +144,14 @@ aux_init = parameters(29,1);
 %Define StepMatrix
 StepMatrix = [NumSteps_tau,NumSteps_T,NumSteps_t,NumSteps_V,NumSteps_aux,NumSteps_pwr];    
 
+
+%Photon echo windowing parameters these need to be integers
+pix_slope = time_slope*(t_stepsize/tau_stepsize);
+tau_stepsize_ps = 2e3*tau_stepsize/speedC;
+t_stepsize_ps = 2e3*t_stepsize/speedC
+pix_offs = round(time_offset/tau_stepsize_ps);
+stdev_window= stdev_window_time/t_stepsize_ps;
+
 %old phase correction. Discarded in favor of phase correction which uses
 %correct time zero
 % ZS1_m = complex(MatrixX1(1:NumSteps_tau,1:NumSteps_T,1:NumSteps_t,:,:,:),MatrixY1(1:NumSteps_tau,1:NumSteps_T,1:NumSteps_t,:,:,:));
@@ -216,6 +224,7 @@ end
 
 ZS1_m = complex(MatrixX1(1:NumSteps_tau,1:NumSteps_T,1:NumSteps_t,:,:,:),MatrixY1(1:NumSteps_tau,1:NumSteps_T,1:NumSteps_t,:,:,:));
 ZS4_m = complex(MatrixX4(1:NumSteps_tau,1:NumSteps_T,1:NumSteps_t,:,:,:),MatrixY4(1:NumSteps_tau,1:NumSteps_T,1:NumSteps_t,:,:,:));
+
 
 if WindowPhotonEcho ==1
     for k = 1:NumSteps_T
