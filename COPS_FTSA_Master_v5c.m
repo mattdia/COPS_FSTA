@@ -21,15 +21,14 @@ speedC = 2.99709e+5; % nm/ps, speed of light in air.
 planck = 4.135667662e-3;  % eV*ps, or eV/THz, from NIST. Uncertainty is in the last 2 digits.
 
 
-ref_freq = speedC/(738.8); % THz
+ref_freq = speedC/(738.74-0.25); % c/(wavelength in nm). Answer is in THz.
 %dir_path = ['E:/Data/2017/2017_05/2017_05_30'];
 %dir_path = ['/Users/Chris2/Desktop/Data/2015/2015_12/2017_04_25'];
 %dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_05/2017_05_10 DQW 5nm'];
 dir_path = ['R:/COPS/Data/2017/2017_05/2017_05_30 in progress'];
 %dir_path = ['.'];
 %dir_path = pwd;
-scan_num = '05';
-
+scan_num = '07';
 
 Delay_t0_um = 120; %um. Use this for Local oscillator measurement.
 isFFTshift = 0;
@@ -38,7 +37,7 @@ numpad = 1024;  %fft prefers 2^n points
 Undersample_win = 0;
 isContourPlot = 0;
 
-NbContours=25;  %Sets the number of contours if using contour plots.
+NbContours=15;  %Sets the number of contours if using contour plots.
 CrtlFlags = [2,0,2,0,0,0]; 
 
     %Flags correspond to [tau,T,t,V,aux,pwr] 
@@ -54,9 +53,9 @@ PhaseCorrectionIndx = 1;
 isWindowFunction_tau = 1; %Enter 1 to window along the tau axis.
 isWindowFunction_T = 0; %Enter 1 to window along the T axis.
 isWindowFunction_t = 1; %Enter 1 to window along the t axis.
-TukeyAlpha_tau = 0.25;     % Select a decimal between 0 (no window) and 1 (Hanning window).
-TukeyAlpha_T = 0.25;     % Select a decimal between 0 (no window) and 1 (Hanning window).
-TukeyAlpha_t = 0.25;     % Select a decimal between 0 (no window) and 1 (Hanning window).
+TukeyAlpha_tau = 1;     % Select a decimal between 0 (no window) and 1 (Hanning window).
+TukeyAlpha_T = 1;     % Select a decimal between 0 (no window) and 1 (Hanning window).
+TukeyAlpha_t = 1;     % Select a decimal between 0 (no window) and 1 (Hanning window).
 isSaveProcessedData = 0; %Set to 1 to save processed data.
 
 
@@ -476,6 +475,7 @@ if(isContourPlot)
 else
     %hFig = imagesc(axis2(ylim_min:ylim_max),axis1(xlim_min:xlim_max),abs(Z1plot(ylim_min:ylim_max,xlim_min:xlim_max))); set(gca,'Ydir','Normal');
     hFig = imagesc(axis2(xlim_min:xlim_max),axis1(ylim_min:ylim_max),abs(Z1plot(ylim_min:ylim_max,xlim_min:xlim_max))); set(gca,'Ydir','Normal');
+    %hFig = surf(axis2(xlim_min:xlim_max),axis1(ylim_min:ylim_max),abs(Z1plot(ylim_min:ylim_max,xlim_min:xlim_max)),'EdgeColor','none'); set(gca,'Ydir','Normal');
 end
 title('S1 Absolute Value')
 colormap(jet)
