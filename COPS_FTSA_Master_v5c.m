@@ -15,11 +15,12 @@
 %Version 5b/5c:
     %Implemented an option for windowing using a Tukey function.
     %Improved the methodology for correcting phase using time0.
+%Version 5d:
+    %Implemented an option to implement a Gaussian window function for photon echos.
 
 clear all; clc; %clf;% Clear variables, close MuPad engine, clear command window.
 speedC = 2.99709e+5; % nm/ps, speed of light in air.
 planck = 4.135667662e-3;  % eV*ps, or eV/THz, from NIST. Uncertainty is in the last 2 digits.
-
 
 ref_freq = speedC/(738.74-0.25); % c/(wavelength in nm). Answer is in THz.
 %dir_path = ['E:/Data/2017/2017_05/2017_05_30'];
@@ -28,18 +29,16 @@ dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_05/2017_05_30 in progress'];
 %dir_path = ['R:/COPS/Data/2017/2017_05/2017_05_30 in progress'];
 %dir_path = ['.'];
 %dir_path = pwd;
-scan_num = '12';
+scan_num = '46';
 
-Delay_t0_um = 120; %um. Use this for Local oscillator measurement.
+Delay_t0_um = 60; %um. Use this for Local oscillator measurement.
 isFFTshift = 0;
 isPadding = 2; %Pad with zeros up to numpad if set to 1. Pad by factor of 2 if set to 2.
 numpad = 1024;  %fft prefers 2^n points
 Undersample_win = 0;
 isContourPlot = 0;
-
 NbContours=15;  %Sets the number of contours if using contour plots.
 CrtlFlags = [1,0,1,0,0,0]; 
-
     %Flags correspond to [tau,T,t,V,aux,pwr] 
     %Value of 0 means do nothing                        
     %Value of 1 means plot time domain
@@ -50,23 +49,18 @@ PlotIndx = [1,1,1,1,1,1]; %Flags correspond to the slice number extracted for el
 StepLimit = [0,0,0]; %Step limit for [tau, T, t]. Entering 0 leaves them at full length.
 isCorrectOverallPhase = 1; %Enter 1 to correct everything by the Tstep specified by PhaseCorrectionIndx, 2 to correct each Tstep independently, 0 for no correction.
 PhaseCorrectionIndx = 1;
+isS1andS2 = 0; %Enter 1 if both S1 and S2 data sets were collected, 0 if only S1.
 isWindowFunction_tau = 0; %Enter 1 to window along the tau axis.
 isWindowFunction_T = 0; %Enter 1 to window along the T axis.
 isWindowFunction_t = 0; %Enter 1 to window along the t axis.
 TukeyAlpha_tau = 1;     % Select a decimal between 0 (no window) and 1 (Hanning window).
 TukeyAlpha_T = 1;     % Select a decimal between 0 (no window) and 1 (Hanning window).
 TukeyAlpha_t = 1;     % Select a decimal between 0 (no window) and 1 (Hanning window).
-isSaveProcessedData = 0; %Set to 1 to save processed data.
-
-
-
-%Photon Echo windowing
-WindowPhotonEcho =1;
+isWindowPhotonEcho = 1; %Enter 1 for photon echo windowing
 stdev_window_time = .5; %in ps, t axis;
-time_slope = 1; %in ps
-time_offset = -.5; %in ps 
-
-
+time_slope = 1; %in ps/ps
+time_offset = -.5; %in ps/ps
+isSaveProcessedData = 0; %Set to 1 to save processed data.
 
 % Eliminate the dialog box below in favor of hard-coding the values.
 % isub = [d(:).isdir];
@@ -144,11 +138,10 @@ aux_init = parameters(29,1);
 %Define StepMatrix
 StepMatrix = [NumSteps_tau,NumSteps_T,NumSteps_t,NumSteps_V,NumSteps_aux,NumSteps_pwr];    
 
-
-%Photon echo windowing parameters these need to be integers
+%Photon echo windowing parameters. These need to be integers.
 pix_slope = time_slope*(t_stepsize/tau_stepsize);
 tau_stepsize_ps = 2e3*tau_stepsize/speedC;
-t_stepsize_ps = 2e3*t_stepsize/speedC
+t_stepsize_ps = 2e3*t_stepsize/speedC;
 pix_offs = round(time_offset/tau_stepsize_ps);
 stdev_window= stdev_window_time/t_stepsize_ps;
 
@@ -205,15 +198,15 @@ end
 [tau_zero,idx_tau_zero] = min(abs(tau));
 if isCorrectOverallPhase == 2
     for q=1:StepMatrix(2)
-        d1_phase_offset = d1_theta(idx_tau_zero,q,idx_t_zero); %Correct each value of T independently.
+        d1_phase_offset = d1_theta(idx_tau_zero,q,idx_t_zero) %Correct each value of T independently.
         d1_theta(:,q,:) = d1_theta(:,q,:)-d1_phase_offset;
-        d4_phase_offset = d4_theta(idx_tau_zero,q,idx_t_zero);
+        d4_phase_offset = d4_theta(idx_tau_zero,q,idx_t_zero)
         d4_theta(:,q,:) = d4_theta(:,q,:)-d4_phase_offset;
     end
 elseif isCorrectOverallPhase == 1
-    d1_phase_offset = d1_theta(idx_tau_zero,PhaseCorrectionIndx,idx_t_zero); %Correct by the specified index point. Apply globally.
+    d1_phase_offset = d1_theta(idx_tau_zero,PhaseCorrectionIndx,idx_t_zero) %Correct by the specified index point. Apply globally.
     d1_theta = d1_theta-d1_phase_offset;
-    d4_phase_offset = d4_theta(idx_tau_zero,PhaseCorrectionIndx,idx_t_zero);
+    d4_phase_offset = d4_theta(idx_tau_zero,PhaseCorrectionIndx,idx_t_zero)
     d4_theta = d4_theta-d4_phase_offset;
 end
 [MatrixX1,MatrixY1]=pol2cart(d1_theta,d1_r);
@@ -226,7 +219,7 @@ ZS1_m = complex(MatrixX1(1:NumSteps_tau,1:NumSteps_T,1:NumSteps_t,:,:,:),MatrixY
 ZS4_m = complex(MatrixX4(1:NumSteps_tau,1:NumSteps_T,1:NumSteps_t,:,:,:),MatrixY4(1:NumSteps_tau,1:NumSteps_T,1:NumSteps_t,:,:,:));
 
 
-if WindowPhotonEcho ==1
+if isWindowPhotonEcho ==1
     for k = 1:NumSteps_T
         for j = 1:NumSteps_t
             offs(j) = round(pix_slope*j)+pix_offs;
@@ -517,31 +510,32 @@ colorbar();
 ylabel(axis1label, 'FontSize',12)
 xlabel(axis2label,'FontSize',12)
 
-subplot(2,2,3)
-if(isContourPlot)
-    hFig = contourf(axis2(1:n),axis1S2(1:m),abs(Z4plot),linspace(0,VmaxZ4,NbContours),'linestyle','none');
-else
-    %hFig = imagesc(axis2(ylim_min:ylim_max),axis1(xlim_min:xlim_max),abs(Z1plot(ylim_min:ylim_max,xlim_min:xlim_max))); set(gca,'Ydir','Normal');
-    hFig = imagesc(axis2(xlim_min:xlim_max),axis1S2(ylim_min:ylim_max),abs(Z4plot(ylim_min:ylim_max,xlim_min:xlim_max))); set(gca,'Ydir','Normal');
-end
-title('S2 Absolute Value')
-x = linspace(axis2(1),axis2(end),20); y = x; line(x,y,'Color','White')%,'LineStyle', ':','MarkerSize',16)
-colorbar();
-ylabel(axis1label, 'FontSize',12)
-xlabel(axis2label,'FontSize',12)
+if isS1andS2
+    subplot(2,2,3)
+    if(isContourPlot)
+        hFig = contourf(axis2(1:n),axis1S2(1:m),abs(Z4plot),linspace(0,VmaxZ4,NbContours),'linestyle','none');
+    else
+        %hFig = imagesc(axis2(ylim_min:ylim_max),axis1(xlim_min:xlim_max),abs(Z1plot(ylim_min:ylim_max,xlim_min:xlim_max))); set(gca,'Ydir','Normal');
+        hFig = imagesc(axis2(xlim_min:xlim_max),axis1S2(ylim_min:ylim_max),abs(Z4plot(ylim_min:ylim_max,xlim_min:xlim_max))); set(gca,'Ydir','Normal');
+    end
+    title('S2 Absolute Value')
+    x = linspace(axis2(1),axis2(end),20); y = x; line(x,y,'Color','White')%,'LineStyle', ':','MarkerSize',16)
+    colorbar();
+    ylabel(axis1label, 'FontSize',12)
+    xlabel(axis2label,'FontSize',12)
 
-subplot(2,2,4)
-if(isContourPlot)
-    contourf(axis2(1:n),axis1S2(1:m),real(Z4plot)/VmaxZ4,linspace(-1,1,NbContours),'linestyle','none');
-else
-    hFigReal = imagesc(axis2(xlim_min:xlim_max),axis1S2(ylim_min:ylim_max),real(Z4plot(ylim_min:ylim_max,xlim_min:xlim_max)),[-VmaxZ4,VmaxZ4]); set(gca,'Ydir','Normal'); 
+    subplot(2,2,4)
+    if(isContourPlot)
+        contourf(axis2(1:n),axis1S2(1:m),real(Z4plot)/VmaxZ4,linspace(-1,1,NbContours),'linestyle','none');
+    else
+        hFigReal = imagesc(axis2(xlim_min:xlim_max),axis1S2(ylim_min:ylim_max),real(Z4plot(ylim_min:ylim_max,xlim_min:xlim_max)),[-VmaxZ4,VmaxZ4]); set(gca,'Ydir','Normal'); 
+    end
+    title('S2 Real Part')
+    x = linspace(axis2(1),axis2(end),20); y = x; line(x,y,'Color','Black','LineStyle', ':')%,'MarkerSize',16)
+    colorbar();
+    ylabel(axis1label, 'FontSize',12)
+    xlabel(axis2label,'FontSize',12) 
 end
-title('S2 Real Part')
-x = linspace(axis2(1),axis2(end),20); y = x; line(x,y,'Color','Black','LineStyle', ':')%,'MarkerSize',16)
-colorbar();
-ylabel(axis1label, 'FontSize',12)
-xlabel(axis2label,'FontSize',12) 
-
 
 %% Extra linear plots
 
