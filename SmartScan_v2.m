@@ -12,10 +12,10 @@ hom_flag = 0; %Purely homogeneous mask
 other_flag = 0; %Change to 1 to load custom scan mask
 
 %% Scan Parameters
-
-NumPnts_tau=700;
+file_path = uigetdir
+NumPnts_tau = 1400;
 NumPnts_T=1;
-NumPnts_t=700;
+NumPnts_t = 1400;
 stepsize_tau=45;
 stepsize_T=-30;
 stepsize_t=-45;
@@ -24,7 +24,7 @@ T_init=-30;
 t_init=0;
 t_offset = 0;
 
-tau_cutoff_index=10; %Number of points on either side of the 
+tau_cutoff_index=2; %Number of points on either side of the 
 %diagonal to take for a purely inhomogeneous scan
 
 %Misc scan parameters
@@ -188,22 +188,23 @@ global_position(:,7) = aux2_position_vector;
 
 global_coordinate = zeros(size(t_position_vector,1),7);
 
-global_coordinate(:,1) = tau_position_vector/stepsize_tau;
+global_coordinate(:,1) = (tau_position_vector/stepsize_tau)+1;
 global_coordinate(:,2) = abs(T_position_vector/stepsize_T);
-global_coordinate(:,3) = abs(t_position_vector/stepsize_t);
+global_coordinate(:,3) = abs(t_position_vector/stepsize_t)+1;
 global_coordinate(:,4) = V_position_vector/V_init;
 global_coordinate(:,5) = LCVolt_position_vector/LCVolt_init;
 global_coordinate(:,6) = aux_position_vector/aux_init;
 global_coordinate(:,7) = aux2_position_vector/aux2_init;
 
 disp('creating files')
-mask_file = strcat('MD_SmartScan_Mask.txt');
+mask_file = strcat(file_path,'\MD_SmartScan_Mask.txt');
 dlmwrite(mask_file,global_position,'\t');
-% 
-position_file = strcat('MD_Calculated_Positions.txt');
+% % 
+position_file = strcat(file_path,'\MD_Calculated_Positions.txt');
 dlmwrite(position_file,global_position,'\t');
-% 
-coordinate_file = strcat('MD_Calculated_coordinates.txt');
+% % 
+coordinate_file = strcat(file_path,'\MD_Calculated_Coordinates.txt');
+disp('done')
 dlmwrite(coordinate_file,global_coordinate,'\t');
 
 

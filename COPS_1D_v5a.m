@@ -8,7 +8,7 @@
 
 clear all;
 %clf;
-file_path = ['E:/Data/2017/2017_04/2017_04_29/scan02/'];
+file_path = ['E:/Data/2017/2017_06/2017_06_06/scan02/'];
 %file_path = ['/Users/Chris2/Desktop/Data/2015/2015_12/2015_12_01/scan13/'];
 %file_path = ['/Volumes/cundiff/COPS/Data/2017/2017_04/2017_04_29/scan01/'];
 data_path = [file_path '1D_output.txt'];
@@ -22,7 +22,7 @@ Measuring_tau = str2num(INPUT{2});
 phase_gradient_option = str2num(INPUT{3});
 
 speedC = 2.99709e+5; %(nm/ps), speed of light in air. This value is from Wolfram Alpha. 
-lambda_ref = 851.85; %lambda reference beam in nm
+lambda_ref = 738.49; %lambda reference beam in nm
 ref_freq = speedC/lambda_ref; % in THz
 
 %% Notes on corrections of phase  

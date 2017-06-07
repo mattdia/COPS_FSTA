@@ -22,23 +22,23 @@ clear all; clc; %clf;% Clear variables, close MuPad engine, clear command window
 speedC = 2.99709e+5; % nm/ps, speed of light in air.
 planck = 4.135667662e-3;  % eV*ps, or eV/THz, from NIST. Uncertainty is in the last 2 digits.
 
-ref_freq = speedC/(738.74-0.25); % c/(wavelength in nm). Answer is in THz.
-%dir_path = ['E:/Data/2017/2017_05/2017_05_30'];
+ref_freq = speedC/(738.9-0.25); % c/(wavelength in nm). Answer is in THz.
+dir_path = ['E:/Data/2017/2017_06/2017_06_06'];
 %dir_path = ['/Users/Chris2/Desktop/Data/2015/2015_12/2017_04_25'];
-dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_05/2017_05_30 in progress'];
+%dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_06/2017_06_06'];
 %dir_path = ['R:/COPS/Data/2017/2017_05/2017_05_30 in progress'];
 %dir_path = ['.'];
 %dir_path = pwd;
-scan_num = '46';
+scan_num = '04';
 
-Delay_t0_um = 60; %um. Use this for Local oscillator measurement.
+Delay_t0_um = 0; %um. Use this for Local oscillator measurement.
 isFFTshift = 0;
 isPadding = 2; %Pad with zeros up to numpad if set to 1. Pad by factor of 2 if set to 2.
 numpad = 1024;  %fft prefers 2^n points
 Undersample_win = 0;
 isContourPlot = 0;
 NbContours=15;  %Sets the number of contours if using contour plots.
-CrtlFlags = [1,0,1,0,0,0]; 
+CrtlFlags = [2,0,2,0,0,0]; 
     %Flags correspond to [tau,T,t,V,aux,pwr] 
     %Value of 0 means do nothing                        
     %Value of 1 means plot time domain
@@ -198,15 +198,16 @@ end
 [tau_zero,idx_tau_zero] = min(abs(tau));
 if isCorrectOverallPhase == 2
     for q=1:StepMatrix(2)
-        d1_phase_offset = d1_theta(idx_tau_zero,q,idx_t_zero) %Correct each value of T independently.
+        d1_phase_offset = d1_theta(idx_tau_zero,q,idx_t_zero); %Correct each value of T independently.
         d1_theta(:,q,:) = d1_theta(:,q,:)-d1_phase_offset;
-        d4_phase_offset = d4_theta(idx_tau_zero,q,idx_t_zero)
-        d4_theta(:,q,:) = d4_theta(:,q,:)-d4_phase_offset;
+        d4_phase_offset = d4_theta(idx_tau_zero,q,idx_t_zero);
     end
 elseif isCorrectOverallPhase == 1
-    d1_phase_offset = d1_theta(idx_tau_zero,PhaseCorrectionIndx,idx_t_zero) %Correct by the specified index point. Apply globally.
+    d1_phase_offset = d1_theta(idx_tau_zero,PhaseCorrectionIndx,idx_t_zero); %Correct by the specified index point. Apply globally.
+    disp(strcat('phase offset correction for D1 = ',num2str(d1_phase_offset),' radians.'))
     d1_theta = d1_theta-d1_phase_offset;
-    d4_phase_offset = d4_theta(idx_tau_zero,PhaseCorrectionIndx,idx_t_zero)
+    d4_phase_offset = d4_theta(idx_tau_zero,PhaseCorrectionIndx,idx_t_zero);
+    disp(strcat('phase offset correction for D4 = ',num2str(d4_phase_offset),' radians.'))
     d4_theta = d4_theta-d4_phase_offset;
 end
 [MatrixX1,MatrixY1]=pol2cart(d1_theta,d1_r);
@@ -480,8 +481,9 @@ else
     %hFig = surf(axis2(xlim_min:xlim_max),axis1(ylim_min:ylim_max),abs(Z1plot(ylim_min:ylim_max,xlim_min:xlim_max)),'EdgeColor','none'); set(gca,'Ydir','Normal');
 end
 title('S1 Absolute Value')
-colormap(jet)
-%colormap(parula)
+%colormap(jet)
+colormap(beach)
+%colormap(flipud(bone))
 %colormap(gray)
 %colormap(flipud(gray))
 if (CrtlFlags(1) == 2) & (CrtlFlags(3) == 2) 
