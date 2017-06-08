@@ -7,15 +7,15 @@
 %version of SmartScan which lives in the COPS old software folder.
 
 %% Flags
-inhom_flag = 1; %Purely inhomogeneous mask
+inhom_flag = 0; %Purely inhomogeneous mask
 hom_flag = 0; %Purely homogeneous mask
-other_flag = 0; %Change to 1 to load custom scan mask
+other_flag = 1; %Change to 1 to load custom scan mask
 
 %% Scan Parameters
 
-NumPnts_tau=700;
-NumPnts_T=1;
-NumPnts_t=700;
+NumPnts_tau=70;
+NumPnts_T=70;
+NumPnts_t=70;
 stepsize_tau=45;
 stepsize_T=-30;
 stepsize_t=-45;
@@ -108,6 +108,23 @@ end
     t_position_vector = t_position_matrix(t_position_matrix ~= 0)-stepsize_t;
     disp('t/tau mask done')
 end
+
+if other_flag ==1 %takes mask (for now just a 3D matrix with tau,t,T coordinates)
+%and converts into proper labview inputfiles
+    mask_file = uigetdir %find the mask file
+    mask = dlmread(maskfile,'\t'); %read in mask file
+    [row, col, page] = ind2sub(size(md_mask),find(md_mask>0)); %find nonzero mask elements
+    tau_coordinate_vector = reshape(row,[],1);%make coordniate vectors
+    t_coordinate_vector = reshape(col,[],1);
+    T_coordinate_vector = reshape(page,[],1);
+    
+    for i = 1:numel(tau_coordinate_vector) %make position vectors
+        tau_position_vector = (i-1)*tau_coordinate_vector(i);
+        t_position_vector = (i-1)*t_coordinate_vector(i);
+        T_position_vector = (i-1)*T_coordinate_vector(i);
+    end
+end
+
 
 %% Creating Correct T for Inhomogeneous scans (if a 3D scan is desired)
 size_tau = size(tau_position_vector,1);
@@ -205,6 +222,7 @@ dlmwrite(position_file,global_position,'\t');
 % 
 coordinate_file = strcat('MD_Calculated_coordinates.txt');
 dlmwrite(coordinate_file,global_coordinate,'\t');
+disp('done')
 
 
 
