@@ -8,8 +8,8 @@
 
 %% Flags
 inhom_flag = 0; %Purely inhomogeneous mask
-hom_flag = 0; %Purely homogeneous mask
-other_flag = 1; %Change to 1 to load custom scan mask
+hom_flag = 1; %Purely homogeneous mask
+other_flag = 0; %Change to 1 to load custom scan mask
 
 %% Scan Parameters
 
@@ -108,7 +108,40 @@ end
     t_position_vector = t_position_matrix(t_position_matrix ~= 0)-stepsize_t;
     disp('t/tau mask done')
 end
+%% Pure homogeneous masking
+if hom_flag ==1
+    mask = ones(NumPnts_tau,NumPnts_t);
+    md_mask = ones(NumPnts_tau,NumPnts_t,NumPnts_T);
+    mask_idx = NumPnts_tau+NumPnts_t;
+    for i = 1:NumPnts_tau
+        for j = 1:NumPnts_t
+            if (i-1 + j-1) >= mask_idx/2
+                mask(i,j) = 0;
+            end
+        end
+    end
+    
+    for k = 1:NumPnts_T
+        md_mask(:,:,k) = mask;
+    end
+    
+    
+    [row, col, page] = ind2sub(size(md_mask),find(md_mask>0)); %find nonzero mask elements
+    tau_coordinate_vector = reshape(row,[],1);%make coordniate vectors
+    t_coordinate_vector = reshape(col,[],1);
+    T_coordinate_vector = reshape(page,[],1);
+    T_position_vector = T_coordinate_vector; %Force T to be a column vector, as it was a special case for some reason
+    
+    for i = 1:numel(tau_coordinate_vector) %make position vectors
+        tau_position_vector(i) = (i-1)*tau_coordinate_vector(i);
+        t_position_vector(i) = (i-1)*t_coordinate_vector(i);
+        T_position_vector(i) = (i-1)*T_coordinate_vector(i);
+    end
 
+    disp('done creating hom. mask')
+end
+
+%% Other Mask
 if other_flag ==1 %takes mask (for now just a 3D matrix with tau,t,T coordinates)
 %and converts into proper labview inputfiles
     mask_file = uigetdir %find the mask file
@@ -119,9 +152,9 @@ if other_flag ==1 %takes mask (for now just a 3D matrix with tau,t,T coordinates
     T_coordinate_vector = reshape(page,[],1);
     
     for i = 1:numel(tau_coordinate_vector) %make position vectors
-        tau_position_vector = (i-1)*tau_coordinate_vector(i);
-        t_position_vector = (i-1)*t_coordinate_vector(i);
-        T_position_vector = (i-1)*T_coordinate_vector(i);
+        tau_position_vector(i) = (i-1)*tau_coordinate_vector(i);
+        t_position_vector(i) = (i-1)*t_coordinate_vector(i);
+        T_position_vector(i) = (i-1)*T_coordinate_vector(i);
     end
 end
 
@@ -129,7 +162,7 @@ end
 %% Creating Correct T for Inhomogeneous scans (if a 3D scan is desired)
 size_tau = size(tau_position_vector,1);
 
-if NumPnts_T ~=1
+if NumPnts_T ~=1 && hom_flag == 0 && other_flag == 0
     for k = 1:NumPnts_T
         T_position_matrix(:,k) = [ones(size_tau,1)]*(k-1)*stepsize_T;
         tau_composite_matrix(:,k) = tau_position_vector;
@@ -213,16 +246,16 @@ global_coordinate(:,5) = LCVolt_position_vector/LCVolt_init;
 global_coordinate(:,6) = aux_position_vector/aux_init;
 global_coordinate(:,7) = aux2_position_vector/aux2_init;
 
-disp('creating files')
-mask_file = strcat('MD_SmartScan_Mask.txt');
-dlmwrite(mask_file,global_position,'\t');
-% 
-position_file = strcat('MD_Calculated_Positions.txt');
-dlmwrite(position_file,global_position,'\t');
-% 
-coordinate_file = strcat('MD_Calculated_coordinates.txt');
-dlmwrite(coordinate_file,global_coordinate,'\t');
-disp('done')
+% disp('creating files')
+% mask_file = strcat('MD_SmartScan_Mask.txt');
+% dlmwrite(mask_file,global_position,'\t');
+% % 
+% position_file = strcat('MD_Calculated_Positions.txt');
+% dlmwrite(position_file,global_position,'\t');
+% % 
+% coordinate_file = strcat('MD_Calculated_coordinates.txt');
+% dlmwrite(coordinate_file,global_coordinate,'\t');
+% disp('done')
 
 
 
