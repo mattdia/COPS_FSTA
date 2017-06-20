@@ -23,9 +23,10 @@ speedC = 2.99709e+5; % nm/ps, speed of light in air.
 planck = 4.135667662e-3;  % eV*ps, or eV/THz, from NIST. Uncertainty is in the last 2 digits.
 
 ref_freq = speedC/(738.9-0.25); % c/(wavelength in nm). Answer is in THz.
-dir_path = ['E:/Data/2017/2017_06/2017_06_06'];
+%ref_freq = speedC/(737.3-0.25); % c/(wavelength in nm). Answer is in THz.
+%dir_path = ['E:/Data/2017/2017_06/2017_06_06'];
 %dir_path = ['/Users/Chris2/Desktop/Data/2015/2015_12/2017_04_25'];
-%dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_06/2017_06_06'];
+dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_06/2017_06_06'];
 %dir_path = ['R:/COPS/Data/2017/2017_05/2017_05_30 in progress'];
 %dir_path = ['.'];
 %dir_path = pwd;
@@ -38,7 +39,7 @@ numpad = 1024;  %fft prefers 2^n points
 Undersample_win = 0;
 isContourPlot = 0;
 NbContours=15;  %Sets the number of contours if using contour plots.
-CrtlFlags = [2,0,2,0,0,0]; 
+CrtlFlags = [1,0,1,0,0,0]; 
     %Flags correspond to [tau,T,t,V,aux,pwr] 
     %Value of 0 means do nothing                        
     %Value of 1 means plot time domain
@@ -53,14 +54,14 @@ isS1andS2 = 0; %Enter 1 if both S1 and S2 data sets were collected, 0 if only S1
 isWindowFunction_tau = 0; %Enter 1 to window along the tau axis.
 isWindowFunction_T = 0; %Enter 1 to window along the T axis.
 isWindowFunction_t = 0; %Enter 1 to window along the t axis.
+isWindowPhotonEcho = 0; %Enter 1 for photon echo windowing
 TukeyAlpha_tau = 1;     % Select a decimal between 0 (no window) and 1 (Hanning window).
 TukeyAlpha_T = 1;     % Select a decimal between 0 (no window) and 1 (Hanning window).
 TukeyAlpha_t = 1;     % Select a decimal between 0 (no window) and 1 (Hanning window).
-isWindowPhotonEcho = 1; %Enter 1 for photon echo windowing
 stdev_window_time = .5; %in ps, t axis;
 time_slope = 1; %in ps/ps
 time_offset = -.5; %in ps/ps
-isSaveProcessedData = 0; %Set to 1 to save processed data.
+isSaveProcessedData = 1; %Set to 1 to save processed data.
 
 % Eliminate the dialog box below in favor of hard-coding the values.
 % isub = [d(:).isdir];
@@ -204,21 +205,17 @@ if isCorrectOverallPhase == 2
     end
 elseif isCorrectOverallPhase == 1
     d1_phase_offset = d1_theta(idx_tau_zero,PhaseCorrectionIndx,idx_t_zero); %Correct by the specified index point. Apply globally.
-    disp(strcat('phase offset correction for D1 = ',num2str(d1_phase_offset),' radians.'))
+    disp(['Phase offset correction for D1: ',num2str(d1_phase_offset),' radians.'])
     d1_theta = d1_theta-d1_phase_offset;
     d4_phase_offset = d4_theta(idx_tau_zero,PhaseCorrectionIndx,idx_t_zero);
-    disp(strcat('phase offset correction for D4 = ',num2str(d4_phase_offset),' radians.'))
+    disp(['Phase offset correction for D4: ',num2str(d4_phase_offset),' radians.'])
     d4_theta = d4_theta-d4_phase_offset;
 end
 [MatrixX1,MatrixY1]=pol2cart(d1_theta,d1_r);
 [MatrixX4,MatrixY4]=pol2cart(d4_theta,d4_r);
 
-
-
-
 ZS1_m = complex(MatrixX1(1:NumSteps_tau,1:NumSteps_T,1:NumSteps_t,:,:,:),MatrixY1(1:NumSteps_tau,1:NumSteps_T,1:NumSteps_t,:,:,:));
 ZS4_m = complex(MatrixX4(1:NumSteps_tau,1:NumSteps_T,1:NumSteps_t,:,:,:),MatrixY4(1:NumSteps_tau,1:NumSteps_T,1:NumSteps_t,:,:,:));
-
 
 if isWindowPhotonEcho ==1
     for k = 1:NumSteps_T
@@ -482,7 +479,8 @@ else
 end
 title('S1 Absolute Value')
 %colormap(jet)
-colormap(beach)
+colormap(viridis)
+%colormap(beach)
 %colormap(flipud(bone))
 %colormap(gray)
 %colormap(flipud(gray))
