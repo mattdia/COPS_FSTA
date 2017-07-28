@@ -22,24 +22,24 @@ clear all; clc; %clf;% Clear variables, close MuPad engine, clear command window
 speedC = 2.99709e+5; % nm/ps, speed of light in air.
 planck = 4.135667662e-3;  % eV*ps, or eV/THz, from NIST. Uncertainty is in the last 2 digits.
 
-ref_freq = speedC/(738.9-0.25); % c/(wavelength in nm). Answer is in THz.
+ref_freq = speedC/(850); % c/(wavelength in nm). Answer is in THz.
 %ref_freq = speedC/(737.3-0.25); % c/(wavelength in nm). Answer is in THz.
 %dir_path = ['E:/Data/2017/2017_06/2017_06_06'];
 %dir_path = ['/Users/Chris2/Desktop/Data/2015/2015_12/2017_04_25'];
-dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_06/2017_06_06'];
-%dir_path = ['R:/COPS/Data/2017/2017_05/2017_05_30 in progress'];
+%dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_06/2017_06_06'];
+dir_path = ['R:/COPS/Data/2017/2017_05/2017_05_10 DQW 5nm'];
 %dir_path = ['.'];
 %dir_path = pwd;
-scan_num = '04';
+scan_num = '26 - high stats S1 3uW';
 
-Delay_t0_um = 0; %um. Use this for Local oscillator measurement.
+Delay_t0_um = 60; %um. Use this for Local oscillator measurement.
 isFFTshift = 0;
 isPadding = 2; %Pad with zeros up to numpad if set to 1. Pad by factor of 2 if set to 2.
 numpad = 1024;  %fft prefers 2^n points
 Undersample_win = 0;
 isContourPlot = 0;
 NbContours=15;  %Sets the number of contours if using contour plots.
-CrtlFlags = [1,0,1,0,0,0]; 
+CrtlFlags = [2,0,2,0,0,0]; 
     %Flags correspond to [tau,T,t,V,aux,pwr] 
     %Value of 0 means do nothing                        
     %Value of 1 means plot time domain
@@ -50,6 +50,8 @@ PlotIndx = [1,1,1,1,1,1]; %Flags correspond to the slice number extracted for el
 StepLimit = [0,0,0]; %Step limit for [tau, T, t]. Entering 0 leaves them at full length.
 isCorrectOverallPhase = 1; %Enter 1 to correct everything by the Tstep specified by PhaseCorrectionIndx, 2 to correct each Tstep independently, 0 for no correction.
 PhaseCorrectionIndx = 1;
+Z1_phase_cor_man = (2*pi*197)/360;
+Z4_phase_cor_man = 0;
 isS1andS2 = 0; %Enter 1 if both S1 and S2 data sets were collected, 0 if only S1.
 isWindowFunction_tau = 0; %Enter 1 to window along the tau axis.
 isWindowFunction_T = 0; %Enter 1 to window along the T axis.
@@ -204,10 +206,10 @@ if isCorrectOverallPhase == 2
         d4_phase_offset = d4_theta(idx_tau_zero,q,idx_t_zero);
     end
 elseif isCorrectOverallPhase == 1
-    d1_phase_offset = d1_theta(idx_tau_zero,PhaseCorrectionIndx,idx_t_zero); %Correct by the specified index point. Apply globally.
+    d1_phase_offset = d1_theta(idx_tau_zero,PhaseCorrectionIndx,idx_t_zero)+Z1_phase_cor_man; %Correct by the specified index point. Apply globally.
     disp(['Phase offset correction for D1: ',num2str(d1_phase_offset),' radians.'])
     d1_theta = d1_theta-d1_phase_offset;
-    d4_phase_offset = d4_theta(idx_tau_zero,PhaseCorrectionIndx,idx_t_zero);
+    d4_phase_offset = d4_theta(idx_tau_zero,PhaseCorrectionIndx,idx_t_zero)+Z4_phase_cor_man;
     disp(['Phase offset correction for D4: ',num2str(d4_phase_offset),' radians.'])
     d4_theta = d4_theta-d4_phase_offset;
 end
@@ -478,8 +480,8 @@ else
     %hFig = surf(axis2(xlim_min:xlim_max),axis1(ylim_min:ylim_max),abs(Z1plot(ylim_min:ylim_max,xlim_min:xlim_max)),'EdgeColor','none'); set(gca,'Ydir','Normal');
 end
 title('S1 Absolute Value')
-%colormap(jet)
-colormap(viridis)
+colormap(jet)
+%colormap(viridis)
 %colormap(beach)
 %colormap(flipud(bone))
 %colormap(gray)
