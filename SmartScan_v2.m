@@ -13,22 +13,22 @@ other_flag = 0; %Change to 1 to load custom scan mask
 
 %% Scan Parameters
 
-NumPnts_tau=10;
+NumPnts_tau= 601;
 NumPnts_T=1;
-NumPnts_t=10;
-stepsize_tau=45;
+NumPnts_t= 400;
+stepsize_tau=120;
 stepsize_T=-30;
-stepsize_t=-45;
+stepsize_t= -120;
 tau_init=0;
 T_init=-30;
 t_init=0;
 t_offset = 0;
 
-tau_cutoff_index=10; %Number of points on either side of the 
+tau_cutoff_index= 100; %Number of points on either side of the 
 %diagonal to take for a purely inhomogeneous scan
 
 %Misc scan parameters
-V_init=.2;
+V_init= -.7;
 stepsize_V=.2;
 NumPnts_V=1;
 NumPnts_LCVolt=1;
@@ -37,8 +37,8 @@ LCVolt_init = 5;
 LCVolt = [];
 
 %Microscope stages NEED TO AGREE WITH LABVIEW
-aux_init = -24259; %x (µm)
-aux2_init = -25586; %y (µm)
+aux_init = -22957; %x (µm)
+aux2_init = -26000; %y (µm)
 
 stepsize_aux = 0;
 stepsize_aux2 = 0;
@@ -75,19 +75,19 @@ tau_position_vector = reshape(tau_position_matrix,[],1);
 
 %% Inhomogeneous Masking
 elseif inhom_flag==1 && hom_flag==0 && other_flag==0   
-mask = zeros(NumPnts_tau,NumPnts_tau+tau_cutoff_index);
+mask = ones(NumPnts_tau,NumPnts_t);
 
 
 for j= 1:NumPnts_tau
     i_low= j-tau_cutoff_index;
     i_high = j+tau_cutoff_index;
     if i_low <= 0
-        for i = 1:i_high
-            mask(i,j) = (i)*stepsize_tau;
+        for i > 1:i_high
+            mask(i,j) = 0;
             t_position_matrix(i,j) = (i)*stepsize_t;
             
         end
-    else
+    elseif i_high <= NumPnts_t
         for i = i_low:i_high
             mask(i,j) = (i)*stepsize_tau;
             t_position_matrix(i,j) = (i)*stepsize_t;
@@ -135,7 +135,7 @@ if hom_flag ==1
             t_position_vector(i) = (t_coordinate_vector(i)-1)*stepsize_t - t_offset;
             T_position_vector(i) = (T_coordinate_vector(i)-1)*stepsize_t;
         end 
-    elseif NumPnts_T ==1 
+    elseif NumPnts_T == 1 
     [row, col] = find(mask>0);
     tau_coordinate_vector = reshape(row,[],1);%make coordniate vectors
     t_coordinate_vector = reshape(col,[],1);
@@ -262,9 +262,9 @@ global_position(:,7) = aux2_position_vector;
 
 global_coordinate = zeros(size(t_position_vector,1),7);
 
-global_coordinate(:,1) = tau_position_vector/stepsize_tau;
+global_coordinate(:,1) = (tau_position_vector/stepsize_tau)+1;
 global_coordinate(:,2) = abs(T_position_vector/stepsize_T);
-global_coordinate(:,3) = abs(t_position_vector/stepsize_t);
+global_coordinate(:,3) = (abs(t_position_vector/stepsize_t))+1;
 global_coordinate(:,4) = V_position_vector/V_init;
 global_coordinate(:,5) = LCVolt_position_vector/LCVolt_init;
 global_coordinate(:,6) = aux_position_vector/aux_init;
@@ -273,10 +273,10 @@ global_coordinate(:,7) = aux2_position_vector/aux2_init;
 % disp('creating files')
 % mask_file = strcat('MD_SmartScan_Mask.txt');
 % dlmwrite(mask_file,global_position,'\t');
-% % 
+% % % 
 % position_file = strcat('MD_Calculated_Positions.txt');
 % dlmwrite(position_file,global_position,'\t');
-% % 
+% % % 
 % coordinate_file = strcat('MD_Calculated_coordinates.txt');
 % dlmwrite(coordinate_file,global_coordinate,'\t');
 % disp('done')
