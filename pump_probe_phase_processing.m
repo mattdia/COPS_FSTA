@@ -1,7 +1,10 @@
 planck = 4.135667662e-3; %eV/THz
 
-M_dir_path = ['R:\MONSTR1\2015\2015_07_14 - phased CG153, offres CG156\2D4\Output'];
-filename = strcat(M_dir_path,'\DTMatched.dat');
+%M_dir_path = ['R:\MONSTR1\2015\2015_07_14 - phased CG153, offres CG156\2D4\Output'];
+M_dir_path = ['/Volumes/cundiff/MONSTR1/2015/2015_07_14 - phased CG153, offres CG156/2D4/Output'];
+
+%filename = strcat(M_dir_path,'\DTMatched.dat');
+filename = strcat(M_dir_path,'/DTMatched.dat');
 
 raw_dat = dlmread(filename);
 
@@ -10,7 +13,9 @@ pump_probe = [raw_dat(:,1), raw_dat(:,3)];
 freq_dat = pump_probe(:,1);
 sig_dat = pump_probe(:,2);
 
-COPS_dir_path = ['R:/COPS/Data/2017/2017_05/2017_05_10 DQW 5nm/scan26 - high stats S1 3uW/Processed_Output/'];
+%COPS_dir_path = ['R:/COPS/Data/2017/2017_05/2017_05_10 DQW 5nm/scan26 - high stats S1 3uW/Processed_Output/'];
+COPS_dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_05/2017_05_10 DQW 5nm/scan26 - high stats S1 3uW/Processed_Output/'];
+
 
 Z1_phase_corr_man = -1*pi;
 
@@ -45,12 +50,12 @@ sig_peaks = sig_peaks';
 %     
     for i = 1:360
         [z1_theta,z1_r]= cart2pol(real_interp/max(abs(real_interp)),imag_interp/max(abs(imag_interp))); 
-        phase_offs = (i*2*pi)/360;
+        phase_offs = (2*i*pi)/360;
         
         z1_theta = z1_theta+phase_offs;
 % 
         [z1x,z1y] = pol2cart(z1_theta,z1_r);
-        diff = abs(z1x) - abs(sig_peaks(1:170));
+        diff = z1x - sig_peaks(1:170);
         diffs(i,:)=  diff;
         
 

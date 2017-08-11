@@ -8,9 +8,9 @@
 
 clear all;
 %clf;
-file_path = ['E:/Data/2017/2017_06/2017_06_06/scan02/'];
+%file_path = ['E:/Data/2017/2017_06/2017_06_06/scan02/'];
 %file_path = ['/Users/Chris2/Desktop/Data/2015/2015_12/2015_12_01/scan13/'];
-%file_path = ['/Volumes/cundiff/COPS/Data/2017/2017_04/2017_04_29/scan01/'];
+file_path = ['/Volumes/cundiff/COPS/Data/2017/2017_04/2017_04_29/scan01/'];
 data_path = [file_path '1D_output.txt'];
 parameters_path = [file_path '1D_parameters.txt'];
 Data = load(data_path);
