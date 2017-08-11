@@ -9,13 +9,13 @@
 %% Flags
 inhom_flag = 0; %Purely inhomogeneous mask
 hom_flag = 0; %Purely homogeneous mask
-other_flag = 1; %Change to 1 to load custom scan mask
+other_flag = 0; %Change to 1 to load custom scan mask
 
 %% Scan Parameters
 
-NumPnts_tau=70;
-NumPnts_T=70;
-NumPnts_t=70;
+NumPnts_tau=10;
+NumPnts_T=10;
+NumPnts_t=10;
 stepsize_tau=45;
 stepsize_T=-30;
 stepsize_t=-45;
@@ -51,6 +51,11 @@ NumPnts_aux2 = 1;
 num_pnts_total = NumPnts_tau*NumPnts_T*NumPnts_t;
 position_matrix = zeros(NumPnts_t,NumPnts_tau);
 t_position_matrix = [];
+tau_position_matrix = [];
+T_position_matrix = [];
+t_composite_matrix = [];
+tau_composite_matrix = [];
+t_position_matrix = [];
 tau_position_vector = [];
 t_abs_position = [];
 t_position = [];
@@ -58,20 +63,23 @@ t_position = [];
 mask = zeros(NumPnts_t,NumPnts_tau);
 
 %% Pure photon echo masking (along diagonal pixel, plus/minus index cutoff in t direction)
-if inhom_flag==0
+if inhom_flag==0 && hom_flag==0 &&other_flag==0
+
     for i = 1:NumPnts_t
         for j = 1:NumPnts_tau
             t_position_matrix(i,j) = j*stepsize_t;
         end
     end
 t_position_vector = reshape(t_position_matrix,[],1);
+
+
 for i = 1:NumPnts_tau
     for j = 1:NumPnts_t
         tau_position_matrix(i,j) = j*stepsize_tau;
     end
 end
-tau_position_vector = reshape(tau_position_matrix,[],1);
 
+tau_position_vector = reshape(tau_position_matrix,[],1);
 
 
 elseif inhom_flag==1    
@@ -109,9 +117,54 @@ end
     disp('t/tau mask done')
 end
 
+%% Pure Homogeneous windowing
+%want to scan over window defined by a right triangle (on the time-time
+%plane) subtended by the tau and t axes.
+
+mask = ones(NumPnts_tau,NumPnts_t);
+if hom_flag==1
+for i = 1:NumPnts_tau
+    for j = 1:NumPnts_t
+        if (j-1) + round(NumPnts_tau/NumPnts_t)*(i-1) >= NumPnts_tau 
+            mask(i,j)=0;
+        end
+    end
+end
+
+if NumPnts_T ~=1
+    mask_threed = zeros(NumPnts_tau,NumPnts_t,NumPnts_T);
+    md_mask = [];
+    for k = 1:NumPnts_T
+        md_mask(:,:,k) = mask;
+    end
+    
+    [row, col, page] = ind2sub(size(md_mask),find(md_mask>0));
+    tau_coordinate_vector = reshape(row,[],1);%make coordniate vectors
+    t_coordinate_vector = reshape(col,[],1);
+    T_coordinate_vector = reshape(page,[],1);
+    
+    for i = 1:numel(tau_coordinate_vector) %make position vectors
+        tau_position_vector = (i-1)*tau_coordinate_vector(i);
+        t_position_vector = (i-1)*t_coordinate_vector(i);
+        T_position_vector = (i-1)*T_coordinate_vector(i);
+    end
+else
+    
+    [row, col] = find(md_mask>0);
+    tau_coordinate_vector = reshape(row,[],1);%make coordniate vectors
+    t_coordinate_vector = reshape(col,[],1);   
+    for i = 1:numel(tau_coordinate_vector) %make position vectors
+        tau_position_vector = (i-1)*tau_coordinate_vector(i);
+        t_position_vector = (i-1)*t_coordinate_vector(i);
+        T_position_vector = (i-1)*T_coordinate_vector(i);
+    end
+end
+end
+
+%% Loading a custom mask (NEEDS TO BE 3D MATRIX STRUCTURED IN tau,t,T FORMAT)
 if other_flag ==1 %takes mask (for now just a 3D matrix with tau,t,T coordinates)
 %and converts into proper labview inputfiles
-    mask_file = uigetdir %find the mask file
+    mask_file = uigetfile %find the mask file
     mask = dlmread(maskfile,'\t'); %read in mask file
     [row, col, page] = ind2sub(size(md_mask),find(md_mask>0)); %find nonzero mask elements
     tau_coordinate_vector = reshape(row,[],1);%make coordniate vectors
@@ -123,13 +176,14 @@ if other_flag ==1 %takes mask (for now just a 3D matrix with tau,t,T coordinates
         t_position_vector = (i-1)*t_coordinate_vector(i);
         T_position_vector = (i-1)*T_coordinate_vector(i);
     end
+disp('mask loaded')
 end
 
 
 %% Creating Correct T for Inhomogeneous scans (if a 3D scan is desired)
 size_tau = size(tau_position_vector,1);
 
-if NumPnts_T ~=1
+if NumPnts_T ~=1 
     for k = 1:NumPnts_T
         T_position_matrix(:,k) = [ones(size_tau,1)]*(k-1)*stepsize_T;
         tau_composite_matrix(:,k) = tau_position_vector;
@@ -155,6 +209,8 @@ if NumPnts_T ==1
 end
 
 if NumPnts_V == 1
+    V_position_vector = [];
+    V_coordinate_vector=[];
     for i = 1:size(t_position_vector)
         V_position_vector(i) = V_init;
         V_coordinate_vector(i) = 1;
@@ -164,6 +220,9 @@ if NumPnts_V == 1
 end
            
 if NumPnts_aux == 1
+    aux_position_vector =[];
+    aux_coordinate_vector = [];
+    
     for i = 1:size(t_position_vector)
         aux_position_vector(i) = aux_init;
         aux_coordinate_vector(i) = 1;
@@ -172,6 +231,8 @@ if NumPnts_aux == 1
     aux_coordinate_vector=reshape(aux_coordinate_vector,[],1);
 end
 if NumPnts_aux2 == 1
+    aux2_position_vector=[];
+    aux2_coordinate_vector = [];
     for i = 1:size(t_position_vector)
         aux2_position_vector(i) = aux2_init;
         aux2_coordinate_vector(i) = 1;
@@ -181,6 +242,8 @@ if NumPnts_aux2 == 1
 end
 
 if NumPnts_LCVolt == 1
+    LCVolt_position_vector =[];
+    LCVolt_coordinate_vector= [];
     for i = 1:size(t_position_vector)
         LCVolt_position_vector(i) = LCVolt_init;
         LCVolt_coordinate_vector(i) = 1;
