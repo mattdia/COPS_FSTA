@@ -75,16 +75,15 @@ tau_position_vector = reshape(tau_position_matrix,[],1);
 
 %% Inhomogeneous Masking
 elseif inhom_flag==1 && hom_flag==0 && other_flag==0   
-    mask = zeros(NumPnts_tau,NumPnts_t);
-    md_mask = zeros(NumPnts_t,NumPnts_t,NumPnts_T);
+    mask = ones(NumPnts_tau,NumPnts_t);
+    md_mask = ones(NumPnts_tau,NumPnts_t,NumPnts_T);
     mask_idx = NumPnts_tau+NumPnts_t;
     
-        for i = 1:NumPnts_t
-            idx_low = i-tau_cutoff_idx;
-            idx_high = i-tau_cutoff_idx;
+        for i = 1:NumPnts_tau
             for j = 1:NumPnts_t
-                if idx_low <=1 &&
-                    mask(i,j)
+                if (i-1 + j-1) >= mask_idx/2
+                    mask(i,j) = 0;
+                end
             end
         end
     
