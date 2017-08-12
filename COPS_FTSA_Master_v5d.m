@@ -20,25 +20,28 @@
 
 clear all; clc; %clf;% Clear variables, close MuPad engine, clear command window.
 speedC = 2.99709e+5; % nm/ps, speed of light in air.
+speedCvac = 2.99792458e+5; %nm/ps, speed of light in vacuum. This is exact.
 planck = 4.135667662e-3;  % eV*ps, or eV/THz, from NIST. Uncertainty is in the last 2 digits.
 
-ref_freq = speedC/(738.74-0.25); % c/(wavelength in nm). Answer is in THz.
-%dir_path = ['E:/Data/2017/2017_05/2017_05_30'];
+%ref_freq = speedC/(935.872017); % c/(wavelength in nm). Answer is in THz.
+%ref_freq = speedC/(735.45150); % c/(wavelength in nm). Answer is in THz.
+ref_freq = speedCvac/(738.45247); %c/(wavelength in nm). Answer is in THz.
+%dir_path = ['E:/Data/2017/2017_08/2017_08_10'];
 %dir_path = ['/Users/Chris2/Desktop/Data/2015/2015_12/2017_04_25'];
-dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_05/2017_05_30 in progress'];
-%dir_path = ['R:/COPS/Data/2017/2017_05/2017_05_30 in progress'];
+%dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_05/2017_05_10'];
+dir_path = ['R:/COPS/Data/2017/2017_08/2017_08_10 in prog'];
 %dir_path = ['.'];
 %dir_path = pwd;
-scan_num = '46';
+scan_num = '09';
 
-Delay_t0_um = 60; %um. Use this for Local oscillator measurement.
+Delay_t0_um = 00; %um. Use this for Local oscillator measurement.
 isFFTshift = 0;
 isPadding = 2; %Pad with zeros up to numpad if set to 1. Pad by factor of 2 if set to 2.
 numpad = 1024;  %fft prefers 2^n points
 Undersample_win = 0;
 isContourPlot = 0;
-NbContours=15;  %Sets the number of contours if using contour plots.
-CrtlFlags = [1,0,1,0,0,0]; 
+NbContours=25;  %Sets the number of contours if using contour plots.
+CrtlFlags = [2,0,2,0,0,0]; 
     %Flags correspond to [tau,T,t,V,aux,pwr] 
     %Value of 0 means do nothing                        
     %Value of 1 means plot time domain
@@ -49,18 +52,18 @@ PlotIndx = [1,1,1,1,1,1]; %Flags correspond to the slice number extracted for el
 StepLimit = [0,0,0]; %Step limit for [tau, T, t]. Entering 0 leaves them at full length.
 isCorrectOverallPhase = 1; %Enter 1 to correct everything by the Tstep specified by PhaseCorrectionIndx, 2 to correct each Tstep independently, 0 for no correction.
 PhaseCorrectionIndx = 1;
-isS1andS2 = 0; %Enter 1 if both S1 and S2 data sets were collected, 0 if only S1.
+isS1andS2 = 1; %Enter 1 if both S1 and S2 data sets were collected, 0 if only S1.
 isWindowFunction_tau = 0; %Enter 1 to window along the tau axis.
 isWindowFunction_T = 0; %Enter 1 to window along the T axis.
 isWindowFunction_t = 0; %Enter 1 to window along the t axis.
 TukeyAlpha_tau = 1;     % Select a decimal between 0 (no window) and 1 (Hanning window).
 TukeyAlpha_T = 1;     % Select a decimal between 0 (no window) and 1 (Hanning window).
 TukeyAlpha_t = 1;     % Select a decimal between 0 (no window) and 1 (Hanning window).
-isWindowPhotonEcho = 1; %Enter 1 for photon echo windowing
+isWindowPhotonEcho = 0; %Enter 1 for photon echo windowing
 stdev_window_time = .5; %in ps, t axis;
 time_slope = 1; %in ps/ps
 time_offset = -.5; %in ps/ps
-isSaveProcessedData = 0; %Set to 1 to save processed data.
+isSaveProcessedData = 1; %Set to 1 to save processed data.
 
 % Eliminate the dialog box below in favor of hard-coding the values.
 % isub = [d(:).isdir];
@@ -480,8 +483,8 @@ else
     %hFig = surf(axis2(xlim_min:xlim_max),axis1(ylim_min:ylim_max),abs(Z1plot(ylim_min:ylim_max,xlim_min:xlim_max)),'EdgeColor','none'); set(gca,'Ydir','Normal');
 end
 title('S1 Absolute Value')
-colormap(jet)
-%colormap(parula)
+%colormap(jet)
+colormap(parula)
 %colormap(gray)
 %colormap(flipud(gray))
 if (CrtlFlags(1) == 2) & (CrtlFlags(3) == 2) 
