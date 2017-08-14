@@ -8,7 +8,7 @@
 
 clear all;
 %clf;
-file_path = ['E:/Data/2017/2017_06/2017_06_06/scan02/'];
+file_path = ['E:/Data/2017/2017_08/2017_08_14/scan03/'];
 %file_path = ['/Users/Chris2/Desktop/Data/2015/2015_12/2015_12_01/scan13/'];
 %file_path = ['/Volumes/cundiff/COPS/Data/2017/2017_04/2017_04_29/scan01/'];
 data_path = [file_path '1D_output.txt'];
@@ -16,7 +16,7 @@ parameters_path = [file_path '1D_parameters.txt'];
 Data = load(data_path);
 
 prompt = {'Demodulator','Measuring tau? (change to 0 if measuring T or t)','Phase gradient option (choose 1, 2, or 3)'};
-INPUT = inputdlg(prompt,'Input',1,{'1','1','2'});
+INPUT = inputdlg(prompt,'Input',1,{'1','0','1'});
 Demod = str2num(INPUT{1});
 Measuring_tau = str2num(INPUT{2});
 phase_gradient_option = str2num(INPUT{3});
