@@ -23,16 +23,17 @@ speedC = 2.99709e+5; % nm/ps, speed of light in air.
 planck = 4.135667662e-3;  % eV*ps, or eV/THz, from NIST. Uncertainty is in the last 2 digits.
 
 %ref_freq = speedC/(738.9-0.25); % c/(wavelength in nm). Answer is in THz.
-ref_freq = 738.452132;
+ref_freq = speedC/738.452132;
 %ref_freq = speedC/(737.3-0.25); % c/(wavelength in nm). Answer is in THz.
-%dir_path = ['E:/Data/2017/2017_08/2017_08_10'];
+dir_path = ['E:/Data/2017/2017_08/2017_08_10'];
 %dir_path = ['/Users/Chris2/Desktop/Data/2015/2015_12/2017_04_25'];
 %dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_06/2017_06_06'];
-dir_path = ['R:/COPS/Data/2017/2017_08/2017_08_10 in prog'];
+%dir_path = ['R:/COPS/Data/2017/2017_08/2017_08_10 in prog'];
 %dir_path = ['R:/COPS/Data/2017/2017_08/2017_08_07 SiV PL'];
 %dir_path = ['.'];
 %dir_path = pwd;
-scan_num = '09 - hi res cocirc';
+%scan_num = '09 - hi res cocirc';
+scan_num = '05';
 
 Delay_t0_um = 0; %um. Use this for Local oscillator measurement.
 isFFTshift = 0;
@@ -480,8 +481,8 @@ else
     %hFig = surf(axis2(xlim_min:xlim_max),axis1(ylim_min:ylim_max),abs(Z1plot(ylim_min:ylim_max,xlim_min:xlim_max)),'EdgeColor','none'); set(gca,'Ydir','Normal');
 end
 title('S1 Absolute Value')
-%colormap(jet)
-colormap(parula)
+colormap(jet)
+%colormap(parula)
 %colormap(viridis)
 %colormap(beach)
 %colormap(flipud(bone))
