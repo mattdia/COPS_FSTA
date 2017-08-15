@@ -20,12 +20,13 @@
 
 clear all; clc; %clf;% Clear variables, close MuPad engine, clear command window.
 speedC = 2.99709e+5; % nm/ps, speed of light in air.
+speedCvac = 2.99792458e+5; % nm/ps, speed of light in vacuum. For wavemeter measurements.
 planck = 4.135667662e-3;  % eV*ps, or eV/THz, from NIST. Uncertainty is in the last 2 digits.
 
 %ref_freq = speedC/(738.9-0.25); % c/(wavelength in nm). Answer is in THz.
-ref_freq = speedC/738.452132;
+ref_freq = speedCvac/738.452132;
 %ref_freq = speedC/(737.3-0.25); % c/(wavelength in nm). Answer is in THz.
-dir_path = ['E:/Data/2017/2017_08/2017_08_10'];
+dir_path = ['E:/Data/2017/2017_08/2017_08_15'];
 %dir_path = ['/Users/Chris2/Desktop/Data/2015/2015_12/2017_04_25'];
 %dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_06/2017_06_06'];
 %dir_path = ['R:/COPS/Data/2017/2017_08/2017_08_10 in prog'];
@@ -33,7 +34,7 @@ dir_path = ['E:/Data/2017/2017_08/2017_08_10'];
 %dir_path = ['.'];
 %dir_path = pwd;
 %scan_num = '09 - hi res cocirc';
-scan_num = '05';
+scan_num = '03';
 
 Delay_t0_um = 0; %um. Use this for Local oscillator measurement.
 isFFTshift = 0;

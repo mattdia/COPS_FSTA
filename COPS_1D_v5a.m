@@ -8,7 +8,7 @@
 
 clear all;
 %clf;
-file_path = ['E:/Data/2017/2017_08/2017_08_14/scan03/'];
+file_path = ['E:/Data/2017/2017_08/2017_08_15/scan00/'];
 %file_path = ['/Users/Chris2/Desktop/Data/2015/2015_12/2015_12_01/scan13/'];
 %file_path = ['/Volumes/cundiff/COPS/Data/2017/2017_04/2017_04_29/scan01/'];
 data_path = [file_path '1D_output.txt'];
@@ -22,8 +22,9 @@ Measuring_tau = str2num(INPUT{2});
 phase_gradient_option = str2num(INPUT{3});
 
 speedC = 2.99709e+5; %(nm/ps), speed of light in air. This value is from Wolfram Alpha. 
+speedCvac = 2.99792458e+5; % nm/ps, speed of light in vacuum. For wavemeter measurements.
 lambda_ref = 738.49; %lambda reference beam in nm
-ref_freq = speedC/lambda_ref; % in THz
+ref_freq = speedCvac/lambda_ref; % in THz
 
 %% Notes on corrections of phase  
 % There are two phase corrections in the code.
