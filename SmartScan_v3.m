@@ -1,7 +1,7 @@
 %SmartScan_v2
 %Author Matthew Day
 
-
+clear
 %This file generates a 7 column long matrix which is read into LabView
 %and which can set the scan parameters. This file is to replace a slower
 %version of SmartScan which lives in the COPS old software folder.
@@ -16,7 +16,7 @@ other_flag = 0; %Change to 1 to load custom scan mask
 NumPnts_tau=400;
 NumPnts_T=1;
 NumPnts_t=400;
-stepsize_tau=120;
+stepsize_tau=240;
 stepsize_T=-30;
 stepsize_t=-120;
 tau_init=0;
@@ -24,14 +24,14 @@ T_init=-30;
 t_init=0;
 t_offset = 0;
 
-tau_cutoff_index=100; %Number of points on either side of the 
+tau_cutoff_index = 100; %Number of points on either side of the 
 %diagonal to take for a purely inhomogeneous scan
 
 %Misc scan parameters
-V_init=-0.7;
-stepsize_V=.2;
-NumPnts_V=1;
-NumPnts_LCVolt=1;
+V_init = -0.7;
+stepsize_V= .2;
+NumPnts_V= 1;
+NumPnts_LCVolt= 1;
 % LCVolt = [60,86,150,500,1000,2000,3500];
 LCVolt_init = 5;
 LCVolt = [];
@@ -62,7 +62,7 @@ t_position = [];
 
 mask = zeros(NumPnts_t,NumPnts_tau);
 
-%% Pure photon echo masking (along diagonal pixel, plus/minus index cutoff in t direction)
+%% no mask 
 if inhom_flag==0 && hom_flag==0 &&other_flag==0
 
     for i = 1:NumPnts_t
@@ -73,62 +73,95 @@ if inhom_flag==0 && hom_flag==0 &&other_flag==0
 t_position_vector = reshape(t_position_matrix,[],1);
 
 
-for i = 1:NumPnts_tau
-    for j = 1:NumPnts_t
-        tau_position_matrix(i,j) = j*stepsize_tau;
+    for i = 1:NumPnts_tau
+        for j = 1:NumPnts_t
+            tau_position_matrix(i,j) = j*stepsize_tau;
+        end
     end
-end
 
 tau_position_vector = reshape(tau_position_matrix,[],1);
-
-
-elseif inhom_flag == 1    
-mask = zeros(NumPnts_tau,NumPnts_t);
-
-
-for j= 1:NumPnts_tau
-    i_low= j-tau_cutoff_index;
-    i_high = j+tau_cutoff_index;
-    if i_low <= 0
-        for i = 1:i_high
-            mask(i,j) = 1;
-           %t_position_matrix(i,j) = (i)*stepsize_t;
-            
-        end
-    elseif i_high < NumPnts_t
-        
-        for i = i_low:i_high
-            mask(i,j) = 1;
-            %t_position_matrix(i,j) = (i)*stepsize_t;
-        end
-    elseif i_high >= NumPnts_t
-        
-        for i = i_low:NumPnts_t
-            mask(i,j) = 1;
-            %t_position_matrix(i,j) = (i)*stepsize_t;
-        end
-    end
-
 end
+clear i j
 
- [row, col] = find(mask>0);
-    tau_coordinate_vector = reshape(row,[],1);%make coordniate vectors
-    t_coordinate_vector = reshape(col,[],1);
+%% Inhom masking (along diagonal pixel, plus/minus index cutoff in t direction)
+if inhom_flag == 1    
+    mask = zeros(NumPnts_tau,NumPnts_t);
+
+if abs(stepsize_t) == abs(stepsize_tau)
     
-    clear i
-    for i = 1:numel(tau_coordinate_vector) %make position vectors
-        tau_position_vector(i) = (tau_coordinate_vector(i)-1)*stepsize_tau;
-        t_position_vector(i) = (t_coordinate_vector(i)-1)*stepsize_t;
+    for j= 1:NumPnts_tau
+        i_low= j-tau_cutoff_index;
+        i_high = j+tau_cutoff_index;
+        
+        if i_low <= 0
+            for i = 1:i_high
+                mask(i,j) = 1;
+               %t_position_matrix(i,j) = (i)*stepsize_t;
+
+            end
+        elseif i_high < NumPnts_t
+
+            for i = i_low:i_high
+                mask(i,j) = 1;
+                %t_position_matrix(i,j) = (i)*stepsize_t;
+            end
+        elseif i_high >= NumPnts_t
+
+            for i = i_low:NumPnts_t
+                mask(i,j) = 1;
+                %t_position_matrix(i,j) = (i)*stepsize_t;
+            end
+        end
+
     end
-
-    tau_position_vector = tau_position_vector';
-    t_position_vector = t_position_vector';
-%    t_position_matrix = t_position_matrix'; %needs to be transposed because t is the slow axis.
     
- %These matricies have nonzero offsets because the masking program cuts out zero elements, 
- %so we need to get rid of offsets to start at zero.
+    %this part of the code works for photon echo masks of unequal t,tau
+    %stepsize. 
+    
+    elseif stepsize_tau ~= stepsize_t
+        clear mask
+        for ii = 1:NumPnts_t
+            diagonal_steps(ii) = 1;
+            mask = diag(diagonal_steps);
+        end
+        
+        clear ii j
+        
+        for ii = 1:NumPnts_t 
+            j = ii-tau_cutoff_index;
+            k = ii+tau_cutoff_index;
+            if j<=1
+                mask(1:ii+tau_cutoff_index,ii) = 1;
+            elseif j>1 && k<= NumPnts_t
+                mask(ii-tau_cutoff_index:ii+tau_cutoff_index,ii) = 1;
+            else
+                mask(ii-tau_cutoff_index:NumPnts_t,ii)=1;
+            end
+        end
+        
+end       
+    
 
-    disp('t/tau mask done')
+
+     [row, col] = find(mask>0);
+        tau_coordinate_vector = reshape(row,[],1);%make coordniate vectors
+        t_coordinate_vector = reshape(col,[],1);
+
+        clear i
+        for i = 1:numel(tau_coordinate_vector) %make position vectors
+            tau_position_vector(i) = (tau_coordinate_vector(i)-1)*stepsize_tau;
+            t_position_vector(i) = (t_coordinate_vector(i)-1)*stepsize_t;
+        end
+
+        tau_position_vector = tau_position_vector';
+        t_position_vector = t_position_vector';
+    %    t_position_matrix = t_position_matrix'; %needs to be transposed because t is the slow axis.
+
+     %These matricies have nonzero offsets because the masking program cuts out zero elements, 
+     %so we need to get rid of offsets to start at zero.
+
+        disp('t/tau mask done')
+
 end
 
 %% Pure Homogeneous windowing
@@ -294,10 +327,10 @@ global_coordinate(:,7) = aux2_position_vector/aux2_init;
 disp('creating files')
 mask_file = strcat('MD_SmartScan_Mask.txt');
 dlmwrite(mask_file,global_position,'\t');
-% 
+
 position_file = strcat('MD_Calculated_Positions.txt');
 dlmwrite(position_file,global_position,'\t');
-% 
+
 coordinate_file = strcat('MD_Calculated_coordinates.txt');
 dlmwrite(coordinate_file,global_coordinate,'\t');
 disp('done')
