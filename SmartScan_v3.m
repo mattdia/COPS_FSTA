@@ -24,14 +24,14 @@ T_init=-30;
 t_init=0;
 t_offset = 0;
 
-tau_cutoff_index=100; %Number of points on either side of the 
+tau_cutoff_index = 100; %Number of points on either side of the 
 %diagonal to take for a purely inhomogeneous scan
 
 %Misc scan parameters
-V_init=-0.7;
-stepsize_V=.2;
-NumPnts_V=1;
-NumPnts_LCVolt=1;
+V_init = -0.7;
+stepsize_V= .2;
+NumPnts_V= 1;
+NumPnts_LCVolt= 1;
 % LCVolt = [60,86,150,500,1000,2000,3500];
 LCVolt_init = 5;
 LCVolt = [];
@@ -323,17 +323,17 @@ global_coordinate(:,4) = V_position_vector/V_init;
 global_coordinate(:,5) = LCVolt_position_vector/LCVolt_init;
 global_coordinate(:,6) = aux_position_vector/aux_init;
 global_coordinate(:,7) = aux2_position_vector/aux2_init;
-% 
-% disp('creating files')
-% mask_file = strcat('MD_SmartScan_Mask.txt');
-% dlmwrite(mask_file,global_position,'\t');
-% 
-% position_file = strcat('MD_Calculated_Positions.txt');
-% dlmwrite(position_file,global_position,'\t');
-% 
-% coordinate_file = strcat('MD_Calculated_coordinates.txt');
-% dlmwrite(coordinate_file,global_coordinate,'\t');
-% disp('done')
+
+disp('creating files')
+mask_file = strcat('MD_SmartScan_Mask.txt');
+dlmwrite(mask_file,global_position,'\t');
+
+position_file = strcat('MD_Calculated_Positions.txt');
+dlmwrite(position_file,global_position,'\t');
+
+coordinate_file = strcat('MD_Calculated_coordinates.txt');
+dlmwrite(coordinate_file,global_coordinate,'\t');
+disp('done')
 
 
 
