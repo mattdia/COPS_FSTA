@@ -13,18 +13,18 @@ other_flag = 0; %Change to 1 to load custom scan mask
 
 %% Scan Parameters
 
-NumPnts_tau=400;
+NumPnts_tau=200;
 NumPnts_T=1;
-NumPnts_t=400;
-stepsize_tau=240;
-stepsize_T=-30;
-stepsize_t=-120;
+NumPnts_t = 400;
+stepsize_tau= 240;
+stepsize_T= -50;
+stepsize_t= -120;
 tau_init=0;
-T_init=-30;
+T_init=-50;
 t_init=0;
 t_offset = 0;
 
-tau_cutoff_index = 100; %Number of points on either side of the 
+tau_cutoff_index = 50; %Number of points on either side of the 
 %diagonal to take for a purely inhomogeneous scan
 
 %Misc scan parameters
@@ -57,6 +57,7 @@ t_composite_matrix = [];
 tau_composite_matrix = [];
 t_position_matrix = [];
 tau_position_vector = [];
+t_position_vector = [];
 t_abs_position = [];
 t_position = [];
 
@@ -118,44 +119,50 @@ if abs(stepsize_t) == abs(stepsize_tau)
     %this part of the code works for photon echo masks of unequal t,tau
     %stepsize. 
     
-    elseif stepsize_tau ~= stepsize_t
-        clear mask
-        for ii = 1:NumPnts_t
-            diagonal_steps(ii) = 1;
-            mask = diag(diagonal_steps);
+    elseif abs(stepsize_tau) ~= abs(stepsize_t)
+        clear mask i j k ii 
+        
+        for i = 1:NumPnts_t
+            
+                tau_center = floor(abs(i*stepsize_t)/abs(stepsize_tau))*stepsize_tau;
+                tau_center_non_integer = ((i*stepsize_t)/abs(stepsize_tau))*stepsize_tau;
+                tau_upper = tau_center+abs(tau_cutoff_index*stepsize_tau);
+                tau_lower = tau_center-abs(tau_cutoff_index*stepsize_tau);
+               
+                if tau_center == tau_center_non_integer
+                   for j = 1:(2*tau_cutoff_index)+1
+                       
+                        vec(j) = tau_lower + (j)*stepsize_tau;
+                   end
+                else 
+                   for j = 1:(2*tau_cutoff_index)
+                       
+                        vec(j) = tau_lower + (j)*stepsize_tau;
+                   end
+                end
+                   
+                   
+                 vec(vec/stepsize_tau < 0) = NaN;
+                 vec(abs(vec)> abs(NumPnts_t * stepsize_t)) = NaN;
+                 
+                 t_vec(1:size(vec,2)) = (i-1)*stepsize_t;
+                 
+                t_position_vector = [t_position_vector, t_vec];
+                tau_position_vector = [tau_position_vector,vec];
+                
+                
+        
         end
-        
-        clear ii j
-        
-        for ii = 1:NumPnts_t 
-            j = ii-tau_cutoff_index;
-            k = ii+tau_cutoff_index;
-            if j<=1
-                mask(1:ii+tau_cutoff_index,ii) = 1;
-            elseif j>1 && k<= NumPnts_t
-                mask(ii-tau_cutoff_index:ii+tau_cutoff_index,ii) = 1;
-            else
-                mask(ii-tau_cutoff_index:NumPnts_t,ii)=1;
-            end
-        end
-        
+        corrected_tau_idx = find(isnan(tau_position_vector)==0);
+        tau_position_vector = tau_position_vector(corrected_tau_idx);
+        t_position_vector = t_position_vector(corrected_tau_idx);
 end       
     
 
 
-     [row, col] = find(mask>0);
-        tau_coordinate_vector = reshape(row,[],1);%make coordniate vectors
-        t_coordinate_vector = reshape(col,[],1);
-
-        clear i
-        for i = 1:numel(tau_coordinate_vector) %make position vectors
-            tau_position_vector(i) = (tau_coordinate_vector(i)-1)*stepsize_tau;
-            t_position_vector(i) = (t_coordinate_vector(i)-1)*stepsize_t;
-        end
-
         tau_position_vector = tau_position_vector';
         t_position_vector = t_position_vector';
-    %    t_position_matrix = t_position_matrix'; %needs to be transposed because t is the slow axis.
+    %   t_position_matrix = t_position_matrix'; %needs to be transposed because t is the slow axis.
 
      %These matricies have nonzero offsets because the masking program cuts out zero elements, 
      %so we need to get rid of offsets to start at zero.
