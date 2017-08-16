@@ -33,49 +33,45 @@ det_axis_THz = (t_axis_en/1000)/planck;
 Z1_real = Z1_real(1,:);
 Z1_imag = Z1_imag(1,:);
 
-[cops_peaks ~]= find(det_axis_THz >= 353 & det_axis_THz <= 354.7);
-[monstr_peaks ~] = find(freq_dat >= 354.21 & freq_dat <= 355.91);
 
+
+
+
+%Z1 = complex(real_interp,-imag_interp);
+
+for i = 1:4000
+    offs = .001*i;
+    fmin = 351+offs;
+    fmax = 353+offs;
+    
+[cops_peaks ~]= find(det_axis_THz >= 353 & det_axis_THz <= 355);
+[monstr_peaks ~] = find(freq_dat >= fmin & freq_dat <= fmax);
 real_interp = interp(Z1_real(cops_peaks),round(length(sig_dat(monstr_peaks))/length(Z1_real(cops_peaks))));
 imag_interp = - interp(Z1_imag(cops_peaks),round(length(sig_dat(monstr_peaks))/length(Z1_real(cops_peaks))));
 
-Z1 = complex(real_interp,-imag_interp);
+Z1 = abs(complex(real_interp,imag_interp))/max(abs(complex(real_interp,imag_interp)));
+
+
+
+
+
 %Z1 = Z1/max(abs(Z1));
 
 sig_peaks = sig_dat(monstr_peaks);
-sig_peaks = sig_peaks/(max(abs(sig_peaks)));
 sig_peaks = sig_peaks';
-
+%    
 sig_fft = fft(sig_peaks);
 sig_fft(round(size(sig_fft,2)/2):size(sig_fft,2))= 0;
 sig_peaks = ifft(sig_fft);
-
 sig_peaks = sig_peaks/max(abs(sig_peaks));
 
+diff = abs(Z1) -abs(sig_peaks(1:size(real_interp,2)));
 
-   [z1_theta,z1_r]= cart2pol(real_interp/max(abs(real_interp)),imag_interp/max(abs(imag_interp)));
-%     
-    for i = 1:360
-        z1 = complex(real_interp,imag_interp);
-        z1 = z1/max(abs(z1));
-        [z1_theta,z1_r]= cart2pol(real(z1),imag(z1)); 
-        phase_offs = (2*i*pi)/360;
-        
-        z1_theta = z1_theta+phase_offs;
-% 
-        [z1x,z1y] = pol2cart(z1_theta,z1_r);
-        
-        diff = z1x - real(sig_peaks(1:size(z1x,2)));
-        
-        diffs(i,:)=  diff;
-        
+diffs(i,:)=  abs(diff);
 
+end
 
-    end
-
-%     
-
-
+[monstr_peaks ~] = find(freq_dat >= 353.2 & freq_dat <= 355.2);
     
 figure()
 surf(diffs,'EdgeColor','none')
@@ -84,6 +80,7 @@ grid off
 figure()
 ndiff = sum(diffs,2);
 plot(ndiff)
+
 % figure()
 % plot(freq_dat,sig_dat)
 % 
