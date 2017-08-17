@@ -41,7 +41,7 @@ dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_08/2017_08_10 SiV PL'];
 %dir_path = ['R:/COPS/Data/2017/2017_08/2017_08_07 SiV PL'];
 %dir_path = ['.'];
 %dir_path = pwd;
-scan_num = '05 - hi res collin';
+scan_num = '09 - hi res cocirc';
 %scan_num = '09 - hi res cocirc';
 %scan_num = '09 - 3D 5uW';
 %scan_num = '26 - high stats S1 3uW';
@@ -77,8 +77,8 @@ TukeyAlpha_t = 1;     % Select a decimal between 0 (no window) and 1 (Hanning wi
 stdev_window_time = .5; %in ps, t axis;
 time_slope = 1; %in ps/ps
 time_offset = -.5; %in ps/ps
-isSaveProcessedData = 1; %Set to 1 to save processed data.
-
+isSaveProcessedData = 0; %Set to 1 to save processed data.
+d1_phase_corr_man = (2*pi*0)/360; %Use if correcting global phase manually, should be positive and in degrees.
 % Eliminate the dialog box below in favor of hard-coding the values.
 % isub = [d(:).isdir];
 % nameFolds = {d(isub).name}';
@@ -222,7 +222,7 @@ if isCorrectOverallPhase == 2
 elseif isCorrectOverallPhase == 1
     d1_phase_offset = d1_theta(idx_tau_zero,PhaseCorrectionIndx,idx_t_zero); %Correct by the specified index point. Apply globally.
     disp(['Phase offset correction for D1: ',num2str(d1_phase_offset),' radians.'])
-    d1_theta = d1_theta-d1_phase_offset;
+    d1_theta = d1_theta-d1_phase_offset+d1_phase_corr_man;
     d4_phase_offset = d4_theta(idx_tau_zero,PhaseCorrectionIndx,idx_t_zero);
     disp(['Phase offset correction for D4: ',num2str(d4_phase_offset),' radians.'])
     d4_theta = d4_theta-d4_phase_offset;
