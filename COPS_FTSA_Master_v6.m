@@ -516,15 +516,15 @@ else
     %hFig = surf(axis2(xlim_min:xlim_max),axis1(ylim_min:ylim_max),abs(Z1plot(ylim_min:ylim_max,xlim_min:xlim_max)),'EdgeColor','none'); set(gca,'Ydir','Normal');
 end
 title('S1 Absolute Value')
-colormap(jet)
-%colormap(parula)
+%colormap(jet)
+colormap(parula)
 %colormap(viridis)
 %colormap(beach)
 %colormap(flipud(bone))
 %colormap(gray)
 %colormap(flipud(gray))
 if (CrtlFlags(1) == 2) & (CrtlFlags(3) == 2) 
-    x = linspace(axis2(1),axis2(end),20); y = -x; line(x,y,'Color','White')%,'LineStyle', ':','MarkerSize',16)
+    %x = linspace(axis2(1),axis2(end),20); y = -x; line(x,y,'Color','White')%,'LineStyle', ':','MarkerSize',16)
 end
 colorbar();
 % ylabel('${\hbar\omega_{\tau}}$', 'interpreter','latex','FontSize',18)
