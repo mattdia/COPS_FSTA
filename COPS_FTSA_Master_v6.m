@@ -20,6 +20,7 @@
 %Version 6: Revised 2017-08-16 by Chris Smallwood.
     %Previous version was backwards in phase conventions!!
     %All fft's are changed to iffts now. Quadratures for PrepDataF_v9 are swapped by making Y quadrature negative.
+    %To accomodate this, sign of t0 correction has been changed.
 
 clear all; clc; %clf;% Clear variables, close MuPad engine, clear command window.
 speedC = 2.99709e+5; % nm/ps, speed of light in air.
@@ -50,7 +51,7 @@ numpad = 1024;  %fft prefers 2^n points
 Undersample_win = 0;
 isContourPlot = 0;
 NbContours=15;  %Sets the number of contours if using contour plots.
-CrtlFlags = [1,0,1,0,0,0]; 
+CrtlFlags = [2,0,2,0,0,0]; 
     %Flags correspond to [tau,T,t,V,aux,pwr] 
     %Value of 0 means do nothing                        
     %Value of 1 means plot time domain
@@ -407,7 +408,7 @@ elseif((CrtlFlags(3) == 2) & (i < 3))
     ZS4 = ifft(ZS4,[],3);
     Delay_t0 = Delay_t0_um * 2e+3/speedC;
     ReducedFreq = freq_t - ref_freq;
-    PhaseAdjustment_t0 = exp( complex(0,1)*2*pi*ReducedFreq*Delay_t0 );
+    PhaseAdjustment_t0 = exp( -complex(0,1)*2*pi*ReducedFreq*Delay_t0 );
     for r=1:length(PhaseAdjustment_t0)
         ZS1(:,:,r) = ZS1(:,:,r) * PhaseAdjustment_t0(r);
         ZS4(:,:,r) = ZS4(:,:,r) * PhaseAdjustment_t0(r);
