@@ -29,17 +29,17 @@ speedCvac = 2.99792458e+5; % nm/ps, speed of light in vacuum. For wavemeter meas
 planck = 4.135667662e-3;  % eV*ps, or eV/THz, from NIST. Uncertainty is in the last 2 digits.
 
 
-%ref_freq = speedC/(850); % c/(wavelength in nm). Answer is in THz.
+ref_freq = speedC/(850); % c/(wavelength in nm). Answer is in THz.
 %ref_freq = speedC/(738.9-0.25); % c/(wavelength in nm). Answer is in THz.
-ref_freq = speedCvac/738.452132;
+%ref_freq = speedCvac/738.452132;
 
 %ref_freq = speedC/(737.3-0.25); % c/(wavelength in nm). Answer is in THz.
 %dir_path = ['E:/Data/2017/2017_08/2017_08_15'];
 %dir_path = ['/Users/Chris2/Desktop/Data/2015/2015_12/2017_04_25'];
 %dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_06/2017_06_06'];
 
-%dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_05/2017_05_10 DQW 5nm'];
-dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_08/2017_08_10 SiV PL'];
+dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_05/2017_05_10 DQW 5nm'];
+%dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_08/2017_08_10 SiV PL'];
 %dir_path = ['R:/COPS/Data/2017/2017_08/2017_08_10 in prog'];
 %dir_path = ['R:/COPS/Data/2017/2017_08/2017_08_07 SiV PL'];
 %dir_path = ['.'];
@@ -69,10 +69,10 @@ PlotIndx = [1,1,1,1,1,1]; %Flags correspond to the slice number extracted for el
 StepLimit = [0,0,0]; %Step limit for [tau, T, t]. Entering 0 leaves them at full length.
 isCorrectOverallPhase = 1; %Enter 1 to correct everything by the Tstep specified by PhaseCorrectionIndx, 2 to correct each Tstep independently, 0 for no correction.
 PhaseCorrectionIndx = 1;
-Z1_phase_cor_man = (2*pi*197)/360;
+Z1_phase_cor_man = (2*pi*221)/360;
 Z4_phase_cor_man = 0;
 isS1andS2 = 0; %Enter 1 if both S1 and S2 data sets were collected, 0 if only S1.
-isFrequencyUnits = 1; %Enter 1 for frequency units (THz). Enter 0 for energy units (meV).
+isFrequencyUnits = 0; %Enter 1 for frequency units (THz). Enter 0 for energy units (meV).
 isWindowFunction_tau = 0; %Enter 1 to window along the tau axis.
 isWindowFunction_T = 0; %Enter 1 to window along the T axis.
 isWindowFunction_t = 0; %Enter 1 to window along the t axis.
@@ -228,7 +228,7 @@ if isCorrectOverallPhase == 2
 elseif isCorrectOverallPhase == 1
     d1_phase_offset = d1_theta(idx_tau_zero,PhaseCorrectionIndx,idx_t_zero)+Z1_phase_cor_man; %Correct by the specified index point. Apply globally.
     disp(['Phase offset correction for D1: ',num2str(d1_phase_offset),' radians.'])
-    d1_theta = d1_theta-d1_phase_offset;
+    d1_theta = d1_theta+d1_phase_offset;
     d4_phase_offset = d4_theta(idx_tau_zero,PhaseCorrectionIndx,idx_t_zero)+Z4_phase_cor_man;
     disp(['Phase offset correction for D4: ',num2str(d4_phase_offset),' radians.'])
     d4_theta = d4_theta-d4_phase_offset;

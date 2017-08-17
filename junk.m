@@ -47,7 +47,7 @@ for i = 1:1400
 [cops_peaks ~]= find(det_axis_THz >= 353 & det_axis_THz <= 355);
 [monstr_peaks ~] = find(freq_dat >= fmin & freq_dat <= fmax);
 real_interp = interp(Z1_real(cops_peaks),round(length(sig_dat(monstr_peaks))/length(Z1_real(cops_peaks))));
-imag_interp = - interp(Z1_imag(cops_peaks),round(length(sig_dat(monstr_peaks))/length(Z1_real(cops_peaks))));
+imag_interp =  interp(Z1_imag(cops_peaks),round(length(sig_dat(monstr_peaks))/length(Z1_real(cops_peaks))));
 
 Z1 = abs(complex(real_interp,imag_interp))/max(abs(complex(real_interp,imag_interp)));
 
@@ -65,16 +65,16 @@ sig_fft(round(size(sig_fft,2)/2):size(sig_fft,2))= 0;
 sig_peaks = ifft(sig_fft);
 sig_peaks = sig_peaks/max(abs(sig_peaks));
 
-diff = abs(Z1) + abs(sig_peaks(1:size(real_interp,2)));
+diff = abs(Z1) - abs(sig_peaks(1:size(real_interp,2)));
 
-diffs(i,:)=  diff;
+diffs(i,:)=  abs(diff);
 
 end
 
 
     
 figure()
-surf(abs(diffs),'EdgeColor','none')
+surf(diffs,'EdgeColor','none')
 grid off
 
 figure()

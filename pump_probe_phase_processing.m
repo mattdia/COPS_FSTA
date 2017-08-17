@@ -33,11 +33,11 @@ det_axis_THz = (t_axis_en/1000)/planck;
 Z1_real = Z1_real(1,:);
 Z1_imag = Z1_imag(1,:);
 
-[cops_peaks ~]= find(det_axis_THz >= 353 & det_axis_THz <= 354);
-[monstr_peaks ~] = find(freq_dat >= 353.2 & freq_dat <= 354.2);
+[cops_peaks ~]= find(det_axis_THz >= 353 & det_axis_THz <= 355);
+[monstr_peaks ~] = find(freq_dat >= 353.2 & freq_dat <= 355.2);
 
 real_interp = interp(Z1_real(cops_peaks),round(length(sig_dat(monstr_peaks))/length(Z1_real(cops_peaks))));
-imag_interp = - interp(Z1_imag(cops_peaks),round(length(sig_dat(monstr_peaks))/length(Z1_real(cops_peaks))));
+imag_interp =  interp(Z1_imag(cops_peaks),round(length(sig_dat(monstr_peaks))/length(Z1_real(cops_peaks))));
 
 Z1 = complex(real_interp,-imag_interp);
 %Z1 = Z1/max(abs(Z1));
