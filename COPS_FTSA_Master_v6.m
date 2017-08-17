@@ -21,30 +21,33 @@
     %Previous version was backwards in phase conventions!!
     %All fft's are changed to iffts now. Quadratures for PrepDataF_v9 are swapped by making Y quadrature negative.
     %To accomodate this, sign of t0 correction has been changed.
+    %Version 6 also includes the ability to plot as a function of frequency instead of just energy.
 
 clear all; clc; %clf;% Clear variables, close MuPad engine, clear command window.
 speedC = 2.99709e+5; % nm/ps, speed of light in air.
 speedCvac = 2.99792458e+5; % nm/ps, speed of light in vacuum. For wavemeter measurements.
 planck = 4.135667662e-3;  % eV*ps, or eV/THz, from NIST. Uncertainty is in the last 2 digits.
 
-ref_freq = speedC/(850); % c/(wavelength in nm). Answer is in THz.
+%ref_freq = speedC/(850); % c/(wavelength in nm). Answer is in THz.
 %ref_freq = speedC/(738.9-0.25); % c/(wavelength in nm). Answer is in THz.
-%ref_freq = speedCvac/738.452132;
+ref_freq = speedCvac/738.452132;
 %ref_freq = speedC/(737.3-0.25); % c/(wavelength in nm). Answer is in THz.
 %dir_path = ['E:/Data/2017/2017_08/2017_08_15'];
 %dir_path = ['/Users/Chris2/Desktop/Data/2015/2015_12/2017_04_25'];
 %dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_06/2017_06_06'];
-dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_05/2017_05_10 DQW 5nm'];
+%dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_05/2017_05_10 DQW 5nm'];
+dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_08/2017_08_10 SiV PL'];
 %dir_path = ['R:/COPS/Data/2017/2017_08/2017_08_10 in prog'];
 %dir_path = ['R:/COPS/Data/2017/2017_08/2017_08_07 SiV PL'];
 %dir_path = ['.'];
 %dir_path = pwd;
+scan_num = '05 - hi res collin';
 %scan_num = '09 - hi res cocirc';
 %scan_num = '09 - 3D 5uW';
-scan_num = '26 - high stats S1 3uW';
+%scan_num = '26 - high stats S1 3uW';
 %scan_num = '03';
 
-Delay_t0_um = 60; %um. Use this for Local oscillator measurement.
+Delay_t0_um = 0; %um. Use this for Local oscillator measurement.
 isFFTshift = 0;
 isPadding = 2; %Pad with zeros up to numpad if set to 1. Pad by factor of 2 if set to 2.
 numpad = 1024;  %fft prefers 2^n points
@@ -63,6 +66,7 @@ StepLimit = [0,0,0]; %Step limit for [tau, T, t]. Entering 0 leaves them at full
 isCorrectOverallPhase = 1; %Enter 1 to correct everything by the Tstep specified by PhaseCorrectionIndx, 2 to correct each Tstep independently, 0 for no correction.
 PhaseCorrectionIndx = 1;
 isS1andS2 = 0; %Enter 1 if both S1 and S2 data sets were collected, 0 if only S1.
+isFrequencyUnits = 1; %Enter 1 for frequency units (THz). Enter 0 for energy units (meV).
 isWindowFunction_tau = 0; %Enter 1 to window along the tau axis.
 isWindowFunction_T = 0; %Enter 1 to window along the T axis.
 isWindowFunction_t = 0; %Enter 1 to window along the t axis.
@@ -362,8 +366,17 @@ if(CrtlFlags(1) == 1)
     axislabel{1} = '\tau (ps)';
     i = i+1;
 elseif(CrtlFlags(1) == 2)
-    axis{1} = E_tauS1;
-    axis{3} = E_tauS2;
+    if isFrequencyUnits == 1
+        axis{1} = freq_tauS1;
+        axis{3} = freq_tauS2;
+        %axislabel{1} = 'E_\tau (meV)';
+        axislabel{1} = 'Excitation frequency (THz)';
+    else
+        axis{1} = E_tauS1;
+        axis{3} = E_tauS2;
+        %axislabel{1} = 'E_\tau (meV)';
+        axislabel{1} = 'Excitation frequency (meV)';
+    end
     if isFFTshift
         ZS1 = fftshift(ifft(ZS1,[],1),1);
         ZS4 = fftshift(ifft(ZS4,[],1),1);
@@ -371,8 +384,6 @@ elseif(CrtlFlags(1) == 2)
         ZS1 = ifft(ZS1,[],1);
         ZS4 = ifft(ZS4,[],1);
     end
-    %axislabel{1} = 'E_\tau (meV)';
-    axislabel{1} = 'Excitation frequency (meV)';
     i = i+1;
 end
 if(CrtlFlags(2) == 1)
@@ -380,8 +391,13 @@ if(CrtlFlags(2) == 1)
     axislabel{i} = 'T (ps)';
     i=i+1;
 elseif(CrtlFlags(2) == 2 | CrtlFlags(2) == 3)
-    axis{i} = E_T;
-    axislabel{i} = 'E_T (meV)';
+    if isFrequencyUnits == 1
+        axis{i} = freq_T
+        axislabel{i} = 'f_T (THz)';
+    else
+        axis{i} = E_T;
+        axislabel{i} = 'E_T (meV)';
+    end
     if isFFTshift
         ZS1 = fftshift(ifft(ZS1,[],2),2);
         ZS4 = fftshift(ifft(ZS4,[],2),2);
@@ -391,8 +407,13 @@ elseif(CrtlFlags(2) == 2 | CrtlFlags(2) == 3)
     end
     i=i+1;
 elseif(CrtlFlags(2) == 4) %Always FFTshift for zero-quantum.
-    axis{i} = E_T;
-    axislabel{i} = 'Zero-quantum frequency (meV)';
+    if isFrequencyUnits == 1
+        axis{i} = freq_T;
+        axislabel{i} = 'Zero-quantum frequency (THz)';
+    else
+        axis{i} = E_T;
+        axislabel{i} = 'Zero-quantum frequency (meV)';
+    end
     ZS1 = fftshift(ifft(ZS1,[],2),2);
     ZS4 = fftshift(ifft(ZS4,[],2),2);
     i=i+1;
@@ -402,8 +423,13 @@ if((CrtlFlags(3) == 1) & (i < 3))
     axislabel{i} = 't (ps)';
     i=i+1;
 elseif((CrtlFlags(3) == 2) & (i < 3))
-    axis{i} = E_t;
-    axislabel{i} = 'Detection frequency (meV)';
+    if isFrequencyUnits == 1
+        axis{i} = freq_t;
+        axislabel{i} = 'Detection frequency (THz)';
+    else
+        axis{i} = E_t;
+        axislabel{i} = 'Detection frequency (meV)';
+    end
     ZS1 = ifft(ZS1,[],3);    
     ZS4 = ifft(ZS4,[],3);
     Delay_t0 = Delay_t0_um * 2e+3/speedC;
