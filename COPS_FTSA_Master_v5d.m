@@ -17,33 +17,40 @@
     %Improved the methodology for correcting phase using time0.
 %Version 5d:
     %Implemented an option to implement a Gaussian window function for photon echos.
+%Version 6: Revised 2017-08-16 by Chris Smallwood.
+    %Previous version was backwards in phase conventions!!
+    %All fft's are changed to iffts now. Quadratures for PrepDataF_v9 are swapped by making Y quadrature negative.
 
 clear all; clc; %clf;% Clear variables, close MuPad engine, clear command window.
 speedC = 2.99709e+5; % nm/ps, speed of light in air.
 speedCvac = 2.99792458e+5; % nm/ps, speed of light in vacuum. For wavemeter measurements.
 planck = 4.135667662e-3;  % eV*ps, or eV/THz, from NIST. Uncertainty is in the last 2 digits.
 
+ref_freq = speedC/(850); % c/(wavelength in nm). Answer is in THz.
 %ref_freq = speedC/(738.9-0.25); % c/(wavelength in nm). Answer is in THz.
-ref_freq = speedCvac/738.452132;
+%ref_freq = speedCvac/738.452132;
 %ref_freq = speedC/(737.3-0.25); % c/(wavelength in nm). Answer is in THz.
-dir_path = ['E:/Data/2017/2017_08/2017_08_15'];
+%dir_path = ['E:/Data/2017/2017_08/2017_08_15'];
 %dir_path = ['/Users/Chris2/Desktop/Data/2015/2015_12/2017_04_25'];
 %dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_06/2017_06_06'];
+dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_05/2017_05_10 DQW 5nm'];
 %dir_path = ['R:/COPS/Data/2017/2017_08/2017_08_10 in prog'];
 %dir_path = ['R:/COPS/Data/2017/2017_08/2017_08_07 SiV PL'];
 %dir_path = ['.'];
 %dir_path = pwd;
 %scan_num = '09 - hi res cocirc';
-scan_num = '03';
+%scan_num = '09 - 3D 5uW';
+scan_num = '26 - high stats S1 3uW';
+%scan_num = '03';
 
-Delay_t0_um = 0; %um. Use this for Local oscillator measurement.
+Delay_t0_um = 60; %um. Use this for Local oscillator measurement.
 isFFTshift = 0;
 isPadding = 2; %Pad with zeros up to numpad if set to 1. Pad by factor of 2 if set to 2.
 numpad = 1024;  %fft prefers 2^n points
 Undersample_win = 0;
 isContourPlot = 0;
 NbContours=15;  %Sets the number of contours if using contour plots.
-CrtlFlags = [2,0,2,0,0,0]; 
+CrtlFlags = [1,0,1,0,0,0]; 
     %Flags correspond to [tau,T,t,V,aux,pwr] 
     %Value of 0 means do nothing                        
     %Value of 1 means plot time domain
@@ -93,8 +100,8 @@ parameters_path = [file_path 'MD_parameters.txt'];
 % pwr = load(power_path); % Power comes in from the bs
 % [a,b] = size(pwr);
 
-%Call data from PrepDataF_v8 reading in all demodulators at once.
-[MatrixX1,MatrixY1,MatrixX2,MatrixY2,MatrixX3,MatrixY3,MatrixX4,MatrixY4,MatrixX5,MatrixY5,MatrixX6,MatrixY6] = PrepDataF_v8(file_path);
+%Call data from PrepDataF_v9 reading in all demodulators at once.
+[MatrixX1,MatrixY1,MatrixX2,MatrixY2,MatrixX3,MatrixY3,MatrixX4,MatrixY4,MatrixX5,MatrixY5,MatrixX6,MatrixY6] = PrepDataF_v9(file_path);
 parameters = FindParameters2D_v5(parameters_path); %NB! This also gets executed internally in PrepData above. Not sure if could be faster. I think PrepData does not need to be a separate function.
 NumSteps_pwr = 1;        
 %Define Number of Steps, allow for both scan limiting and interrupted scans
@@ -221,7 +228,7 @@ end
 ZS1_m = complex(MatrixX1(1:NumSteps_tau,1:NumSteps_T,1:NumSteps_t,:,:,:),MatrixY1(1:NumSteps_tau,1:NumSteps_T,1:NumSteps_t,:,:,:));
 ZS4_m = complex(MatrixX4(1:NumSteps_tau,1:NumSteps_T,1:NumSteps_t,:,:,:),MatrixY4(1:NumSteps_tau,1:NumSteps_T,1:NumSteps_t,:,:,:));
 
-if isWindowPhotonEcho ==1
+if isWindowPhotonEcho == 1
     for k = 1:NumSteps_T
         for j = 1:NumSteps_t
             offs(j) = round(pix_slope*j)+pix_offs;
@@ -357,11 +364,11 @@ elseif(CrtlFlags(1) == 2)
     axis{1} = E_tauS1;
     axis{3} = E_tauS2;
     if isFFTshift
-        ZS1 = fftshift(fft(ZS1,[],1),1);
-        ZS4 = fftshift(fft(ZS4,[],1),1);
+        ZS1 = fftshift(ifft(ZS1,[],1),1);
+        ZS4 = fftshift(ifft(ZS4,[],1),1);
     else
-        ZS1 = fft(ZS1,[],1);
-        ZS4 = fft(ZS4,[],1);
+        ZS1 = ifft(ZS1,[],1);
+        ZS4 = ifft(ZS4,[],1);
     end
     %axislabel{1} = 'E_\tau (meV)';
     axislabel{1} = 'Excitation frequency (meV)';
@@ -375,18 +382,18 @@ elseif(CrtlFlags(2) == 2 | CrtlFlags(2) == 3)
     axis{i} = E_T;
     axislabel{i} = 'E_T (meV)';
     if isFFTshift
-        ZS1 = fftshift(fft(ZS1,[],2),2);
-        ZS4 = fftshift(fft(ZS4,[],2),2);
+        ZS1 = fftshift(ifft(ZS1,[],2),2);
+        ZS4 = fftshift(ifft(ZS4,[],2),2);
     else
-        ZS1 = fft(ZS1,[],2);
-        ZS4 = fft(ZS4,[],2);
+        ZS1 = ifft(ZS1,[],2);
+        ZS4 = ifft(ZS4,[],2);
     end
     i=i+1;
 elseif(CrtlFlags(2) == 4) %Always FFTshift for zero-quantum.
     axis{i} = E_T;
     axislabel{i} = 'Zero-quantum frequency (meV)';
-    ZS1 = fftshift(fft(ZS1,[],2),2);
-    ZS4 = fftshift(fft(ZS4,[],2),2);
+    ZS1 = fftshift(ifft(ZS1,[],2),2);
+    ZS4 = fftshift(ifft(ZS4,[],2),2);
     i=i+1;
 end
 if((CrtlFlags(3) == 1) & (i < 3))
@@ -396,8 +403,8 @@ if((CrtlFlags(3) == 1) & (i < 3))
 elseif((CrtlFlags(3) == 2) & (i < 3))
     axis{i} = E_t;
     axislabel{i} = 'Detection frequency (meV)';
-    ZS1 = fft(ZS1,[],3);    
-    ZS4 = fft(ZS4,[],3);
+    ZS1 = ifft(ZS1,[],3);    
+    ZS4 = ifft(ZS4,[],3);
     Delay_t0 = Delay_t0_um * 2e+3/speedC;
     ReducedFreq = freq_t - ref_freq;
     PhaseAdjustment_t0 = exp( complex(0,1)*2*pi*ReducedFreq*Delay_t0 );
@@ -490,7 +497,7 @@ colormap(jet)
 %colormap(gray)
 %colormap(flipud(gray))
 if (CrtlFlags(1) == 2) & (CrtlFlags(3) == 2) 
-%    x = linspace(axis2(1),axis2(end),20); y = -x; line(x,y,'Color','White')%,'LineStyle', ':','MarkerSize',16)
+    x = linspace(axis2(1),axis2(end),20); y = -x; line(x,y,'Color','White')%,'LineStyle', ':','MarkerSize',16)
 end
 colorbar();
 % ylabel('${\hbar\omega_{\tau}}$', 'interpreter','latex','FontSize',18)
