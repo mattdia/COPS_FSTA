@@ -13,14 +13,14 @@ other_flag = 0; %Change to 1 to load custom scan mask
 
 %% Scan Parameters
 
-NumPnts_tau=400;
+NumPnts_tau=400; %Not important for inhomogeneous masking, but set it the same to NumPnts_t by convention.
 NumPnts_T=1;
 NumPnts_t=400;
-stepsize_tau=240;
-stepsize_T=-30;
+stepsize_tau=120;
+stepsize_T=-50;
 stepsize_t=-120;
 tau_init=0;
-T_init=-30;
+T_init=-50;
 t_init=0;
 t_offset = 0;
 
