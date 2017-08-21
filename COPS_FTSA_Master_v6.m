@@ -36,12 +36,12 @@ ref_freq = speedCvac/738.452132;
 %dir_path = ['/Users/Chris2/Desktop/Data/2015/2015_12/2017_04_25'];
 %dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_06/2017_06_06'];
 %dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_05/2017_05_10 DQW 5nm'];
-%dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_08/2017_08_15 inc'];
+dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_08/2017_08_10 SiV PL'];
 %dir_path = ['R:/COPS/Data/2017/2017_08/2017_08_10 in prog'];
-dir_path = ['R:/COPS/Data/2017/2017_08/2017_08_15 inc'];
+%dir_path = ['R:/COPS/Data/2017/2017_08/2017_08_07 SiV PL'];
 %dir_path = ['.'];
 %dir_path = pwd;
-scan_num = '12';
+scan_num = '05 - hi res collin';
 %scan_num = '09 - hi res cocirc';
 %scan_num = '09 - 3D 5uW';
 %scan_num = '26 - high stats S1 3uW';
@@ -51,7 +51,9 @@ Delay_t0_um = 0; %um. Use this for Local oscillator measurement.
 isFFTshift = 0;
 isPadding = 2; %Pad with zeros up to numpad if set to 1. Pad by factor of 2 if set to 2.
 numpad = 1024;  %fft prefers 2^n points
-isFrequencyUnits = 1; %Enter 1 for frequency units (THz). Enter 0 for energy units (meV).
+Undersample_win = 0;
+isContourPlot = 0;
+NbContours=15;  %Sets the number of contours if using contour plots.
 CrtlFlags = [2,0,2,0,0,0]; 
     %Flags correspond to [tau,T,t,V,aux,pwr] 
     %Value of 0 means do nothing                        
@@ -64,19 +66,17 @@ StepLimit = [0,0,0]; %Step limit for [tau, T, t]. Entering 0 leaves them at full
 isCorrectOverallPhase = 1; %Enter 1 to correct everything by the Tstep specified by PhaseCorrectionIndx, 2 to correct each Tstep independently, 0 for no correction.
 PhaseCorrectionIndx = 1;
 isS1andS2 = 0; %Enter 1 if both S1 and S2 data sets were collected, 0 if only S1.
+isFrequencyUnits = 1; %Enter 1 for frequency units (THz). Enter 0 for energy units (meV).
 isWindowFunction_tau = 0; %Enter 1 to window along the tau axis.
 isWindowFunction_T = 0; %Enter 1 to window along the T axis.
 isWindowFunction_t = 0; %Enter 1 to window along the t axis.
 isWindowPhotonEcho = 0; %Enter 1 for photon echo windowing
-TukeyAlpha_tau = 1;     % Select a decimal between 0 (no window) and 1 (Hann window).
-TukeyAlpha_T = 1;     % Select a decimal between 0 (no window) and 1 (Hann window).
-TukeyAlpha_t = 1;     % Select a decimal between 0 (no window) and 1 (Hann window).
+TukeyAlpha_tau = 1;     % Select a decimal between 0 (no window) and 1 (Hanning window).
+TukeyAlpha_T = 1;     % Select a decimal between 0 (no window) and 1 (Hanning window).
+TukeyAlpha_t = 1;     % Select a decimal between 0 (no window) and 1 (Hanning window).
 stdev_window_time = .5; %in ps, t axis;
 time_slope = 1; %in ps/ps
 time_offset = -.5; %in ps/ps
-Undersample_win = 0;
-isContourPlot = 0;
-NbContours=15;  %Sets the number of contours if using contour plots.
 isSaveProcessedData = 1; %Set to 1 to save processed data.
 
 % Eliminate the dialog box below in favor of hard-coding the values.
@@ -197,7 +197,7 @@ stdev_window= stdev_window_time/t_stepsize_ps;
 
 %%Define Time/freq etc Axis assuming steps stepped correctly;
 StepSizeMatrix = [tau_stepsize,T_stepsize,t_stepsize,V_stepsize,aux_stepsize];
-t = (10^3)*2/speedC*(-Delay_t0_um:t_stepsize:(NumSteps_t-1)*t_stepsize-Delay_t0_um); %ps. %This has funny conventions for sign of Delay_t0_um because negative delay = positive time.
+t = (10^3)*2/speedC*(-Delay_t0_um:t_stepsize:(NumSteps_t-1)*t_stepsize-Delay_t0_um); %ps. %Funny conventions for sign of Delay_t0_um because negative delay = positive time.
 tau = (10^3)*2/speedC*(0:tau_stepsize:(NumSteps_tau-1)*tau_stepsize);
 T = (10^3)*2/speedC*(0:T_stepsize:(NumSteps_T-1)*T_stepsize);
 bias = transpose(((V_init:V_stepsize:((NumSteps_V-1)*V_stepsize+V_init))));
@@ -392,7 +392,7 @@ if(CrtlFlags(2) == 1)
     i=i+1;
 elseif(CrtlFlags(2) == 2 | CrtlFlags(2) == 3)
     if isFrequencyUnits == 1
-        axis{i} = freq_T;
+        axis{i} = freq_T
         axislabel{i} = 'f_T (THz)';
     else
         axis{i} = E_T;
