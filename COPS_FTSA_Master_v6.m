@@ -36,12 +36,12 @@ ref_freq = speedCvac/738.452132;
 %dir_path = ['/Users/Chris2/Desktop/Data/2015/2015_12/2017_04_25'];
 %dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_06/2017_06_06'];
 %dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_05/2017_05_10 DQW 5nm'];
-dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_08/2017_08_10 SiV PL'];
-%dir_path = ['R:/COPS/Data/2017/2017_08/2017_08_10 in prog'];
+%dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_08/2017_08_10 SiV PL'];
+dir_path = ['R:/COPS/Data/2017/2017_08/2017_08_15 inc'];
 %dir_path = ['R:/COPS/Data/2017/2017_08/2017_08_07 SiV PL'];
 %dir_path = ['.'];
 %dir_path = pwd;
-scan_num = '05 - hi res collin';
+scan_num = '28';
 %scan_num = '09 - hi res cocirc';
 %scan_num = '09 - 3D 5uW';
 %scan_num = '26 - high stats S1 3uW';
@@ -77,8 +77,10 @@ TukeyAlpha_t = 1;     % Select a decimal between 0 (no window) and 1 (Hanning wi
 stdev_window_time = .5; %in ps, t axis;
 time_slope = 1; %in ps/ps
 time_offset = -.5; %in ps/ps
-isSaveProcessedData = 1; %Set to 1 to save processed data.
+isSaveProcessedData = 0; %Set to 1 to save processed data.
 
+isSlicedFigure = 1; %Set to 1 if you want to get cross-slices of the abs. value of the spectrum
+numslices = 1;
 % Eliminate the dialog box below in favor of hard-coding the values.
 % isub = [d(:).isdir];
 % nameFolds = {d(isub).name}';
@@ -618,3 +620,16 @@ if isSaveProcessedData
         dlmwrite([OutDataPath 'axis1S2.txt'], axis1S2');
     end
 end
+
+%% Extract Graph Slices
+if isSlicedFigure 
+    clear x y
+    [x y] = ginput(numslices);
+    hold on
+    figslice = line([x-.05,x+.05] ,[y-.05, y+.05]);
+    x1 = find(axis2(xlim_min:xlim_max) < x+.05 && > x-.05);
+    y1 = find(axis1(ylim_min:ylim_max) < y+.05 && > y-.05);
+    figure()
+    plot(abs(Z1plot(x1,y1)))
+end
+    
