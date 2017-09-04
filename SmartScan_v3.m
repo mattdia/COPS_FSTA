@@ -13,14 +13,14 @@ other_flag = 0; %Change to 1 to load custom scan mask
 
 %% Scan Parameters
 
-NumPnts_tau=200;
-NumPnts_T=1;
-NumPnts_t = 400;
+NumPnts_tau=100;
+NumPnts_T=50s;
+NumPnts_t = 100;
 stepsize_tau= 240;
-stepsize_T= -50;
-stepsize_t= -120;
+stepsize_T = -240;
+stepsize_t= -240;
 tau_init=0;
-T_init=-50;
+T_init= 0;
 t_init=0;
 t_offset = 0;
 
@@ -38,7 +38,7 @@ LCVolt = [];
 
 %Microscope stages NEED TO AGREE WITH LABVIEW
 aux_init = -22957; %x (µm)
-aux2_init = -26100; %y (µm)
+aux2_init = -26200; %y (µm)
 
 stepsize_aux = 0;
 stepsize_aux2 = 0;
@@ -119,7 +119,7 @@ if abs(stepsize_t) == abs(stepsize_tau)
     %this part of the code works for photon echo masks of unequal t,tau
     %stepsize. 
     
-    elseif abs(stepsize_tau) ~= abs(stepsize_t)
+    elseif stepsize_tau ~= stepsize_t
         clear mask i j k ii 
         
         for i = 1:NumPnts_t
@@ -237,7 +237,7 @@ end
 
 %% Creating Correct T for Inhomogeneous scans (if a 3D scan is desired)
 size_tau = size(tau_position_vector,1);
-
+clear k i j mask
 if NumPnts_T ~=1 
     for k = 1:NumPnts_T
         T_position_matrix(:,k) = [ones(size_tau,1)]*(k-1)*stepsize_T;
@@ -245,8 +245,7 @@ if NumPnts_T ~=1
         t_composite_matrix(:,k) = t_position_vector;
     end
 T_position_vector = reshape(T_position_matrix,[],1);
-t_position_vector = reshape(t_composite_matrix,[],1);
-tau_position_vector = reshape(tau_composite_matrix,[],1);
+t_position_vector = reshape(t_composite_matrix,[],1);%tau_position_vector = reshape(tau_composite_matrix,[],1);
 disp('all three masks done')
 end
 
@@ -331,16 +330,16 @@ global_coordinate(:,5) = LCVolt_position_vector/LCVolt_init;
 global_coordinate(:,6) = aux_position_vector/aux_init;
 global_coordinate(:,7) = aux2_position_vector/aux2_init;
 
-disp('creating files')
-mask_file = strcat('MD_SmartScan_Mask.txt');
-dlmwrite(mask_file,global_position,'\t');
-
-position_file = strcat('MD_Calculated_Positions.txt');
-dlmwrite(position_file,global_position,'\t');
-
-coordinate_file = strcat('MD_Calculated_coordinates.txt');
-dlmwrite(coordinate_file,global_coordinate,'\t');
-disp('done')
+% disp('creating files')
+% mask_file = strcat('MD_SmartScan_Mask.txt');
+% dlmwrite(mask_file,global_position,'\t');
+% 
+% position_file = strcat('MD_Calculated_Positions.txt');
+% dlmwrite(position_file,global_position,'\t');
+% 
+% coordinate_file = strcat('MD_Calculated_coordinates.txt');
+% dlmwrite(coordinate_file,global_coordinate,'\t');
+% disp('done')
 
 
 
