@@ -9,16 +9,16 @@
 
 clear all;
 %clf;
-file_path = ['E:/Data/2017/2017_08/2017_08_15/scan00/'];
+%file_path = ['E:/Data/2017/2017_08/2017_08_15/scan00/'];
 %file_path = ['/Users/Chris2/Desktop/Data/2015/2015_12/2015_12_01/scan13/'];
 %file_path = ['/Volumes/cundiff/COPS/Data/2017/2017_04/2017_04_29/scan01/'];
-file_path = ['/Volumes/cundiff/COPS/Data/2017/2017_08/2017_08_15 inc/scan15/'];
+file_path = ['/Volumes/cundiff/COPS/Data/2017/2017_08/2017_08_15 inc/scan24/'];
 data_path = [file_path '1D_output.txt'];
 parameters_path = [file_path '1D_parameters.txt'];
 Data = load(data_path);
 
 prompt = {'Demodulator','Measuring tau? (change to 0 if measuring T or t)','Phase gradient option (choose 1, 2, or 3)'};
-INPUT = inputdlg(prompt,'Input',1,{'1','0','1'});
+INPUT = inputdlg(prompt,'Input',1,{'1','1','2'});
 Demod = str2num(INPUT{1});
 Measuring_tau = str2num(INPUT{2});
 phase_gradient_option = str2num(INPUT{3});
@@ -167,7 +167,7 @@ end
    
 %% Fourier transform and phase correction
 
-FFT_Z = fft(Z_);
+FFT_Z = ifft(Z_);
 FFT_Z = fftshift(FFT_Z);
 
 if (phase_gradient_option==1 || phase_gradient_option==2 || phase_gradient_option==3)   % Removal of phase gradient in the FFT assuming that zero is calibrated   
@@ -191,8 +191,12 @@ if (phase_gradient_option==1 || phase_gradient_option==2 || phase_gradient_optio
    FFT_Z = FFT_Z .* exp(complex(0,1)*2*pi/NumberOfSteps*(PositionOfZeroDelayIndex-1)*(p-floor(NumberOfSteps/2)));
 
    %and for the overall offset...
-   phaseoffset1 = theta(ceil(PositionOfZeroDelayIndex)-1);
    phaseoffset2 = theta(ceil(PositionOfZeroDelayIndex));
+   if ceil(PositionOfZeroDelayIndex) ~= 1;
+       phaseoffset1 = theta(ceil(PositionOfZeroDelayIndex)-1);
+   else
+       phaseoffset1 = phaseoffset2;
+   end
    phaseoffset = mod((phaseoffset1*abs(PositionOfZeroDelayIndex-ceil(PositionOfZeroDelayIndex))+phaseoffset2*abs(PositionOfZeroDelayIndex-ceil(PositionOfZeroDelayIndex)+1)),2*pi);
    FFT_Z = FFT_Z .* exp(-complex(0,1)*phaseoffset);  
    
@@ -209,7 +213,7 @@ Fs = 1/(delay_ps(2)-delay_ps(1));
 NumPnts = length(delay_ps);
 Frequency_THz = (-floor(NumPnts/2):ceil(NumPnts/2)-1)*Fs/NumPnts;
 Frequency_THz = Frequency_THz + ref_freq;
-lambda_t =(speedC./Frequency_THz);
+lambda_t = (speedC./Frequency_THz);
 Wavelength_nm = (lambda_t);
 
 %% Look for the difference between true zero-delay and the closest available step for a given stage
@@ -237,6 +241,10 @@ tdomainx(:,1) = position;
 tdomainx(:,2) = X_;
 savezpath = [file_path 'TimeDomainX.txt'];
 dlmwrite(savezpath,tdomainx);
+tdomainy(:,1) = position;
+tdomainy(:,2) = Y_;
+savezpath = [file_path 'TimeDomainY.txt'];
+dlmwrite(savezpath,tdomainy);
 
 %%
 
