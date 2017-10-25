@@ -36,14 +36,12 @@ ref_freq = speedCvac/738.452132;
 %dir_path = ['/Users/Chris2/Desktop/Data/2015/2015_12/2017_04_25'];
 %dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_06/2017_06_06'];
 %dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_05/2017_05_10 DQW 5nm'];
-%dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_08/2017_08_10 SiV PL'];
-dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_08/2017_08_14 SiV PL'];
 %dir_path = ['R:/COPS/Data/2017/2017_08/2017_08_10 in prog'];
 %dir_path = ['R:/COPS/Data/2017/2017_08/2017_08_07 SiV PL'];
 %dir_path = ['.'];
 %dir_path = pwd;
 %scan_num = '05 - hi res collin';
-scan_num = '05';
+scan_num = '29';
 %scan_num = '09 - hi res cocirc';
 %scan_num = '09 - 3D 5uW';
 %scan_num = '26 - high stats S1 3uW';
@@ -55,31 +53,31 @@ isPadding = 2; %Pad with zeros up to numpad if set to 1. Pad by factor of 2 if s
 numpad = 1024;  %fft prefers 2^n points
 Undersample_win = 0;
 isContourPlot = 0;
-NbContours=15;  %Sets the number of contours if using contour plots.
-CrtlFlags = [2,0,2,0,0,0]; 
+NbContours=10;  %Sets the number of contours if using contour plots.
+CrtlFlags = [0,4,2,0,0,0]; 
     %Flags correspond to [tau,T,t,V,aux,pwr] 
     %Value of 0 means do nothing                        
     %Value of 1 means plot time domain
     %Value of 2 means plot frequency domain for S1/S2.
     %Value of 3 means plot S3 (only for T)
     %Value of 4 means ZeroQuantum (only for T)
-PlotIndx = [1,1,1,1,1,1]; %Flags correspond to the slice number extracted for elements of CrtlFlags that are not plotted.
+PlotIndx = [1,4,2,1,1,1]; %Flags correspond to the slice number extracted for elements of CrtlFlags that are not plotted.
 StepLimit = [0,0,0]; %Step limit for [tau, T, t]. Entering 0 leaves them at full length.
 isCorrectOverallPhase = 1; %Enter 1 to correct everything by the Tstep specified by PhaseCorrectionIndx, 2 to correct each Tstep independently, 0 for no correction.
 PhaseCorrectionIndx = 1;
 isS1andS2 = 0; %Enter 1 if both S1 and S2 data sets were collected, 0 if only S1.
 isFrequencyUnits = 1; %Enter 1 for frequency units (THz). Enter 0 for energy units (meV).
 isWindowFunction_tau = 0; %Enter 1 to window along the tau axis.
-isWindowFunction_T = 0; %Enter 1 to window along the T axis.
-isWindowFunction_t = 0; %Enter 1 to window along the t axis.
+isWindowFunction_T = 1; %Enter 1 to window along the T axis.
+isWindowFunction_t = 1; %Enter 1 to window along the t axis.
 isWindowPhotonEcho = 0; %Enter 1 for photon echo windowing
-TukeyAlpha_tau = 1;     % Select a decimal between 0 (no window) and 1 (Hanning window).
-TukeyAlpha_T = 1;     % Select a decimal between 0 (no window) and 1 (Hanning window).
-TukeyAlpha_t = 1;     % Select a decimal between 0 (no window) and 1 (Hanning window).
+TukeyAlpha_tau = .8;     % Select a decimal between 0 (no window) and 1 (Hanning window).
+TukeyAlpha_T =.8;     % Select a decimal between 0 (no window) and 1 (Hanning window).
+TukeyAlpha_t = .8;     % Select a decimal between 0 (no window) and 1 (Hanning window).
 stdev_window_time = .5; %in ps, t axis;
 time_slope = 1; %in ps/ps
 time_offset = -.5; %in ps/ps
-isSaveProcessedData = 1; %Set to 1 to save processed data.
+isSaveProcessedData = 0; %Set to 1 to save processed data.
 
 % Eliminate the dialog box below in favor of hard-coding the values.
 % isub = [d(:).isdir];
@@ -267,7 +265,7 @@ if isWindowFunction_T
     alpha = TukeyAlpha_T;
     alphaStepMatrix = round(alpha*StepMatrix(2));
     WindowFunc_T(1:alphaStepMatrix) = 0.5*(1+cos(pi*(2*(0:alphaStepMatrix-1)/2/alphaStepMatrix-1)));
-    WindowFunc_T(alphaStepMatrix+1:StepMatrix(3)) = 1;
+    WindowFunc_T(alphaStepMatrix+1:StepMatrix(2)) = 1;
     WindowFunc_T = flipud(transpose(WindowFunc_T));
 else
     WindowFunc_T = ones(StepMatrix(2),1);
@@ -284,6 +282,7 @@ end
 pp = 1:StepMatrix(1);
 qq = 1:StepMatrix(2);
 rr = 1:StepMatrix(3);
+
 for(pp=1:1:StepMatrix(1));
 for(qq=1:1:StepMatrix(2));
 for(rr=1:1:StepMatrix(3));

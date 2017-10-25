@@ -13,18 +13,18 @@ other_flag = 0; %Change to 1 to load custom scan mask
 
 %% Scan Parameters
 
-NumPnts_tau=400; %Not important for inhomogeneous masking, but set it the same to NumPnts_t by convention.
-NumPnts_T=1;
-NumPnts_t=400;
-stepsize_tau=120;
-stepsize_T=-50;
-stepsize_t=-120;
+NumPnts_tau=100;
+NumPnts_T=50s;
+NumPnts_t = 100;
+stepsize_tau= 240;
+stepsize_T = -240;
+stepsize_t= -240;
 tau_init=0;
-T_init=-50;
+T_init= 0;
 t_init=0;
 t_offset = 0;
 
-tau_cutoff_index = 100; %Number of points on either side of the 
+tau_cutoff_index = 50; %Number of points on either side of the 
 %diagonal to take for a purely inhomogeneous scan
 
 %Misc scan parameters
@@ -38,7 +38,7 @@ LCVolt = [];
 
 %Microscope stages NEED TO AGREE WITH LABVIEW
 aux_init = -22957; %x (µm)
-aux2_init = -26000; %y (µm)
+aux2_init = -26200; %y (µm)
 
 stepsize_aux = 0;
 stepsize_aux2 = 0;
@@ -57,6 +57,7 @@ t_composite_matrix = [];
 tau_composite_matrix = [];
 t_position_matrix = [];
 tau_position_vector = [];
+t_position_vector = [];
 t_abs_position = [];
 t_position = [];
 
@@ -119,43 +120,49 @@ if abs(stepsize_t) == abs(stepsize_tau)
     %stepsize. 
     
     elseif stepsize_tau ~= stepsize_t
-        clear mask
-        for ii = 1:NumPnts_t
-            diagonal_steps(ii) = 1;
-            mask = diag(diagonal_steps);
+        clear mask i j k ii 
+        
+        for i = 1:NumPnts_t
+            
+                tau_center = floor(abs(i*stepsize_t)/abs(stepsize_tau))*stepsize_tau;
+                tau_center_non_integer = ((i*stepsize_t)/abs(stepsize_tau))*stepsize_tau;
+                tau_upper = tau_center+abs(tau_cutoff_index*stepsize_tau);
+                tau_lower = tau_center-abs(tau_cutoff_index*stepsize_tau);
+               
+                if tau_center == tau_center_non_integer
+                   for j = 1:(2*tau_cutoff_index)+1
+                       
+                        vec(j) = tau_lower + (j)*stepsize_tau;
+                   end
+                else 
+                   for j = 1:(2*tau_cutoff_index)
+                       
+                        vec(j) = tau_lower + (j)*stepsize_tau;
+                   end
+                end
+                   
+                   
+                 vec(vec/stepsize_tau < 0) = NaN;
+                 vec(abs(vec)> abs(NumPnts_t * stepsize_t)) = NaN;
+                 
+                 t_vec(1:size(vec,2)) = (i-1)*stepsize_t;
+                 
+                t_position_vector = [t_position_vector, t_vec];
+                tau_position_vector = [tau_position_vector,vec];
+                
+                
+        
         end
-        
-        clear ii j
-        
-        for ii = 1:NumPnts_t 
-            j = ii-tau_cutoff_index;
-            k = ii+tau_cutoff_index;
-            if j<=1
-                mask(1:ii+tau_cutoff_index,ii) = 1;
-            elseif j>1 && k<= NumPnts_t
-                mask(ii-tau_cutoff_index:ii+tau_cutoff_index,ii) = 1;
-            else
-                mask(ii-tau_cutoff_index:NumPnts_t,ii)=1;
-            end
-        end
-        
+        corrected_tau_idx = find(isnan(tau_position_vector)==0);
+        tau_position_vector = tau_position_vector(corrected_tau_idx);
+        t_position_vector = t_position_vector(corrected_tau_idx);
 end       
     
 
 
-     [row, col] = find(mask>0);
-        tau_coordinate_vector = reshape(row,[],1);%make coordniate vectors
-        t_coordinate_vector = reshape(col,[],1);
-
-        clear i
-        for i = 1:numel(tau_coordinate_vector) %make position vectors
-            tau_position_vector(i) = (tau_coordinate_vector(i)-1)*stepsize_tau;
-            t_position_vector(i) = (t_coordinate_vector(i)-1)*stepsize_t;
-        end
-
         tau_position_vector = tau_position_vector';
         t_position_vector = t_position_vector';
-    %    t_position_matrix = t_position_matrix'; %needs to be transposed because t is the slow axis.
+    %   t_position_matrix = t_position_matrix'; %needs to be transposed because t is the slow axis.
 
      %These matricies have nonzero offsets because the masking program cuts out zero elements, 
      %so we need to get rid of offsets to start at zero.
@@ -230,7 +237,7 @@ end
 
 %% Creating Correct T for Inhomogeneous scans (if a 3D scan is desired)
 size_tau = size(tau_position_vector,1);
-
+clear k i j mask
 if NumPnts_T ~=1 
     for k = 1:NumPnts_T
         T_position_matrix(:,k) = [ones(size_tau,1)]*(k-1)*stepsize_T;
@@ -238,8 +245,7 @@ if NumPnts_T ~=1
         t_composite_matrix(:,k) = t_position_vector;
     end
 T_position_vector = reshape(T_position_matrix,[],1);
-t_position_vector = reshape(t_composite_matrix,[],1);
-tau_position_vector = reshape(tau_composite_matrix,[],1);
+t_position_vector = reshape(t_composite_matrix,[],1);%tau_position_vector = reshape(tau_composite_matrix,[],1);
 disp('all three masks done')
 end
 
@@ -324,17 +330,16 @@ global_coordinate(:,5) = LCVolt_position_vector/LCVolt_init;
 global_coordinate(:,6) = aux_position_vector/aux_init;
 global_coordinate(:,7) = aux2_position_vector/aux2_init;
 
-disp('creating files')
-mask_file = strcat('MD_SmartScan_Mask.txt');
-dlmwrite(mask_file,global_position,'\t');
-
-position_file = strcat('MD_Calculated_Positions.txt');
-dlmwrite(position_file,global_position,'\t');
-
-coordinate_file = strcat('MD_Calculated_coordinates.txt');
-dlmwrite(coordinate_file,global_coordinate,'\t');
-disp('done')
-
+% disp('creating files')
+% mask_file = strcat('MD_SmartScan_Mask.txt');
+% dlmwrite(mask_file,global_position,'\t');
+% 
+% position_file = strcat('MD_Calculated_Positions.txt');
+% dlmwrite(position_file,global_position,'\t');
+% 
+% coordinate_file = strcat('MD_Calculated_coordinates.txt');
+% dlmwrite(coordinate_file,global_coordinate,'\t');
+% disp('done')
 
 
 
