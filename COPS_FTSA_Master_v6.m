@@ -22,6 +22,8 @@
     %All fft's are changed to iffts now. Quadratures for PrepDataF_v9 are swapped by making Y quadrature negative.
     %To accomodate this, sign of t0 correction has been changed.
     %Version 6 also includes the ability to plot as a function of frequency instead of just energy.
+%Version 6a: Revised 2017-10-25 by Chris Smallwood.
+    %Generalize so that program is capable of extracting MD data sets of (for example) 1 time dimension and 1 frequency dimension.
 
 clear all; clc; %clf;% Clear variables, close MuPad engine, clear command window.
 speedC = 2.99709e+5; % nm/ps, speed of light in air.
@@ -30,46 +32,47 @@ planck = 4.135667662e-3;  % eV*ps, or eV/THz, from NIST. Uncertainty is in the l
 
 %ref_freq = speedC/(850); % c/(wavelength in nm). Answer is in THz.
 %ref_freq = speedC/(738.9-0.25); % c/(wavelength in nm). Answer is in THz.
-ref_freq = speedCvac/738.452132;
+%ref_freq = speedCvac/738.452132;
+ref_freq = speedCvac/940; % c/(wavelength in nm). Answer is in THz.
 %ref_freq = speedC/(737.3-0.25); % c/(wavelength in nm). Answer is in THz.
 %dir_path = ['E:/Data/2017/2017_08/2017_08_15'];
 %dir_path = ['/Users/Chris2/Desktop/Data/2015/2015_12/2017_04_25'];
 %dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_06/2017_06_06'];
-%dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_05/2017_05_10 DQW 5nm'];
+dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_10/2017_10_23 inc'];
 %dir_path = ['R:/COPS/Data/2017/2017_08/2017_08_10 in prog'];
-%dir_path = ['R:/COPS/Data/2017/2017_08/2017_08_07 SiV PL'];
+%dir_path = ['R:/COPS/Data/2017/2017_10/2017_10_23 inc'];
 %dir_path = ['.'];
 %dir_path = pwd;
 %scan_num = '05 - hi res collin';
-scan_num = '29';
+scan_num = '04';
 %scan_num = '09 - hi res cocirc';
 %scan_num = '09 - 3D 5uW';
 %scan_num = '26 - high stats S1 3uW';
 %scan_num = '03';
 
 Delay_t0_um = 0; %um. Use this for Local oscillator measurement.
-isFFTshift = 0;
-isPadding = 2; %Pad with zeros up to numpad if set to 1. Pad by factor of 2 if set to 2.
+isFFTshift = 1;
+isPadding = 0; %Pad with zeros up to numpad if set to 1. Pad by factor of 2 if set to 2.
 numpad = 1024;  %fft prefers 2^n points
 Undersample_win = 0;
 isContourPlot = 0;
 NbContours=10;  %Sets the number of contours if using contour plots.
-CrtlFlags = [0,4,2,0,0,0]; 
-    %Flags correspond to [tau,T,t,V,aux,pwr] 
+CrtlFlags = [0,0,2,0,0,1];
+    %Flags correspond to [tau,T,t,V,aux2,aux1],  Flags used to correspond to [tau,T,t,V,aux,pwr] - CLS, 2017-10-25.
     %Value of 0 means do nothing                        
     %Value of 1 means plot time domain
     %Value of 2 means plot frequency domain for S1/S2.
     %Value of 3 means plot S3 (only for T)
-    %Value of 4 means ZeroQuantum (only for T)
-PlotIndx = [1,4,2,1,1,1]; %Flags correspond to the slice number extracted for elements of CrtlFlags that are not plotted.
+    %Value of 4 means plot ZeroQuantum (only for T)
+PlotIndx = [1,1,1,1,1,1]; %Flags correspond to the slice number extracted for elements of CrtlFlags that are not plotted.
 StepLimit = [0,0,0]; %Step limit for [tau, T, t]. Entering 0 leaves them at full length.
 isCorrectOverallPhase = 1; %Enter 1 to correct everything by the Tstep specified by PhaseCorrectionIndx, 2 to correct each Tstep independently, 0 for no correction.
 PhaseCorrectionIndx = 1;
 isS1andS2 = 0; %Enter 1 if both S1 and S2 data sets were collected, 0 if only S1.
-isFrequencyUnits = 1; %Enter 1 for frequency units (THz). Enter 0 for energy units (meV).
+isFrequencyUnits = 0; %Enter 1 for frequency units (THz). Enter 0 for energy units (meV).
 isWindowFunction_tau = 0; %Enter 1 to window along the tau axis.
-isWindowFunction_T = 1; %Enter 1 to window along the T axis.
-isWindowFunction_t = 1; %Enter 1 to window along the t axis.
+isWindowFunction_T = 0; %Enter 1 to window along the T axis.
+isWindowFunction_t = 0; %Enter 1 to window along the t axis.
 isWindowPhotonEcho = 0; %Enter 1 for photon echo windowing
 TukeyAlpha_tau = .8;     % Select a decimal between 0 (no window) and 1 (Hanning window).
 TukeyAlpha_T =.8;     % Select a decimal between 0 (no window) and 1 (Hanning window).
@@ -77,7 +80,7 @@ TukeyAlpha_t = .8;     % Select a decimal between 0 (no window) and 1 (Hanning w
 stdev_window_time = .5; %in ps, t axis;
 time_slope = 1; %in ps/ps
 time_offset = -.5; %in ps/ps
-isSaveProcessedData = 0; %Set to 1 to save processed data.
+isSaveProcessedData = 1; %Set to 1 to save processed data.
 
 % Eliminate the dialog box below in favor of hard-coding the values.
 % isub = [d(:).isdir];
@@ -111,7 +114,7 @@ parameters = FindParameters2D_v5(parameters_path); %NB! This also gets executed 
 NumSteps_pwr = 1;        
 %Define Number of Steps, allow for both scan limiting and interrupted scans
 %in time axes and scan limiting in all six axes.
-NumSteps3d = [];
+NumSteps3d = ones([1,6]);
 for (i= 1:6)
    if i<=3
         if StepLimit(i)==0
@@ -122,18 +125,18 @@ for (i= 1:6)
             NumSteps3d(i) = size(MatrixX1,i);
         end
    elseif i>3 && size(MatrixX1,i)~=1
-       NumSteps3d(i) = size(MatrixX1,i);       
-   elseif i>3
-      NumSteps3d(4) =  parameters(28,:);
-      NumSteps3d(5) =  parameters(31,:);
-      NumSteps3d(6) =  parameters(31,:); 
+       NumSteps3d(i) = size(MatrixX1,i); %NB! The last two dimensions are swapped relative to what you would think they should look like in LabView. Gross! - CLS, 2017-10-25
+%    elseif i>3
+%       NumSteps3d(4) =  parameters(28,:);
+%       NumSteps3d(5) =  parameters(34,:);
+%       NumSteps3d(6) =  parameters(31,:); 
    end    
 end
 NumSteps_tau = NumSteps3d(1); 
 NumSteps_T = NumSteps3d(2); 
 NumSteps_t = NumSteps3d(3);
 NumSteps_V = NumSteps3d(4);
-NumSteps_aux = NumSteps3d(6);
+NumSteps_aux = NumSteps3d(6); %NB! The last two dimensions are swapped relative to what you would think they should look like in LabView. Gross! - CLS, 2017-10-25
 NumSteps_aux2 = NumSteps3d(5);
 %NumSteps_tau = parameters(7,:); 
 %NumSteps_T = parameters(8,:); 
@@ -146,14 +149,17 @@ tau_stepsize = abs(parameters(4,1));
 T_stepsize = abs(parameters(5,1));
 t_stepsize = abs(parameters(6,1));
 V_stepsize = parameters(27,:);
-aux_stepsize = parameters(30,:);
+aux_stepsize = parameters(30,:); %NB! The last two dimensions are swapped relative to what you would think they should look like in LabView. Gross! - CLS, 2017-10-25
+aux2_stepsize = parameters(33,:);
 %Other Parameters needed
 V_init = parameters(26,1);
-aux_init = parameters(29,1);
+aux_init = parameters(29,1); %NB! The last two dimensions are swapped relative to what you would think they should look like in LabView. Gross! - CLS, 2017-10-25
+aux2_init = parameters(32,1);
 %Cut data to fit the step limit
 
 %Define StepMatrix
-StepMatrix = [NumSteps_tau,NumSteps_T,NumSteps_t,NumSteps_V,NumSteps_aux,NumSteps_pwr];    
+%StepMatrix = [NumSteps_tau,NumSteps_T,NumSteps_t,NumSteps_V,NumSteps_aux,NumSteps_pwr]; 
+StepMatrix = [NumSteps_tau,NumSteps_T,NumSteps_t,NumSteps_V,NumSteps_aux2,NumSteps_aux]; %NB! The last two dimensions are swapped relative to what you would think they should look like in LabView. Gross! - CLS, 2017-10-25
 
 %Photon echo windowing parameters. These need to be integers.
 pix_slope = time_slope*(t_stepsize/tau_stepsize);
@@ -201,7 +207,8 @@ t = (10^3)*2/speedC*(-Delay_t0_um:t_stepsize:(NumSteps_t-1)*t_stepsize-Delay_t0_
 tau = (10^3)*2/speedC*(0:tau_stepsize:(NumSteps_tau-1)*tau_stepsize);
 T = (10^3)*2/speedC*(0:T_stepsize:(NumSteps_T-1)*T_stepsize);
 bias = transpose(((V_init:V_stepsize:((NumSteps_V-1)*V_stepsize+V_init))));
-aux = transpose(((aux_init:aux_stepsize:((NumSteps_aux-1)* aux_stepsize+aux_init))));
+aux = ((aux_init:aux_stepsize:((NumSteps_aux-1)* aux_stepsize+aux_init)));
+aux2 = ((aux2_init:aux2_stepsize:((NumSteps_aux2-1)* aux2_stepsize+aux2_init)));
 [m ,n] = size(bias);
 if(m==0)
    bias = V_init; 
@@ -283,6 +290,7 @@ pp = 1:StepMatrix(1);
 qq = 1:StepMatrix(2);
 rr = 1:StepMatrix(3);
 
+WindowFunc = ones(size(ZS1_m1,1),size(ZS1_m1,2),size(ZS1_m1,3),size(ZS1_m1,4),size(ZS1_m1,5),size(ZS1_m1,6));
 for(pp=1:1:StepMatrix(1));
 for(qq=1:1:StepMatrix(2));
 for(rr=1:1:StepMatrix(3));
@@ -452,30 +460,49 @@ if((CrtlFlags(4) == 1) & (i < 3))
     i=i+1;
 end
 if((CrtlFlags(5) == 1) & (i < 3))
-%Calibration for angle axis after spectra. First degree should be 14.1842 degrees.
-    axis{i} = atan( (aux) / (.05*10^6))*(180/pi) +14.1842-6.788;
-    axislabel{i} = 'angle';
-    %axis{i} = aux;
+%     %Older version that may not be relevant. Calibration for angle axis after spectra. First degree should be 14.1842 degrees.
+%     axis{i} = atan( (aux) / (.05*10^6))*(180/pi) +14.1842-6.788;
+%     axislabel{i} = 'angle';
+    axis{i} = aux2;
+    axislabel{i} = 'aux2';
     i=i+1;
 end  
 if((CrtlFlags(6) == 1) & (i < 3))
-    axis{i} = pwr;
-    axislabel{i} = 'Power';
+    axis{i} = aux;
+    axislabel{i} = 'aux';
+%     %Older version that may not be relevant.
+%     axis{i} = pwr;
+%     axislabel{i} = 'Power';
     i=i+1;
 end
 
 
 %% Plot the figure.
 
-if (CrtlFlags(1) ~= 0) & (CrtlFlags(3) ~= 0)
+if (CrtlFlags(1) ~= 0) & (CrtlFlags(3) ~= 0) %Prefer tau vs. t
     Z1plot = ZS1(:,PlotIndx(2),:,PlotIndx(4),PlotIndx(5),PlotIndx(6));
     Z4plot = ZS4(:,PlotIndx(2),:,PlotIndx(4),PlotIndx(5),PlotIndx(6));
-elseif (CrtlFlags(2) ~= 0) & (CrtlFlags(3) ~= 0)
+elseif (CrtlFlags(2) ~= 0) & (CrtlFlags(3) ~= 0) %Then T vs. t
     Z1plot = ZS1(PlotIndx(1),:,:,PlotIndx(4),PlotIndx(5),PlotIndx(6));
     Z4plot = ZS4(PlotIndx(1),:,:,PlotIndx(4),PlotIndx(5),PlotIndx(6));
-elseif (CrtlFlags(1) ~= 0) & (CrtlFlags(2) ~= 0)
+elseif (CrtlFlags(1) ~= 0) & (CrtlFlags(2) ~= 0) %Then tau vs. T
     Z1plot = ZS1(:,:,PlotIndx(3),PlotIndx(4),PlotIndx(5),PlotIndx(6));
     Z4plot = ZS4(:,:,PlotIndx(3),PlotIndx(4),PlotIndx(5),PlotIndx(6));
+elseif (CrtlFlags(3) ~= 0) & (CrtlFlags(6) ~= 0) %Then t vs. aux 
+    Z1plot = ZS1(PlotIndx(1),PlotIndx(2),:,PlotIndx(4),PlotIndx(5),:);
+    Z4plot = ZS4(PlotIndx(1),PlotIndx(2),PlotIndx(3),PlotIndx(4),PlotIndx(5),PlotIndx(6));
+elseif (CrtlFlags(3) ~= 0) & (CrtlFlags(6) ~= 0) %Then t vs. aux2 
+    Z1plot = ZS1(PlotIndx(1),PlotIndx(2),:,PlotIndx(4),:,PlotIndx(6));
+    Z4plot = ZS4(PlotIndx(1),PlotIndx(2),:,PlotIndx(4),:,PlotIndx(6));
+elseif (CrtlFlags(3) ~= 0) & (CrtlFlags(6) ~= 0) %Then tau vs. aux 
+    Z1plot = ZS1(:,PlotIndx(2),PlotIndx(3),PlotIndx(4),PlotIndx(5),:);
+    Z4plot = ZS4(:,PlotIndx(2),PlotIndx(3),PlotIndx(4),PlotIndx(5),:);
+elseif (CrtlFlags(3) ~= 0) & (CrtlFlags(6) ~= 0) %Then tau vs. aux2 
+    Z1plot = ZS1(:,PlotIndx(2),PlotIndx(3),PlotIndx(4),:,PlotIndx(6));
+    Z4plot = ZS4(:,PlotIndx(2),PlotIndx(3),PlotIndx(4),:,PlotIndx(6));
+elseif (CrtlFlags(3) ~= 0) & (CrtlFlags(6) ~= 0) %Then aux2 vs. aux 
+    Z1plot = ZS1(PlotIndx(1),PlotIndx(2),PlotIndx(3),PlotIndx(4),:,:);
+    Z4plot = ZS4(PlotIndx(1),PlotIndx(2),PlotIndx(3),PlotIndx(4),:,:);
 end
 Z1plot = squeeze(Z1plot);
 Z4plot = squeeze(Z4plot);
@@ -609,10 +636,14 @@ end
 if isSaveProcessedData
     OutDataPath = strcat(file_path, 'Processed_Output/');
     if ~isdir(OutDataPath) mkdir(file_path, 'Processed_Output'); end
-    dlmwrite([OutDataPath 'ZS1Real.txt'],real(ZS1));
-    dlmwrite([OutDataPath 'ZS1Imag.txt'],imag(ZS1));
-    dlmwrite([OutDataPath 'ZS4Real.txt'],real(ZS4));
-    dlmwrite([OutDataPath 'ZS4Imag.txt'],imag(ZS4));
+%     dlmwrite([OutDataPath 'ZS1Real.txt'],real(ZS1));
+%     dlmwrite([OutDataPath 'ZS1Imag.txt'],imag(ZS1));
+    dlmwrite([OutDataPath 'ZS1Real.txt'],squeeze(real(ZS1)));
+    dlmwrite([OutDataPath 'ZS1Imag.txt'],squeeze(imag(ZS1)));
+%     dlmwrite([OutDataPath 'ZS4Real.txt'],real(ZS4));
+%     dlmwrite([OutDataPath 'ZS4Imag.txt'],imag(ZS4));
+    dlmwrite([OutDataPath 'ZS4Real.txt'],squeeze(real(ZS4)));
+    dlmwrite([OutDataPath 'ZS4Imag.txt'],squeeze(imag(ZS4)));
     dlmwrite([OutDataPath 'axis1.txt'], axis1');
     dlmwrite([OutDataPath 'axis2.txt'], axis2');
     if CrtlFlags(1) == 1 || CrtlFlags(1) == 2
