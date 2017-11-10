@@ -9,16 +9,16 @@
 
 clear all;
 %clf;
-%file_path = ['E:/Data/2017/2017_08/2017_08_15/scan00/'];
+file_path = ['E:/Data/2017/2017_11/2017_11_10/scan05/'];
 %file_path = ['/Users/Chris2/Desktop/Data/2015/2015_12/2015_12_01/scan13/'];
 %file_path = ['/Volumes/cundiff/COPS/Data/2017/2017_04/2017_04_29/scan01/'];
-file_path = ['/Volumes/cundiff/COPS/Data/2017/2017_08/2017_08_15 inc/scan24/'];
+%file_path = ['/Volumes/cundiff/COPS/Data/2017/2017_08/2017_08_15 inc/scan24/'];
 data_path = [file_path '1D_output.txt'];
 parameters_path = [file_path '1D_parameters.txt'];
 Data = load(data_path);
 
 prompt = {'Demodulator','Measuring tau? (change to 0 if measuring T or t)','Phase gradient option (choose 1, 2, or 3)'};
-INPUT = inputdlg(prompt,'Input',1,{'1','1','2'});
+INPUT = inputdlg(prompt,'Input',1,{'1','0','1'});
 Demod = str2num(INPUT{1});
 Measuring_tau = str2num(INPUT{2});
 phase_gradient_option = str2num(INPUT{3});
@@ -26,8 +26,9 @@ phase_gradient_option = str2num(INPUT{3});
 speedC = 2.99709e+5; %(nm/ps), speed of light in air. This value is from Wolfram Alpha. 
 speedCvac = 2.99792458e+5; % nm/ps, speed of light in vacuum. For wavemeter measurements.
 %lambda_ref = 738.49; %lambda reference beam in nm
-lambda_ref = 738.45145; %lambda reference beam in nm
-ref_freq = speedCvac/lambda_ref; % in THz
+lambda_ref = 737.77; %lambda reference beam in nm
+%ref_freq = speedCvac/lambda_ref; % in THz
+ref_freq = speedC/lambda_ref; % in THz
 
 %% Notes on corrections of phase  
 % There are two phase corrections in the code.
