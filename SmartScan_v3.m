@@ -11,16 +11,18 @@ inhom_flag = 1; %Purely inhomogeneous mask
 hom_flag = 0; %Purely homogeneous mask
 other_flag = 0; %Change to 1 to load custom scan mask
 
+%% Write parameters to File
+is_writetoFile = 0;
 %% Scan Parameters
 
-NumPnts_tau=100;
-NumPnts_T=50s;
-NumPnts_t = 100;
+NumPnts_tau = 400;
+NumPnts_T = 1;
+NumPnts_t = 800;
 stepsize_tau= 240;
 stepsize_T = -240;
-stepsize_t= -240;
+stepsize_t= -120;
 tau_init=0;
-T_init= 0;
+T_init= -50;
 t_init=0;
 t_offset = 0;
 
@@ -28,7 +30,7 @@ tau_cutoff_index = 50; %Number of points on either side of the
 %diagonal to take for a purely inhomogeneous scan
 
 %Misc scan parameters
-V_init = -0.7;
+V_init = -1;
 stepsize_V= .2;
 NumPnts_V= 1;
 NumPnts_LCVolt= 1;
@@ -37,8 +39,8 @@ LCVolt_init = 5;
 LCVolt = [];
 
 %Microscope stages NEED TO AGREE WITH LABVIEW
-aux_init = -22957; %x (µm)
-aux2_init = -26200; %y (µm)
+aux_init = -27050; %x (µm)
+aux2_init = -24800; %y (µm)
 
 stepsize_aux = 0;
 stepsize_aux2 = 0;
@@ -323,23 +325,26 @@ global_position(:,7) = aux2_position_vector;
 global_coordinate = zeros(size(t_position_vector,1),7);
 
 global_coordinate(:,1) = tau_position_vector/stepsize_tau + 1;
-global_coordinate(:,2) = abs(T_position_vector/stepsize_T);
+global_coordinate(:,2) = abs(T_coordinate_vector);
 global_coordinate(:,3) = abs(t_position_vector/stepsize_t) + 1;
 global_coordinate(:,4) = V_position_vector/V_init;
 global_coordinate(:,5) = LCVolt_position_vector/LCVolt_init;
 global_coordinate(:,6) = aux_position_vector/aux_init;
 global_coordinate(:,7) = aux2_position_vector/aux2_init;
 
-% disp('creating files')
-% mask_file = strcat('MD_SmartScan_Mask.txt');
-% dlmwrite(mask_file,global_position,'\t');
-% 
-% position_file = strcat('MD_Calculated_Positions.txt');
-% dlmwrite(position_file,global_position,'\t');
-% 
-% coordinate_file = strcat('MD_Calculated_coordinates.txt');
-% dlmwrite(coordinate_file,global_coordinate,'\t');
-% disp('done')
+if is_writetoFile ==1
+    disp('creating files')
+    mask_file = strcat('MD_SmartScan_Mask.txt');
+    dlmwrite(mask_file,global_position,'\t');
+
+    position_file = strcat('MD_Calculated_Positions.txt');
+    dlmwrite(position_file,global_position,'\t');
+
+    coordinate_file = strcat('MD_Calculated_coordinates.txt');
+    dlmwrite(coordinate_file,global_coordinate,'\t');
+    disp('done')
+end
+
 
 
 
