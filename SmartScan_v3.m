@@ -12,7 +12,7 @@ hom_flag = 0; %Purely homogeneous mask
 other_flag = 0; %Change to 1 to load custom scan mask
 
 %% Write parameters to File
-is_writetoFile = 0;
+is_writetoFile = 1;
 %% Scan Parameters
 
 NumPnts_tau = 400;
@@ -39,8 +39,8 @@ LCVolt_init = 5;
 LCVolt = [];
 
 %Microscope stages NEED TO AGREE WITH LABVIEW
-aux_init = -27050; %x (µm)
-aux2_init = -24800; %y (µm)
+aux_init = -26150; %x (µm)
+aux2_init = -25600; %y (µm)
 
 stepsize_aux = 0;
 stepsize_aux2 = 0;
