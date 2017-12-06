@@ -8,17 +8,17 @@ function [MatrixX1,MatrixY1,MatrixX2,MatrixY2,MatrixX3,MatrixY3,MatrixX4,MatrixY
 
 %The correct format of ZI lock in outputs is
 % X1 = Data(:,1);
-% Y1 = Data(:,2);
+% Y1 = -Data(:,2);
 % X2 = Data(:,3);
-% Y2 = Data(:,4);
+% Y2 = -Data(:,4);
 % X3 = Data(:,5);
-% Y3 = Data(:,6);
+% Y3 = -Data(:,6);
 % X4 = Data(:,7);
-% Y4 = Data(:,8);
+% Y4 = -Data(:,8);
 % X5 = Data(:,9);
-% Y5 = Data(:,10);
+% Y5 = -Data(:,10);
 % X6 = Data(:,11);
-% Y6 = Data(:,12);
+% Y6 = -Data(:,12);
 % RefFreq1= Data(:,13); %applying to Demodulators 1-3
 % RefFreq2= Data(:,14); %applying to Demodulators 4-6
 % AuxIn0= Data(:,15);
@@ -54,17 +54,17 @@ NumSteps_scan = parameters(12,:);
 
 %% retrieving data (6 demodulators)
 X1 = Data(:,1);
-Y1 = Data(:,2);
+Y1 = -Data(:,2);
 X2 = Data(:,3);
-Y2 = Data(:,4);
+Y2 = -Data(:,4);
 X3 = Data(:,5);
-Y3 = Data(:,6);
+Y3 = -Data(:,6);
 X4 = Data(:,7);
-Y4 = Data(:,8);
+Y4 = -Data(:,8);
 X5 = Data(:,9);
-Y5 = Data(:,10);
+Y5 = -Data(:,10);
 X6 = Data(:,11);
-Y6 = Data(:,12);
+Y6 = -Data(:,12);
 RefFreq1= Data(:,13); %applying to Demodulators 1-3
 RefFreq2= Data(:,14); %applying to Demodulators 4-6
 AuxIn0= Data(:,15);
@@ -119,18 +119,19 @@ DATA_SIZE_tau_T_t=size(ZMatrixX1);
 %Here I define the Data matrices that will be used.
 i=1;
 while (i<= NumSteps_scan)
+    coordinates(i,2) = 1;
     MatrixX1(coordinates(i,1),coordinates(i,2),coordinates(i,3),coordinates(i,4),coordinates(i,5),coordinates(i,6),coordinates(i,7)) = X1(i);
-    MatrixY1(coordinates(i,1),coordinates(i,2),coordinates(i,3),coordinates(i,4),coordinates(i,5),coordinates(i,6),coordinates(i,7)) = -Y1(i);
+    MatrixY1(coordinates(i,1),coordinates(i,2),coordinates(i,3),coordinates(i,4),coordinates(i,5),coordinates(i,6),coordinates(i,7)) = Y1(i);
     MatrixX2(coordinates(i,1),coordinates(i,2),coordinates(i,3),coordinates(i,4),coordinates(i,5),coordinates(i,6),coordinates(i,7)) = X2(i);
-    MatrixY2(coordinates(i,1),coordinates(i,2),coordinates(i,3),coordinates(i,4),coordinates(i,5),coordinates(i,6),coordinates(i,7)) = -Y2(i);
+    MatrixY2(coordinates(i,1),coordinates(i,2),coordinates(i,3),coordinates(i,4),coordinates(i,5),coordinates(i,6),coordinates(i,7)) = Y2(i);
     MatrixX3(coordinates(i,1),coordinates(i,2),coordinates(i,3),coordinates(i,4),coordinates(i,5),coordinates(i,6),coordinates(i,7)) = X3(i);
-    MatrixY3(coordinates(i,1),coordinates(i,2),coordinates(i,3),coordinates(i,4),coordinates(i,5),coordinates(i,6),coordinates(i,7)) = -Y3(i);
+    MatrixY3(coordinates(i,1),coordinates(i,2),coordinates(i,3),coordinates(i,4),coordinates(i,5),coordinates(i,6),coordinates(i,7)) = Y3(i);
     MatrixX4(coordinates(i,1),coordinates(i,2),coordinates(i,3),coordinates(i,4),coordinates(i,5),coordinates(i,6),coordinates(i,7)) = X4(i);
-    MatrixY4(coordinates(i,1),coordinates(i,2),coordinates(i,3),coordinates(i,4),coordinates(i,5),coordinates(i,6),coordinates(i,7)) = -Y4(i);
+    MatrixY4(coordinates(i,1),coordinates(i,2),coordinates(i,3),coordinates(i,4),coordinates(i,5),coordinates(i,6),coordinates(i,7)) = Y4(i);
     MatrixX5(coordinates(i,1),coordinates(i,2),coordinates(i,3),coordinates(i,4),coordinates(i,5),coordinates(i,6),coordinates(i,7)) = X5(i);
-    MatrixY5(coordinates(i,1),coordinates(i,2),coordinates(i,3),coordinates(i,4),coordinates(i,5),coordinates(i,6),coordinates(i,7)) = -Y5(i);
+    MatrixY5(coordinates(i,1),coordinates(i,2),coordinates(i,3),coordinates(i,4),coordinates(i,5),coordinates(i,6),coordinates(i,7)) = Y5(i);
     MatrixX6(coordinates(i,1),coordinates(i,2),coordinates(i,3),coordinates(i,4),coordinates(i,5),coordinates(i,6),coordinates(i,7)) = X6(i);
-    MatrixY6(coordinates(i,1),coordinates(i,2),coordinates(i,3),coordinates(i,4),coordinates(i,5),coordinates(i,6),coordinates(i,7)) = -Y6(i);
+    MatrixY6(coordinates(i,1),coordinates(i,2),coordinates(i,3),coordinates(i,4),coordinates(i,5),coordinates(i,6),coordinates(i,7)) = Y6(i);
     if i>= m;
         
             if i<NumSteps_scan

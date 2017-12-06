@@ -33,26 +33,30 @@ planck = 4.135667662e-3;  % eV*ps, or eV/THz, from NIST. Uncertainty is in the l
 %ref_freq = speedC/(850); % c/(wavelength in nm). Answer is in THz.
 %ref_freq = speedC/(738.9-0.25); % c/(wavelength in nm). Answer is in THz.
 %ref_freq = speedCvac/738.452132;
-ref_freq = speedCvac/940; % c/(wavelength in nm). Answer is in THz.
+ref_freq = speedCvac/737.81734;
+%ref_freq = speedCvac/737.77; % c/(wavelength in nm). Answer is in THz.
 %ref_freq = speedC/(737.3-0.25); % c/(wavelength in nm). Answer is in THz.
 %dir_path = ['E:/Data/2017/2017_10/2017_10_23'];
 %dir_path = ['/Users/Chris2/Desktop/Data/2015/2015_12/2017_04_25'];
 %dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_06/2017_06_06'];
+dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_11/2017_11_10 SiV PL'];
+%dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_08/2017_08_15 SiV PL'];
+%dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_11/2017_11_10 inc'];
 %dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_10/2017_10_23 inc'];
 %dir_path = ['R:/COPS/Data/2017/2017_08/2017_08_10 in prog'];
-dir_path = ['R:/COPS/Data/2017/2017_10/2017_10_23'];
+%dir_path = ['R:/COPS/Data/2017/2017_10/2017_10_23'];
 %dir_path = ['.'];
 %dir_path = pwd;
-%scan_num = '05 - hi res collin';
-scan_num = '36';
+scan_num = '10';
+%scan_num = '05';
 %scan_num = '09 - hi res cocirc';
 %scan_num = '09 - 3D 5uW';
 %scan_num = '26 - high stats S1 3uW';
 %scan_num = '03';
 
 Delay_t0_um = 0; %um. Use this for Local oscillator measurement.
-isFFTshift = 1;
-isPadding = 0; %Pad with zeros up to numpad if set to 1. Pad by factor of 2 if set to 2.
+isFFTshift = 0;
+isPadding = 2; %Pad with zeros up to numpad if set to 1. Pad by factor of 2 if set to 2.
 numpad = 1024;  %fft prefers 2^n points
 Undersample_win = 0;
 isContourPlot = 0;
@@ -552,7 +556,7 @@ colormap(parula)
 %colormap(gray)
 %colormap(flipud(gray))
 if (CrtlFlags(1) == 2) & (CrtlFlags(3) == 2) 
-    x = linspace(axis2(1),axis2(end),20); y = -x; line(x,y,'Color','White')%,'LineStyle', ':','MarkerSize',16)
+    %x = linspace(axis2(1),axis2(end),20); y = -x; line(x,y,'Color','White')%,'LineStyle', ':','MarkerSize',16)
 end
 colorbar();
 % ylabel('${\hbar\omega_{\tau}}$', 'interpreter','latex','FontSize',18)

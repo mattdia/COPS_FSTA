@@ -6,13 +6,16 @@
 %   - Removed undersampling options. These never got used anyway.
 %   - Lots of changes to make the fft phase extraction better.
 % Changes in v6:
+%   - Use ifft instead of fft.
+%   - Corrected frequency sign starting in version 6b to go with ifft.
 
 clear all;
 %clf;
-file_path = ['E:/Data/2017/2017_11/2017_11_10/scan05/'];
+%file_path = ['E:/Data/2017/2017_11/2017_11_10/scan05/'];
 %file_path = ['/Users/Chris2/Desktop/Data/2015/2015_12/2015_12_01/scan13/'];
 %file_path = ['/Volumes/cundiff/COPS/Data/2017/2017_04/2017_04_29/scan01/'];
-%file_path = ['/Volumes/cundiff/COPS/Data/2017/2017_08/2017_08_15 inc/scan24/'];
+file_path = ['/Volumes/cundiff/COPS/Data/2017/2017_11/2017_11_10 SiV PL/scan00/'];
+%file_path = ['/Volumes/cundiff/COPS/Data/2017/2017_11/2017_11_10 inc/scan05/'];
 data_path = [file_path '1D_output.txt'];
 parameters_path = [file_path '1D_parameters.txt'];
 Data = load(data_path);
@@ -26,9 +29,9 @@ phase_gradient_option = str2num(INPUT{3});
 speedC = 2.99709e+5; %(nm/ps), speed of light in air. This value is from Wolfram Alpha. 
 speedCvac = 2.99792458e+5; % nm/ps, speed of light in vacuum. For wavemeter measurements.
 %lambda_ref = 738.49; %lambda reference beam in nm
-lambda_ref = 737.77; %lambda reference beam in nm
-%ref_freq = speedCvac/lambda_ref; % in THz
-ref_freq = speedC/lambda_ref; % in THz
+lambda_ref = 737.81961; %lambda reference beam in nm
+ref_freq = speedCvac/lambda_ref; % in THz
+%ref_freq = speedC/lambda_ref; % in THz
 
 %% Notes on corrections of phase  
 % There are two phase corrections in the code.
@@ -53,9 +56,6 @@ ref_freq = speedC/lambda_ref; % in THz
 % delay = 0 manually.
         
 % no correction of phase gradient for other numbers
-   
-% note: none of the phase gradient correction seems to work when scan
-% starts close to 0 delay 
 
 %% extract partial data from data matrix
 
@@ -76,17 +76,17 @@ end
 %% retrieving data (6 demodulators)
 
 X1 = Data(:,1);
-Y1 = Data(:,2);
+Y1 = -Data(:,2);
 X2 = Data(:,3);
-Y2 = Data(:,4);
+Y2 = -Data(:,4);
 X3 = Data(:,5);
-Y3 = Data(:,6);
+Y3 = -Data(:,6);
 X4 = Data(:,7);
-Y4 = Data(:,8);
+Y4 = -Data(:,8);
 X5 = Data(:,9);
-Y5 = Data(:,10);
+Y5 = -Data(:,10);
 X6 = Data(:,11);
-Y6 = Data(:,12);
+Y6 = -Data(:,12);
 RefFreq1= Data(:,13); %applying to Demodulators 1-3
 RefFreq2= Data(:,14); %applying to Demodulators 4-6
 AuxIn0= Data(:,15);
@@ -123,7 +123,7 @@ position_measured = 1000*position_measured; % Converts mm to um
 
 Parameters = FindParameters1D_v3(parameters_path);
 %default values of parameters are 0
-global InitialPosition StepSize NumberOfSteps
+%global InitialPosition StepSize NumberOfSteps %These probably don't need to be global variables...
 InitialPosition = Parameters(2,1);
 StepSize = Parameters(3,1);
 [NumberOfSteps n] = size(R_);
@@ -136,92 +136,81 @@ position_calculated =InitialPosition+ p*StepSize;  %Calculated Expected Steps
 %position=position_measured;
 position=position_calculated;
 
-%% Correct wave orientation if measured in the reverse direction
-  
-if( position(NumberOfSteps) < position(1) )
-    X_ = flipud(X_);
-    Y_ = flipud(Y_);
-    Z_ = flipud(Z_);
-    R_ = flipud(R_);
-    theta = flipud(theta);
-    position = flipud(position);
-end
- 
 %% fitting time domain signal with a gaussian to find 0 delay
 
-fit_gaussian=fittype('gauss1');
-gaussian_fit  =fit(position,R_,fit_gaussian);
-[a] = coeffvalues(gaussian_fit);
-b = a(2);
-d = a(3);
-a = a(1);
-  
-PositionOfZeroDelay = b
+fit_gaussian = fittype('gauss1');
+gaussian_fit = fit(position,R_,fit_gaussian);
+[W_coef] = coeffvalues(gaussian_fit); %First element is amplitude, second is x0, third is 1/e half-width.
+FittedPositionOfZeroDelay = W_coef(2)
 
-PositionOfZeroDelayIndex = (b-position(1))/abs(StepSize)+1;
-PositionOfNominalZeroIndex = find(abs(position)<abs(StepSize)/2);
-PositionOfNominalZeroIndex = PositionOfNominalZeroIndex - position(PositionOfNominalZeroIndex)/abs(StepSize);
+%% scaling data into delays [ps], frequency [THz], wavelength [nm]
 
-if (b==0)
-    PositionOfZeroDelayIndex=1;
+if(Measuring_tau == 1)
+    delay_ps = (position)*( 10^3 / speedC)*2; 
+%     if( position(NumberOfSteps) < position(1) ) %Correct wave orientation
+%     if measured in the wrong direction. Actually, I think this is not appropriate. Gets taken care of by Fs.
+%         X_ = flipud(X_);
+%         Y_ = flipud(Y_);
+%         Z_ = flipud(Z_);
+%         R_ = flipud(R_);
+%         theta = flipud(theta);
+%         position = flipud(position);
+%         delay_ps = flipup(delay_ps);
+%     end
+else
+    delay_ps = -(position)*( 10^3 / speedC)*2; % negative for T/t since stage is mounted backward -> negative position gives positive delay
 end
-   
+
+Fs = 1/(delay_ps(2)-delay_ps(1));
+NumPnts = length(delay_ps);
+ReducedFrequency_THz = (-floor(NumPnts/2):ceil(NumPnts/2)-1)*Fs/NumPnts; %Does the FFTshift by default.
+Frequency_THz = ReducedFrequency_THz + ref_freq;
+lambda_t = (speedC./Frequency_THz);
+Wavelength_nm = (lambda_t);
+
 %% Fourier transform and phase correction
 
 FFT_Z = ifft(Z_);
 FFT_Z = fftshift(FFT_Z);
 
-if (phase_gradient_option==1 || phase_gradient_option==2 || phase_gradient_option==3)   % Removal of phase gradient in the FFT assuming that zero is calibrated   
-    
-   if (phase_gradient_option==2 || phase_gradient_option==3)
-    
-      PositionOfZeroDelayIndex =  PositionOfNominalZeroIndex;
-  
-      if phase_gradient_option==3
-       
-         prompt = {'Position of zero delay in um?'};
-         INPUT = inputdlg(prompt,'Input',1,{'0'});
-         delay0_offst = str2num(INPUT{1});
-         PositionOfZeroDelayIndex = PositionOfZeroDelayIndex + delay0_offst/abs(StepSize) ; 
-   
-      end
-   
-   end
-   
-   %Correct for zero delay not being at the beginning of the data set...
-   FFT_Z = FFT_Z .* exp(complex(0,1)*2*pi/NumberOfSteps*(PositionOfZeroDelayIndex-1)*(p-floor(NumberOfSteps/2)));
+if (phase_gradient_option==1 || phase_gradient_option==2 || phase_gradient_option==3) % Removal of phase gradient in the FFT assuming that zero is calibrated   
 
-   %and for the overall offset...
-   phaseoffset2 = theta(ceil(PositionOfZeroDelayIndex));
-   if ceil(PositionOfZeroDelayIndex) ~= 1;
-       phaseoffset1 = theta(ceil(PositionOfZeroDelayIndex)-1);
-   else
-       phaseoffset1 = phaseoffset2;
-   end
-   phaseoffset = mod((phaseoffset1*abs(PositionOfZeroDelayIndex-ceil(PositionOfZeroDelayIndex))+phaseoffset2*abs(PositionOfZeroDelayIndex-ceil(PositionOfZeroDelayIndex)+1)),2*pi);
-   FFT_Z = FFT_Z .* exp(-complex(0,1)*phaseoffset);  
+        PositionOfZeroDelay = FittedPositionOfZeroDelay;
+    if (phase_gradient_option==2)
+        PositionOfZeroDelay = 0;
+    elseif phase_gradient_option==3
+        prompt = {'Position of zero delay in um?'};
+        INPUT = inputdlg(prompt,'Input',1,{'0'});
+        PositionOfZeroDelay = str2num(INPUT{1});
+    end
+    [placeholder,PositionOfZeroDelayIndex] = min(abs(position - PositionOfZeroDelay));
+
+    if(Measuring_tau == 1)
+        EffectiveTime0_ps = (PositionOfZeroDelay-position(1))*( 10^3 / speedC)*2; 
+    else
+        EffectiveTime0_ps = -(PositionOfZeroDelay-position(1))*( 10^3 / speedC)*2; % negative for t and T since stage is mounted backward -> negative position gives positive delay
+    end
+   
+    %Correct for zero delay not being at the beginning of the data set...
+    FFT_Z = FFT_Z .* exp(-complex(0,1)*2*pi*ReducedFrequency_THz'*EffectiveTime0_ps);
+ 
+    %and for the overall offset...
+    phaseoffset2 = theta(ceil(PositionOfZeroDelayIndex));
+    if ceil(PositionOfZeroDelayIndex) ~= 1;
+        phaseoffset1 = theta(ceil(PositionOfZeroDelayIndex)-1);
+    else
+        phaseoffset1 = phaseoffset2;
+    end
+    phaseoffset = mod((phaseoffset1*abs(PositionOfZeroDelayIndex-ceil(PositionOfZeroDelayIndex))+phaseoffset2*abs(PositionOfZeroDelayIndex-ceil(PositionOfZeroDelayIndex)+1)),2*pi);
+    FFT_Z = FFT_Z .* exp(-complex(0,1)*phaseoffset);  
    
 end
-
-%% scaling data into delays [ps], frequency [THz], wavelength [nm]
-
-if(Measuring_tau == 1)
-    delay_ps = (position)*( 10^3 / speedC)*2; % negative for tau since stage is mounted backward -> negative position gives positive delay
-else
-    delay_ps = -(position)*( 10^3 / speedC)*2;
-end
-Fs = 1/(delay_ps(2)-delay_ps(1));
-NumPnts = length(delay_ps);
-Frequency_THz = (-floor(NumPnts/2):ceil(NumPnts/2)-1)*Fs/NumPnts;
-Frequency_THz = Frequency_THz + ref_freq;
-lambda_t = (speedC./Frequency_THz);
-Wavelength_nm = (lambda_t);
 
 %% Look for the difference between true zero-delay and the closest available step for a given stage
   
 n=0;  %Number of  Digits in after (1um) Actual Position
 q = 10^n;
-Apos = round(PositionOfZeroDelay*q)/q
+Apos = round(FittedPositionOfZeroDelay*q)/q
 %pos_dif = (PositionOfZeroDelay - Apos)
 
 %%
@@ -252,9 +241,7 @@ dlmwrite(savezpath,tdomainy);
 fig2 = figure(9);
 [m,n] = size(Wavelength_nm);
 %figg= plotyy(Wavelength_nm,abs(FFT_Z(1:n)),Wavelength_nm,Z_(angle(FFT_Z(1:n)))/pi);
-%figg= plotyy(Wavelength_nm,abs(FFT_Z(1:n)),Wavelength_nm,unwrap(angle(FFT_Z(1:n))));
 figg= plotyy(Wavelength_nm,abs(FFT_Z(1:n)),Wavelength_nm,angle(FFT_Z(1:n)));
-%plot(Wavelength_nm,abs(FFT_Z),'b')
 xlabel('Wavelength (nm)')
 ylabel('FFT Ab. Units')
 saveas(fig2,[file_path 'spectrum.png'])
