@@ -15,22 +15,22 @@ other_flag = 0; %Change to 1 to load custom scan mask
 is_writetoFile = 1;
 %% Scan Parameters
 
-NumPnts_tau = 400;
+NumPnts_tau = 100;
 NumPnts_T = 1;
-NumPnts_t = 800;
-stepsize_tau= 240;
-stepsize_T = -240;
-stepsize_t= -120;
+NumPnts_t = 100;
+stepsize_tau= 5;
+stepsize_T = -5;
+stepsize_t= -5;
 tau_init=0;
-T_init= -50;
+T_init= 0;
 t_init=0;
 t_offset = 0;
 
-tau_cutoff_index = 50; %Number of points on either side of the 
+tau_cutoff_index = 30; %Number of points on either side of the 
 %diagonal to take for a purely inhomogeneous scan
 
 %Misc scan parameters
-V_init = -1;
+V_init = -3;
 stepsize_V= .2;
 NumPnts_V= 1;
 NumPnts_LCVolt= 1;
@@ -39,8 +39,8 @@ LCVolt_init = 5;
 LCVolt = [];
 
 %Microscope stages NEED TO AGREE WITH LABVIEW
-aux_init = -26150; %x (µm)
-aux2_init = -25600; %y (µm)
+aux_init = -26998.7; %x (µm)
+aux2_init = -26074.4; %y (µm)
 
 stepsize_aux = 0;
 stepsize_aux2 = 0;
@@ -90,38 +90,41 @@ clear i j
 if inhom_flag == 1    
     mask = zeros(NumPnts_tau,NumPnts_t);
 
-if abs(stepsize_t) == abs(stepsize_tau)
+if abs(stepsize_t) ~= abs(stepsize_tau)
     
-    for j= 1:NumPnts_tau
-        i_low= j-tau_cutoff_index;
-        i_high = j+tau_cutoff_index;
-        
-        if i_low <= 0
-            for i = 1:i_high
-                mask(i,j) = 1;
-               %t_position_matrix(i,j) = (i)*stepsize_t;
-
-            end
-        elseif i_high < NumPnts_t
-
-            for i = i_low:i_high
-                mask(i,j) = 1;
-                %t_position_matrix(i,j) = (i)*stepsize_t;
-            end
-        elseif i_high >= NumPnts_t
-
-            for i = i_low:NumPnts_t
-                mask(i,j) = 1;
-                %t_position_matrix(i,j) = (i)*stepsize_t;
-            end
-        end
-
-    end
+%     for j= 1:NumPnts_tau
+%         i_low= j-tau_cutoff_index;
+%         i_high = j+tau_cutoff_index;
+%         
+%         if i_low <= 0
+%             for i = 1:i_high
+%                 mask(i,j) = 1;
+%                %t_position_matrix(i,j) = (i)*stepsize_t;
+% 
+%             end
+%         elseif i_high < NumPnts_t
+% 
+%             for i = i_low:i_high
+%                 mask(i,j) = 1;
+%                 %t_position_matrix(i,j) = (i)*stepsize_t;
+%             end
+%         elseif i_high >= NumPnts_t
+% 
+%             for i = i_low:NumPnts_t
+%                 mask(i,j) = 1;
+%                 %t_position_matrix(i,j) = (i)*stepsize_t;
+%             end
+%         end
+% 
+%     end
+%         corrected_tau_idx = find(mask==1);
+%         tau_position_vector = tau_position_vector(corrected_tau_idx);
+%         t_position_vector = t_position_vector(corrected_tau_idx);
     
     %this part of the code works for photon echo masks of unequal t,tau
     %stepsize. 
     
-    elseif stepsize_tau ~= stepsize_t
+    elseif abs(stepsize_tau) == abs(stepsize_t)
         clear mask i j k ii 
         
         for i = 1:NumPnts_t
@@ -159,7 +162,7 @@ if abs(stepsize_t) == abs(stepsize_tau)
         tau_position_vector = tau_position_vector(corrected_tau_idx);
         t_position_vector = t_position_vector(corrected_tau_idx);
 end       
-    
+        
 
 
         tau_position_vector = tau_position_vector';
@@ -260,7 +263,7 @@ if NumPnts_T ==1
         T_position_vector(i) = T_init;
         T_coordinate_vector(i) = 1;
     end
-    T_position_vector=reshape(T_position_vector,[],1);
+    T_position_vector = reshape(T_position_vector,[],1);
     T_coordinate_vector=reshape(T_coordinate_vector,[],1);
 end
 
