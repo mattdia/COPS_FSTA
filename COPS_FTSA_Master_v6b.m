@@ -33,11 +33,12 @@ planck = 4.135667662e-3;  % eV*ps, or eV/THz, from NIST. Uncertainty is in the l
 %ref_freq = speedC/(850); % c/(wavelength in nm). Answer is in THz.
 %ref_freq = speedC/(738.9-0.25); % c/(wavelength in nm). Answer is in THz.
 %ref_freq = speedCvac/738.452132;
+ref_freq = speedCvac/738.32071; %use for 2018_02_27
 %ref_freq = speedCvac/737.81734;
-ref_freq = speedCvac/930.80816;
+%ref_freq = speedCvac/930.80816;
 %ref_freq = speedCvac/737.77; % c/(wavelength in nm). Answer is in THz.
 %ref_freq = speedC/(737.3-0.25); % c/(wavelength in nm). Answer is in THz.
-dir_path = ['E:/Data/2018/2018_01/2018_01_17'];
+dir_path = ['E:/Data/2018/2018_02/2018_02_27'];
 %dir_path = ['/Users/Chris2/Desktop/Data/2015/2015_12/2017_04_25'];
 %dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_06/2017_06_06'];
 %dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_12/2017_12_05 SiV PL'];
@@ -48,21 +49,21 @@ dir_path = ['E:/Data/2018/2018_01/2018_01_17'];
 %dir_path = ['R:/COPS/Data/2017/2017_10/2017_10_23'];
 %dir_path = ['.'];
 %dir_path = pwd;
-scan_num = '03';
+scan_num = '17';
 %scan_num = '05';
 %scan_num = '09 - hi res cocirc';
 %scan_num = '09 - 3D 5uW';
 %scan_num = '26 - high stats S1 3uW';
 %scan_num = '03';
 
-Delay_t0_um = 0; %um. Use this for Local oscillator measurement.
+Delay_t0_um = 45; %um. Use this for Local oscillator measurement.
 isFFTshift = 1;
 isPadding = 2; %Pad with zeros up to numpad if set to 1. Pad by factor of 2 if set to 2.
 numpad = 1024;  %fft prefers 2^n points
 Undersample_win = 0;
 isContourPlot = 0;
 NbContours=10;  %Sets the number of contours if using contour plots.
-CrtlFlags = [1,0,1,0,0,0];
+CrtlFlags = [2,0,2,0,0,0];
     %Flags correspond to [tau,T,t,V,aux2,aux1],  Flags used to correspond to [tau,T,t,V,aux,pwr] - CLS, 2017-10-25.
     %Value of 0 means do nothing                        
     %Value of 1 means plot time domain
@@ -75,13 +76,13 @@ isCorrectOverallPhase = 1; %Enter 1 to correct everything by the Tstep specified
 PhaseCorrectionIndx = 1;
 isS1andS2 = 0; %Enter 1 if both S1 and S2 data sets were collected, 0 if only S1.
 isFrequencyUnits = 0; %Enter 1 for frequency units (THz). Enter 0 for energy units (meV).
-isWindowFunction_tau = 0; %Enter 1 to window along the tau axis.
+isWindowFunction_tau = 1; %Enter 1 to window along the tau axis.
 isWindowFunction_T = 0; %Enter 1 to window along the T axis.
-isWindowFunction_t = 0; %Enter 1 to window along the t axis.
+isWindowFunction_t = 1; %Enter 1 to window along the t axis.
 isWindowPhotonEcho = 0; %Enter 1 for photon echo windowing
-TukeyAlpha_tau = .8;     % Select a decimal between 0 (no window) and 1 (Hanning window).
+TukeyAlpha_tau = .1;     % Select a decimal between 0 (no window) and 1 (Hanning window).
 TukeyAlpha_T =.8;     % Select a decimal between 0 (no window) and 1 (Hanning window).
-TukeyAlpha_t = .8;     % Select a decimal between 0 (no window) and 1 (Hanning window).
+TukeyAlpha_t = .1;     % Select a decimal between 0 (no window) and 1 (Hanning window).
 stdev_window_time = .5; %in ps, t axis;
 time_slope = 1; %in ps/ps
 time_offset = -.5; %in ps/ps
@@ -549,15 +550,15 @@ else
     %hFig = surf(axis2(xlim_min:xlim_max),axis1(ylim_min:ylim_max),abs(Z1plot(ylim_min:ylim_max,xlim_min:xlim_max)),'EdgeColor','none'); set(gca,'Ydir','Normal');
 end
 title('S1 Absolute Value')
-%colormap(jet)
-colormap(parula)
+colormap(jet)
+%colormap(parula)
 %colormap(viridis)
 %colormap(beach)
 %colormap(flipud(bone))
 %colormap(gray)
 %colormap(flipud(gray))
 if (CrtlFlags(1) == 2) & (CrtlFlags(3) == 2) 
-    x = linspace(axis2(1),axis2(end),20); y = -x; line(x,y,'Color','White')%,'LineStyle', ':','MarkerSize',16)
+   % x = linspace(axis2(1),axis2(end),20); y = -x; line(x,y,'Color','White')%,'LineStyle', ':','MarkerSize',16)
 end
 colorbar();
 % ylabel('${\hbar\omega_{\tau}}$', 'interpreter','latex','FontSize',18)

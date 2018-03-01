@@ -15,22 +15,22 @@ other_flag = 0; %Change to 1 to load custom scan mask
 is_writetoFile = 1;
 %% Scan Parameters
 
-NumPnts_tau = 100;
+NumPnts_tau = 480;
 NumPnts_T = 1;
-NumPnts_t = 100;
-stepsize_tau= 5;
-stepsize_T = -5;
-stepsize_t= -5;
+NumPnts_t = 482;
+stepsize_tau= 45;
+stepsize_T = -45;
+stepsize_t= -45;
 tau_init=0;
-T_init= 0;
+T_init= -90;
 t_init=0;
-t_offset = 0;
+t_offset = 90;
 
-tau_cutoff_index = 30; %Number of points on either side of the 
+tau_cutoff_index = 25; %Number of points on either side of the 
 %diagonal to take for a purely inhomogeneous scan
 
 %Misc scan parameters
-V_init = -3;
+V_init = -5;
 stepsize_V= .2;
 NumPnts_V= 1;
 NumPnts_LCVolt= 1;
@@ -39,8 +39,8 @@ LCVolt_init = 5;
 LCVolt = [];
 
 %Microscope stages NEED TO AGREE WITH LABVIEW
-aux_init = -26998.7; %x (µm)
-aux2_init = -26074.4; %y (µm)
+aux_init = -28325.1; %x (µm)
+aux2_init = -26765.3; %y (µm)
 
 stepsize_aux = 0;
 stepsize_aux2 = 0;
