@@ -20,11 +20,11 @@ NumPnts_T = 1;
 NumPnts_t = 482;
 stepsize_tau= 45;
 stepsize_T = -45;
-stepsize_t= -45;
+stepsize_t= -90;
 tau_init=0;
 T_init= -90;
 t_init=0;
-t_offset = 90;
+t_offset = 180;
 
 tau_cutoff_index = 25; %Number of points on either side of the 
 %diagonal to take for a purely inhomogeneous scan
@@ -90,41 +90,41 @@ clear i j
 if inhom_flag == 1    
     mask = zeros(NumPnts_tau,NumPnts_t);
 
-if abs(stepsize_t) ~= abs(stepsize_tau)
+if abs(stepsize_t) == abs(stepsize_tau)
     
-%     for j= 1:NumPnts_tau
-%         i_low= j-tau_cutoff_index;
-%         i_high = j+tau_cutoff_index;
-%         
-%         if i_low <= 0
-%             for i = 1:i_high
-%                 mask(i,j) = 1;
-%                %t_position_matrix(i,j) = (i)*stepsize_t;
-% 
-%             end
-%         elseif i_high < NumPnts_t
-% 
-%             for i = i_low:i_high
-%                 mask(i,j) = 1;
-%                 %t_position_matrix(i,j) = (i)*stepsize_t;
-%             end
-%         elseif i_high >= NumPnts_t
-% 
-%             for i = i_low:NumPnts_t
-%                 mask(i,j) = 1;
-%                 %t_position_matrix(i,j) = (i)*stepsize_t;
-%             end
-%         end
-% 
-%     end
-%         corrected_tau_idx = find(mask==1);
-%         tau_position_vector = tau_position_vector(corrected_tau_idx);
-%         t_position_vector = t_position_vector(corrected_tau_idx);
+    for j= 1:NumPnts_tau
+        i_low= j-tau_cutoff_index;
+        i_high = j+tau_cutoff_index;
+        
+        if i_low <= 0
+            for i = 1:i_high
+                mask(i,j) = 1;
+               %t_position_matrix(i,j) = (i)*stepsize_t;
+
+            end
+        elseif i_high < NumPnts_t
+
+            for i = i_low:i_high
+                mask(i,j) = 1;
+                %t_position_matrix(i,j) = (i)*stepsize_t;
+            end
+        elseif i_high >= NumPnts_t
+
+            for i = i_low:NumPnts_t
+                mask(i,j) = 1;
+                %t_position_matrix(i,j) = (i)*stepsize_t;
+            end
+        end
+
+    end
+        corrected_tau_idx = find(mask==1);
+        tau_position_vector = tau_position_vector(corrected_tau_idx);
+        t_position_vector = t_position_vector(corrected_tau_idx);
     
     %this part of the code works for photon echo masks of unequal t,tau
     %stepsize. 
     
-    elseif abs(stepsize_tau) == abs(stepsize_t)
+    elseif abs(stepsize_tau) ~= abs(stepsize_t)
         clear mask i j k ii 
         
         for i = 1:NumPnts_t
