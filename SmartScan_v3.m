@@ -15,18 +15,18 @@ other_flag = 0; %Change to 1 to load custom scan mask
 is_writetoFile = 1;
 %% Scan Parameters
 
-NumPnts_tau = 480;
+NumPnts_tau = 1000;
 NumPnts_T = 1;
-NumPnts_t = 482;
-stepsize_tau= 45;
+NumPnts_t = 1000;
+stepsize_tau= 75;
 stepsize_T = -45;
-stepsize_t= -90;
-tau_init=0;
+stepsize_t= -75;
+tau_init= 0;
 T_init= -90;
 t_init=0;
-t_offset = 180;
+t_offset = -75;
 
-tau_cutoff_index = 25; %Number of points on either side of the 
+tau_cutoff_index = 1; %Number of points on either side of the 
 %diagonal to take for a purely inhomogeneous scan
 
 %Misc scan parameters
@@ -39,8 +39,8 @@ LCVolt_init = 5;
 LCVolt = [];
 
 %Microscope stages NEED TO AGREE WITH LABVIEW
-aux_init = -28325.1; %x (µm)
-aux2_init = -26765.3; %y (µm)
+aux_init = -28732.9; %x (µm)
+aux2_init = -27183.7; %y (µm)
 
 stepsize_aux = 0;
 stepsize_aux2 = 0;
@@ -90,7 +90,7 @@ clear i j
 if inhom_flag == 1    
     mask = zeros(NumPnts_tau,NumPnts_t);
 
-if abs(stepsize_t) == abs(stepsize_tau)
+if abs(stepsize_t) ~= abs(stepsize_tau)
     
     for j= 1:NumPnts_tau
         i_low= j-tau_cutoff_index;
@@ -124,7 +124,7 @@ if abs(stepsize_t) == abs(stepsize_tau)
     %this part of the code works for photon echo masks of unequal t,tau
     %stepsize. 
     
-    elseif abs(stepsize_tau) ~= abs(stepsize_t)
+    elseif abs(stepsize_tau) == abs(stepsize_t)
         clear mask i j k ii 
         
         for i = 1:NumPnts_t
@@ -318,7 +318,7 @@ disp('all position vectors done')
 global_position = zeros(size(t_position_vector,1),7);
 global_position(:,1) = tau_position_vector;
 global_position(:,2) = T_position_vector;
-global_position(:,3) = t_position_vector-t_offset;
+global_position(:,3) = t_position_vector+t_offset;
 global_position(:,4) = V_position_vector;
 global_position(:,5) = LCVolt_position_vector;
 global_position(:,6) = aux_position_vector;
