@@ -10,10 +10,11 @@
 %   - Corrected frequency sign starting in version 6b to go with ifft.
 
 clear all;
-%clf;
-file_path = ['E:/Data/2018/2018_03/2018_03_15/scan02/'];
+%clf;%file_path = ['E:/Data/2018/2018_04/2018_04_09/scan22/'];
+
+%file_path = ['E:/Data/2018/2018_03/2018_03_15/scan02/'];
 %file_path = ['/Users/Chris2/Desktop/Data/2015/2015_12/2015_12_01/scan13/'];
-%file_path = ['/Volumes/cundiff/COPS/Data/2017/2017_04/2017_04_29/scan01/'];
+file_path = ['/Volumes/cundiff/COPS/Data/2018/2018_04/2018_04_09/scan22/'];
 %file_path = ['/Volumes/cundiff/COPS/Data/2018/2017_01/2017_01_02/scan00'];
 %file_path = ['/Volumes/cundiff/COPS/Data/2017/2017_11/2017_11_10 inc/scan05/'];
 data_path = [file_path '1D_output.txt'];
