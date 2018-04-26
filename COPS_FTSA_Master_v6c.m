@@ -24,6 +24,10 @@
     %Version 6 also includes the ability to plot as a function of frequency instead of just energy.
 %Version 6a: Revised 2017-10-25 by Chris Smallwood.
     %Generalize so that program is capable of extracting MD data sets of (for example) 1 time dimension and 1 frequency dimension.
+    
+%Version6c: Revised 2017-04-03 by Matt Day
+    % Fixed photon echo windowing so the windowing occurs along the proper
+    % rotated coordinates in the time-time domain
 
 clear all; clc; %clf;% Clear variables, close MuPad engine, clear command window.
 speedC = 2.99709e+5; % nm/ps, speed of light in air.
@@ -32,19 +36,23 @@ planck = 4.135667662e-3;  % eV*ps, or eV/THz, from NIST. Uncertainty is in the l
 
 %ref_freq = speedC/(850); % c/(wavelength in nm). Answer is in THz.
 %ref_freq = speedC/(738.9-0.25); % c/(wavelength in nm). Answer is in THz.
+%ref_freq = speedC/737.77;
+%ref_freq = speedCvac/737.815555; %use for 2017_11_10, scan21
+%ref_freq = speedCvac/737.81961; %use for 2017_11_10, scan16
 %ref_freq = speedCvac/738.452132;
 %ref_freq = speedCvac/738.32071; %use for 2018_02_27
 %ref_freq = speedCvac/738.3437; %use for 2018_03_15
 %ref_freq = speedCvac/738.3431; %use for  2018_03_15 scan 11
-ref_freq = speedCvac/738.3468; %use for  2018_03_15 scan 13
-%ref_freq = speedCvac/738.3571; %Use for 2018_03_15 scan17
+%ref_freq = speedCvac/738.3468; %Use for 2018_03_15 scan13
+ref_freq = speedCvac/738.35841; %Use for 2018_03_15 scan17
+%ref_freq = speedCvac/737.71447; %use for 2017_10_11 SiV PL scan17
 %ref_freq = speedCvac/737.81642;
 %ref_freq = speedCvac/930.80816;
 %ref_freq = speedCvac/737.77; % c/(wavelength in nm). Answer is in THz.
 %ref_freq = speedC/(737.3-0.25); % c/(wavelength in nm). Answer is in THz.
 %dir_path = ['E:/Data/2018/2018_01/2018_01_17'];
 %dir_path = ['/Users/Chris2/Desktop/Data/2015/2015_12/2017_04_25'];
-dir_path = ['/Volumes/cundiff/COPS/Data/2018/2018_03/2018_03_15'];
+dir_path = ['/Volumes/cundiff/COPS/Data/2018/2018_04/2018_04_09'];
 %dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_11/2017_11_10 SiV PL'];
 %dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_08/2017_08_15 SiV PL'];
 %dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_11/2017_11_10 inc'];
@@ -53,15 +61,15 @@ dir_path = ['/Volumes/cundiff/COPS/Data/2018/2018_03/2018_03_15'];
 %dir_path = ['R:/COPS/Data/2017/2017_10/2017_10_23'];
 %dir_path = ['.'];
 %dir_path = pwd;
-scan_num = '13';
+scan_num = '08';
 %scan_num = '05';
 %scan_num = '09 - hi res cocirc';
 %scan_num = '09 - 3D 5uW';
 %scan_num = '26 - high stats S1 3uW';
 %scan_num = '03';
 
-Delay_t0_um = 180; %um. Use this for Local oscillator measurement.
-isFFTshift = 0;
+Delay_t0_um = 40; %um. Use this for Local oscillator measurement.
+isFFTshift = 1;
 isPadding = 2; %Pad with zeros up to numpad if set to 1. Pad by factor of 2 if set to 2.
 numpad = 1024;  %fft prefers 2^n points
 Undersample_win = 0;
@@ -79,17 +87,22 @@ StepLimit = [0,0,0]; %Step limit for [tau, T, t]. Entering 0 leaves them at full
 isCorrectOverallPhase = 1; %Enter 1 to correct everything by the Tstep specified by PhaseCorrectionIndx, 2 to correct each Tstep independently, 0 for no correction.
 PhaseCorrectionIndx = 1;
 isS1andS2 = 0; %Enter 1 if both S1 and S2 data sets were collected, 0 if only S1.
-isFrequencyUnits = 1; %Enter 1 for frequency units (THz). Enter 0 for energy units (meV).
-isWindowFunction_tau = 1; %Enter 1 to window along the tau axis.
+isFrequencyUnits = 0; %Enter 1 for frequency units (THz). Enter 0 for energy units (meV).
+isWindowFunction_tau = 0; %Enter 1 to window along the tau axis.
 isWindowFunction_T = 0; %Enter 1 to window along the T axis.
-isWindowFunction_t = 1; %Enter 1 to window along the t axis.
-isWindowPhotonEcho = 0; %Enter 1 for photon echo windowing
+isWindowFunction_t = 0; %Enter 1 to window along the t axis.
+isWindowPhotonEcho = 0; %Enter 1 for photon echo windowing across AND along the t/tau diagonal, enter 2 for across.
 TukeyAlpha_tau = .1;     % Select a decimal between 0 (no window) and 1 (Hanning window).
 TukeyAlpha_T =.8;     % Select a decimal between 0 (no window) and 1 (Hanning window).
 TukeyAlpha_t = .1;     % Select a decimal between 0 (no window) and 1 (Hanning window).
-stdev_window_time = 2.5; %in ps, t axis;
-time_slope = 1; %in ps/ps
-time_offset = -.5; %in ps/ps
+
+sigma_diag = 100000;
+sigma_cross_diag = 5;
+%norm = 1/(sqrt(2*pi)*sigma);
+x_offset = 2; %(right: +, left:-) (along t_axis in pixels)
+%stdev_window_time = 2.5; %in ps, t axis;
+%time_slope = 1; %in ps/ps
+%time_offset = -.5; %in ps/ps
 isSaveProcessedData = 1; %Set to 1 to save processed data.
 
 % Eliminate the dialog box below in favor of hard-coding the values.
@@ -172,11 +185,11 @@ aux2_init = parameters(32,1);
 StepMatrix = [NumSteps_tau,NumSteps_T,NumSteps_t,NumSteps_V,NumSteps_aux2,NumSteps_aux]; %NB! The last two dimensions are swapped relative to what you would think they should look like in LabView. Gross! - CLS, 2017-10-25
 
 %Photon echo windowing parameters. These need to be integers.
-pix_slope = time_slope*(t_stepsize/tau_stepsize);
-tau_stepsize_ps = 2e3*tau_stepsize/speedC;
-t_stepsize_ps = 2e3*t_stepsize/speedC;
-pix_offs = round(time_offset/tau_stepsize_ps);
-stdev_window= stdev_window_time/t_stepsize_ps;
+%pix_slope = time_slope*(t_stepsize/tau_stepsize);
+%tau_stepsize_ps = 2e3*tau_stepsize/speedC;
+%t_stepsize_ps = 2e3*t_stepsize/speedC;
+%pix_offs = round(time_offset/tau_stepsize_ps);
+%stdev_window= stdev_window_time/t_stepsize_ps;
 
 %old phase correction. Discarded in favor of phase correction which uses
 %correct time zero
@@ -250,15 +263,21 @@ end
 ZS1_m = complex(MatrixX1(1:NumSteps_tau,1:NumSteps_T,1:NumSteps_t,:,:,:),MatrixY1(1:NumSteps_tau,1:NumSteps_T,1:NumSteps_t,:,:,:));
 ZS4_m = complex(MatrixX4(1:NumSteps_tau,1:NumSteps_T,1:NumSteps_t,:,:,:),MatrixY4(1:NumSteps_tau,1:NumSteps_T,1:NumSteps_t,:,:,:));
 
-if isWindowPhotonEcho == 1
-    
+if isWindowPhotonEcho ~= 0
+    slope = abs(t_stepsize/tau_stepsize);
     mask = zeros(size(ZS1_m));
     norm = 1;
     for i = 1:size(mask,1)
         i_offs = i+x_offset;
         for j = 1:size(mask,3)
-               mask(i,:,j) = norm *exp(-.5*((i_offs-j)/(sigma_diag))^2)*...
-                        exp(-.5*((i_offs+j)/(sigma_cross_diag))^2);
+            j_offs= slope*j;
+            if isWindowPhotonEcho ==1
+            mask(i,:,j) = norm *exp(-.5*((i_offs-j_offs)/(sigma_cross_diag))^2)*...
+                    exp(-.5*((i_offs+j_offs)/(sigma_diag))^2);
+            elseif isWindowPhotonEcho == 2
+                mask(i,:,j) = norm *exp(-.5*((i_offs-j_offs)/(sigma_cross_diag))^2);
+            end
+            ZS1_m(i,:,j,:,:,:,:) = mask(i,:,j)*ZS1_m(i,:,j,:,:,:,:) ;
     end
 end
 %     for k = 1:NumSteps_T
@@ -269,7 +288,7 @@ end
 %             end
 %         end
 %     end
-clear offs i j k 
+clear offs i j k j_offs i_offs norm 
 end
 
 

@@ -1,4 +1,4 @@
-%SmartScan_v2
+igo%SmartScan_v2
 %Author Matthew Day
 
 clear
@@ -20,7 +20,7 @@ NumPnts_T = 1;
 NumPnts_t = 482;
 stepsize_tau= 45;
 stepsize_T = -45;
-stepsize_t= -90;
+stepsize_t= -45;
 tau_init=0;
 T_init= -90;
 t_init=0;
@@ -90,7 +90,7 @@ clear i j
 if inhom_flag == 1    
     mask = zeros(NumPnts_tau,NumPnts_t);
 
-if abs(stepsize_t) == abs(stepsize_tau)
+if abs(stepsize_t) ~= abs(stepsize_tau)
     
     for j= 1:NumPnts_tau
         i_low= j-tau_cutoff_index;
@@ -124,7 +124,7 @@ if abs(stepsize_t) == abs(stepsize_tau)
     %this part of the code works for photon echo masks of unequal t,tau
     %stepsize. 
     
-    elseif abs(stepsize_tau) ~= abs(stepsize_t)
+    elseif abs(stepsize_tau) == abs(stepsize_t)
         clear mask i j k ii 
         
         for i = 1:NumPnts_t
