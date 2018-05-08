@@ -7,7 +7,7 @@ clear
 %version of SmartScan which lives in the COPS old software folder.
 
 %% Flags
-inhom_flag = 1; %Purely inhomogeneous mask
+inhom_flag = 0; %Purely inhomogeneous mask
 hom_flag = 0; %Purely homogeneous mask
 other_flag = 0; %Change to 1 to load custom scan mask
 
@@ -15,16 +15,16 @@ other_flag = 0; %Change to 1 to load custom scan mask
 is_writetoFile = 1;
 %% Scan Parameters
 
-NumPnts_tau = 1000;
+NumPnts_tau = 10;
 NumPnts_T = 1;
-NumPnts_t = 1000;
-stepsize_tau= 75;
+NumPnts_t = 10;
+stepsize_tau= 3;
 stepsize_T = -45;
-stepsize_t= -75;
+stepsize_t= -3;
 tau_init= 0;
 T_init= -90;
 t_init=0;
-t_offset = -75;
+t_offset = 0;
 
 tau_cutoff_index = 1; %Number of points on either side of the 
 %diagonal to take for a purely inhomogeneous scan
@@ -68,8 +68,8 @@ mask = zeros(NumPnts_t,NumPnts_tau);
 %% no mask 
 if inhom_flag==0 && hom_flag==0 &&other_flag==0
 
-    for i = 1:NumPnts_t
-        for j = 1:NumPnts_tau
+    for i = 1:NumPnts_tau
+        for j = 1:NumPnts_t
             t_position_matrix(i,j) = j*stepsize_t;
         end
     end
@@ -78,71 +78,32 @@ t_position_vector = reshape(t_position_matrix,[],1);
 
     for i = 1:NumPnts_tau
         for j = 1:NumPnts_t
-            tau_position_matrix(i,j) = j*stepsize_tau;
+            tau_position_matrix(i,j) = i*stepsize_tau;
         end
     end
 
-tau_position_vector = reshape(tau_position_matrix,[],1);
+tau_position_vector = reshape(tau_position_matrix,[],1');
+t_position_vector = reshape(t_position_matrix,[],1)';
 end
 clear i j
 
 %% Inhom masking (along diagonal pixel, plus/minus index cutoff in t direction)
 if inhom_flag == 1    
-    mask = zeros(NumPnts_tau,NumPnts_t);
-
-if abs(stepsize_t) ~= abs(stepsize_tau)
-    
-    for j= 1:NumPnts_tau
-        i_low= j-tau_cutoff_index;
-        i_high = j+tau_cutoff_index;
-        
-        if i_low <= 0
-            for i = 1:i_high
-                mask(i,j) = 1;
-               %t_position_matrix(i,j) = (i)*stepsize_t;
-
-            end
-        elseif i_high < NumPnts_t
-
-            for i = i_low:i_high
-                mask(i,j) = 1;
-                %t_position_matrix(i,j) = (i)*stepsize_t;
-            end
-        elseif i_high >= NumPnts_t
-
-            for i = i_low:NumPnts_t
-                mask(i,j) = 1;
-                %t_position_matrix(i,j) = (i)*stepsize_t;
-            end
-        end
-
-    end
-        corrected_tau_idx = find(mask==1);
-        tau_position_vector = tau_position_vector(corrected_tau_idx);
-        t_position_vector = t_position_vector(corrected_tau_idx);
-    
     %this part of the code works for photon echo masks of unequal t,tau
     %stepsize. 
-    
-    elseif abs(stepsize_tau) == abs(stepsize_t)
-        clear mask i j k ii 
         
         for i = 1:NumPnts_t
             
-                tau_center = floor(abs(i*stepsize_t)/abs(stepsize_tau))*stepsize_tau;
-                tau_center_non_integer = ((i*stepsize_t)/abs(stepsize_tau))*stepsize_tau;
+                tau_center = floor(abs((i-1)*stepsize_t)/abs(stepsize_tau))*stepsize_tau;
+                tau_center_non_integer = (abs((i-1)*stepsize_t)/abs(stepsize_tau))*stepsize_tau;
                 tau_upper = tau_center+abs(tau_cutoff_index*stepsize_tau);
                 tau_lower = tau_center-abs(tau_cutoff_index*stepsize_tau);
                
-                if tau_center == tau_center_non_integer
-                   for j = 1:(2*tau_cutoff_index)+1
-                       
-                        vec(j) = tau_lower + (j)*stepsize_tau;
-                   end
+                if tau_cutoff_index ==0
+                    vec = tau_lower;
                 else 
-                   for j = 1:(2*tau_cutoff_index)
-                       
-                        vec(j) = tau_lower + (j)*stepsize_tau;
+                   for j = 1:(2*tau_cutoff_index)+1
+                        vec(j) = tau_lower + (j-1)*stepsize_tau;
                    end
                 end
                    
@@ -173,8 +134,6 @@ end
      %so we need to get rid of offsets to start at zero.
 
         disp('t/tau mask done')
-
-end
 
 %% Pure Homogeneous windowing
 %want to scan over window defined by a right triangle (on the time-time
@@ -250,13 +209,15 @@ if NumPnts_T ~=1
         t_composite_matrix(:,k) = t_position_vector;
     end
 T_position_vector = reshape(T_position_matrix,[],1);
-t_position_vector = reshape(t_composite_matrix,[],1);%tau_position_vector = reshape(tau_composite_matrix,[],1);
+t_position_vector = reshape(t_composite_matrix,[],1);
+tau_position_vector = reshape(tau_composite_matrix,[],1);
 disp('all three masks done')
 end
 
 %% Case Structure for making vectors of unused dimensions
 %if we don't want any T (or other) points, we can just create a 1D vector
-%which just repeats in value for the mask
+%which just repeats in value for the mask. WILL BREAK UNLESS UPDATED FOR
+%UNUSED DIMENSIONS
 
 if NumPnts_T ==1 
     for i = 1:size(t_position_vector)
