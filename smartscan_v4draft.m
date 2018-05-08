@@ -1,10 +1,23 @@
-%SmartScan_v2
+%SmartScan_v4
 %Author Matthew Day
 
 clear
 %This file generates a 7 column long matrix which is read into LabView
 %and which can set the scan parameters. This file is to replace a slower
 %version of SmartScan which lives in the COPS old software folder.
+%Changes after v3: 
+%{
+v4a: updated the Inhomogeneous windowing to work for an arbitrary stepsize
+in t/tau. 
+
+things to do: 
+?update such that we can take multiple inhomogeneously
+windowed T steps for 3D scans
+?update such that we can take multiple steps in the aux directions
+
+%}
+   
+
 
 %% Flags
 inhom_flag = 0; %Purely inhomogeneous mask
