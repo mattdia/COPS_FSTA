@@ -35,7 +35,7 @@ planck = 4.135667662e-3;  % eV*ps, or eV/THz, from NIST. Uncertainty is in the l
 
 %ref_freq = speedC/(850); % c/(wavelength in nm). Answer is in THz.
 %ref_freq = speedC/(738.9-0.25); % c/(wavelength in nm). Answer is in THz.
-%ref_freq = speedC/737.77;
+ref_freq = speedCvac/737.82; %2017_11_10, scan12
 %ref_freq = speedCvac/737.815555; %use for 2017_11_10, scan21
 %ref_freq = speedCvac/737.81961; %use for 2017_11_10, scan16
 %ref_freq = speedCvac/738.452132;
@@ -49,8 +49,9 @@ ref_freq = speedCvac/737.82;
 %ref_freq = speedCvac/930.80816;
 %ref_freq = speedCvac/737.77; % c/(wavelength in nm). Answer is in THz.
 %ref_freq = speedC/(737.3-0.25); % c/(wavelength in nm). Answer is in THz.
-dir_path = ['E:/Data/2018/2018_05/2018_05_07'];
+%dir_path = ['E:/Data/2018/2018_05/2018_05_07'];
 %dir_path = ['/Users/Chris2/Desktop/Data/2015/2015_12/2017_04_25'];
+dir_path = ['/Volumes/cundiff/COPS/Data/2018/2018_03/2018_03_15'];
 %dir_path = ['/Volumes/cundiff/COPS/Data/2018/2018_03/2018_03_15'];
 %dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_11/2017_11_10 SiV PL'];
 %dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_08/2017_08_15 SiV PL'];
@@ -60,7 +61,8 @@ dir_path = ['E:/Data/2018/2018_05/2018_05_07'];
 %dir_path = ['R:/COPS/Data/2017/2017_10/2017_10_23'];
 %dir_path = ['.'];
 %dir_path = pwd;
-scan_num = '06';
+
+scan_num = '17';
 %scan_num = '05';
 %scan_num = '09 - hi res cocirc';
 %scan_num = '09 - 3D 5uW';
@@ -91,18 +93,18 @@ isWindowFunction_tau = 0; %Enter 1 to window along the tau axis.
 isWindowFunction_T = 0; %Enter 1 to window along the T axis.
 isWindowFunction_t = 0; %Enter 1 to window along the t axis.
 isWindowPhotonEcho = 0; %Enter 1 for photon echo windowing across AND along the t/tau diagonal, enter 2 for across.
-TukeyAlpha_tau = .1;     % Select a decimal between 0 (no window) and 1 (Hanning window).
+TukeyAlpha_tau = .9;     % Select a decimal between 0 (no window) and 1 (Hanning window).
 TukeyAlpha_T =.8;     % Select a decimal between 0 (no window) and 1 (Hanning window).
-TukeyAlpha_t = .1;     % Select a decimal between 0 (no window) and 1 (Hanning window).
+TukeyAlpha_t = .9;     % Select a decimal between 0 (no window) and 1 (Hanning window).
 
-sigma_diag = 100000;
-sigma_cross_diag = 5;
+sigma_diag = 1000000;
+sigma_cross_diag = 100;
 %norm = 1/(sqrt(2*pi)*sigma);
 x_offset = 2; %(right: +, left:-) (along t_axis in pixels)
 %stdev_window_time = 2.5; %in ps, t axis;
 %time_slope = 1; %in ps/ps
 %time_offset = -.5; %in ps/ps
-isSaveProcessedData = 1; %Set to 1 to save processed data.
+isSaveProcessedData = 0; %Set to 1 to save processed data.
 
 % Eliminate the dialog box below in favor of hard-coding the values.
 % isub = [d(:).isdir];
@@ -593,7 +595,6 @@ if (CrtlFlags(1) == 2) & (CrtlFlags(3) == 2)
    % x = linspace(axis2(1),axis2(end),20); y = -x; line(x,y,'Color','White')%,'LineStyle', ':','MarkerSize',16)
 end
 colorbar();
-%colormap(sjc)
 % ylabel('${\hbar\omega_{\tau}}$', 'interpreter','latex','FontSize',18)
 % xlabel('${\hbar\omega_{t}}$', 'interpreter','latex','FontSize',18)
 ylabel(axis1label, 'FontSize',12)
