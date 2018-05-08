@@ -23,8 +23,7 @@
     %To accomodate this, sign of t0 correction has been changed.
     %Version 6 also includes the ability to plot as a function of frequency instead of just energy.
 %Version 6a: Revised 2017-10-25 by Chris Smallwood.
-    %Generalize so that program is capable of extracting MD data sets of (for example) 1 time dimension and 1 frequency dimension.
-    
+    %Generalize so that program is capable of extracting MD data sets of (for example) 1 time dimension and 1 frequency dimension. 
 %Version6c: Revised 2017-04-03 by Matt Day
     % Fixed photon echo windowing so the windowing occurs along the proper
     % rotated coordinates in the time-time domain
@@ -44,16 +43,16 @@ planck = 4.135667662e-3;  % eV*ps, or eV/THz, from NIST. Uncertainty is in the l
 %ref_freq = speedCvac/738.3437; %use for 2018_03_15
 %ref_freq = speedCvac/738.3431; %use for  2018_03_15 scan 11
 %ref_freq = speedCvac/738.3468; %Use for 2018_03_15 scan13
-ref_freq = speedCvac/738.35841; %Use for 2018_03_15 scan17
+%ref_freq = speedCvac/738.35841; %Use for 2018_03_15 scan17
 %ref_freq = speedCvac/737.71447; %use for 2017_10_11 SiV PL scan17
-%ref_freq = speedCvac/737.81642;
+ref_freq = speedCvac/737.82;
 %ref_freq = speedCvac/930.80816;
 %ref_freq = speedCvac/737.77; % c/(wavelength in nm). Answer is in THz.
 %ref_freq = speedC/(737.3-0.25); % c/(wavelength in nm). Answer is in THz.
 %dir_path = ['E:/Data/2018/2018_01/2018_01_17'];
 %dir_path = ['/Users/Chris2/Desktop/Data/2015/2015_12/2017_04_25'];
-dir_path = ['/Volumes/cundiff/COPS/Data/2018/2018_04/2018_04_09'];
-%dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_11/2017_11_10 SiV PL'];
+%dir_path = ['/Volumes/cundiff/COPS/Data/2018/2018_03/2018_03_15'];
+dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_11/2017_11_10 SiV PL'];
 %dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_08/2017_08_15 SiV PL'];
 %dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_11/2017_11_10 inc'];
 %dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_10/2017_10_23 inc'];
@@ -61,21 +60,21 @@ dir_path = ['/Volumes/cundiff/COPS/Data/2018/2018_04/2018_04_09'];
 %dir_path = ['R:/COPS/Data/2017/2017_10/2017_10_23'];
 %dir_path = ['.'];
 %dir_path = pwd;
-scan_num = '08';
+scan_num = '12';
 %scan_num = '05';
 %scan_num = '09 - hi res cocirc';
 %scan_num = '09 - 3D 5uW';
 %scan_num = '26 - high stats S1 3uW';
 %scan_num = '03';
 
-Delay_t0_um = 40; %um. Use this for Local oscillator measurement.
-isFFTshift = 1;
+Delay_t0_um = 0; %um. Use this for Local oscillator measurement.
+isFFTshift = 0;
 isPadding = 2; %Pad with zeros up to numpad if set to 1. Pad by factor of 2 if set to 2.
 numpad = 1024;  %fft prefers 2^n points
 Undersample_win = 0;
 isContourPlot = 0;
 NbContours=10;  %Sets the number of contours if using contour plots.
-CrtlFlags = [2,0,2,0,0,0];
+CrtlFlags = [1,0,1,0,0,0];
     %Flags correspond to [tau,T,t,V,aux2,aux1],  Flags used to correspond to [tau,T,t,V,aux,pwr] - CLS, 2017-10-25.
     %Value of 0 means do nothing                        
     %Value of 1 means plot time domain
@@ -594,7 +593,7 @@ if (CrtlFlags(1) == 2) & (CrtlFlags(3) == 2)
    % x = linspace(axis2(1),axis2(end),20); y = -x; line(x,y,'Color','White')%,'LineStyle', ':','MarkerSize',16)
 end
 colorbar();
-colormap(sjc)
+%colormap(sjc)
 % ylabel('${\hbar\omega_{\tau}}$', 'interpreter','latex','FontSize',18)
 % xlabel('${\hbar\omega_{t}}$', 'interpreter','latex','FontSize',18)
 ylabel(axis1label, 'FontSize',12)
