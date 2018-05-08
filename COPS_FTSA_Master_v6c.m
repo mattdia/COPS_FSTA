@@ -50,9 +50,9 @@ ref_freq = speedCvac/738.35841; %Use for 2018_03_15 scan17
 %ref_freq = speedCvac/930.80816;
 %ref_freq = speedCvac/737.77; % c/(wavelength in nm). Answer is in THz.
 %ref_freq = speedC/(737.3-0.25); % c/(wavelength in nm). Answer is in THz.
-%dir_path = ['E:/Data/2018/2018_01/2018_01_17'];
+dir_path = ['E:/Data/2018/2018_05/2018_05_07'];
 %dir_path = ['/Users/Chris2/Desktop/Data/2015/2015_12/2017_04_25'];
-dir_path = ['/Volumes/cundiff/COPS/Data/2018/2018_04/2018_04_09'];
+%dir_path = ['/Volumes/cundiff/COPS/Data/2018/2018_05/2018_05_02'];
 %dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_11/2017_11_10 SiV PL'];
 %dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_08/2017_08_15 SiV PL'];
 %dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_11/2017_11_10 inc'];
@@ -61,16 +61,16 @@ dir_path = ['/Volumes/cundiff/COPS/Data/2018/2018_04/2018_04_09'];
 %dir_path = ['R:/COPS/Data/2017/2017_10/2017_10_23'];
 %dir_path = ['.'];
 %dir_path = pwd;
-scan_num = '08';
+scan_num = '06';
 %scan_num = '05';
 %scan_num = '09 - hi res cocirc';
 %scan_num = '09 - 3D 5uW';
 %scan_num = '26 - high stats S1 3uW';
 %scan_num = '03';
 
-Delay_t0_um = 40; %um. Use this for Local oscillator measurement.
+Delay_t0_um = 0; %um. Use this for Local oscillator measurement.
 isFFTshift = 1;
-isPadding = 2; %Pad with zeros up to numpad if set to 1. Pad by factor of 2 if set to 2.
+isPadding = 0; %Pad with zeros up to numpad if set to 1. Pad by factor of 2 if set to 2.
 numpad = 1024;  %fft prefers 2^n points
 Undersample_win = 0;
 isContourPlot = 0;
@@ -583,8 +583,8 @@ else
     %hFig = surf(axis2(xlim_min:xlim_max),axis1(ylim_min:ylim_max),abs(Z1plot(ylim_min:ylim_max,xlim_min:xlim_max)),'EdgeColor','none'); set(gca,'Ydir','Normal');
 end
 title('S1 Absolute Value')
-colormap(sunset)
-%colormap(parula)
+
+colormap(parula)
 %colormap(viridis)
 %colormap(beach)
 %colormap(flipud(bone))
@@ -594,7 +594,7 @@ if (CrtlFlags(1) == 2) & (CrtlFlags(3) == 2)
    % x = linspace(axis2(1),axis2(end),20); y = -x; line(x,y,'Color','White')%,'LineStyle', ':','MarkerSize',16)
 end
 colorbar();
-colormap(sjc)
+
 % ylabel('${\hbar\omega_{\tau}}$', 'interpreter','latex','FontSize',18)
 % xlabel('${\hbar\omega_{t}}$', 'interpreter','latex','FontSize',18)
 ylabel(axis1label, 'FontSize',12)
