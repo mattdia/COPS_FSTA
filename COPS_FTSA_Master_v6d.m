@@ -23,10 +23,12 @@
     %To accomodate this, sign of t0 correction has been changed.
     %Version 6 also includes the ability to plot as a function of frequency instead of just energy.
 %Version 6a: Revised 2017-10-25 by Chris Smallwood.
-    %Generalize so that program is capable of extracting MD data sets of (for example) 1 time dimension and 1 frequency dimension. 
+    %Generalize so that program is capable of extracting MD data sets of (for example) 1 time dimension and 1 frequency dimension.
+    
 %Version6c: Revised 2017-04-03 by Matt Day
     % Fixed photon echo windowing so the windowing occurs along the proper
     % rotated coordinates in the time-time domain
+    % Changed code to save processing parameters
 
 clear all; clc; %clf;% Clear variables, close MuPad engine, clear command window.
 speedC = 2.99709e+5; % nm/ps, speed of light in air.
@@ -35,7 +37,7 @@ planck = 4.135667662e-3;  % eV*ps, or eV/THz, from NIST. Uncertainty is in the l
 
 %ref_freq = speedC/(850); % c/(wavelength in nm). Answer is in THz.
 %ref_freq = speedC/(738.9-0.25); % c/(wavelength in nm). Answer is in THz.
-ref_freq = speedCvac/737.82; %2017_11_10, scan12
+ref_freq = speedCvac/738.452; 
 %ref_freq = speedCvac/737.815555; %use for 2017_11_10, scan21
 %ref_freq = speedCvac/737.81961; %use for 2017_11_10, scan16
 %ref_freq = speedCvac/738.452132;
@@ -45,24 +47,23 @@ ref_freq = speedCvac/737.82; %2017_11_10, scan12
 %ref_freq = speedCvac/738.3468; %Use for 2018_03_15 scan13
 %ref_freq = speedCvac/738.35841; %Use for 2018_03_15 scan17
 %ref_freq = speedCvac/737.71447; %use for 2017_10_11 SiV PL scan17
-ref_freq = speedCvac/737.82;
+%ref_freq = speedCvac/737.81642;
 %ref_freq = speedCvac/930.80816;
 %ref_freq = speedCvac/737.77; % c/(wavelength in nm). Answer is in THz.
 %ref_freq = speedC/(737.3-0.25); % c/(wavelength in nm). Answer is in THz.
-%dir_path = ['E:/Data/2018/2018_05/2018_05_07'];
+%dir_path = ['E:/Data/2018/2018_01/2018_01_17'];
 %dir_path = ['/Users/Chris2/Desktop/Data/2015/2015_12/2017_04_25'];
-dir_path = ['/Volumes/cundiff/COPS/Data/2018/2018_03/2018_03_15'];
-%dir_path = ['/Volumes/cundiff/COPS/Data/2018/2018_03/2018_03_15'];
+%dir_path = ['/Volumes/cundiff/COPS/Data/2018/2018_05/2018_05_10'];
 %dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_11/2017_11_10 SiV PL'];
 %dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_08/2017_08_15 SiV PL'];
+dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_08/2017_08_15 SiV PL'];
 %dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_11/2017_11_10 inc'];
 %dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_10/2017_10_23 inc'];
 %dir_path = ['R:/COPS/Data/2017/2017_08/2017_08_10 in prog'];
 %dir_path = ['R:/COPS/Data/2017/2017_10/2017_10_23'];
 %dir_path = ['.'];
 %dir_path = pwd;
-
-scan_num = '17';
+scan_num = '10';
 %scan_num = '05';
 %scan_num = '09 - hi res cocirc';
 %scan_num = '09 - 3D 5uW';
@@ -76,7 +77,7 @@ numpad = 1024;  %fft prefers 2^n points
 Undersample_win = 0;
 isContourPlot = 0;
 NbContours=10;  %Sets the number of contours if using contour plots.
-CrtlFlags = [1,0,1,0,0,0];
+CrtlFlags = [2,0,2,0,0,0];
     %Flags correspond to [tau,T,t,V,aux2,aux1],  Flags used to correspond to [tau,T,t,V,aux,pwr] - CLS, 2017-10-25.
     %Value of 0 means do nothing                        
     %Value of 1 means plot time domain
@@ -104,7 +105,7 @@ x_offset = 2; %(right: +, left:-) (along t_axis in pixels)
 %stdev_window_time = 2.5; %in ps, t axis;
 %time_slope = 1; %in ps/ps
 %time_offset = -.5; %in ps/ps
-isSaveProcessedData = 0; %Set to 1 to save processed data.
+isSaveProcessedData = 1; %Set to 1 to save processed data.
 
 % Eliminate the dialog box below in favor of hard-coding the values.
 % isub = [d(:).isdir];
@@ -584,8 +585,8 @@ else
     %hFig = surf(axis2(xlim_min:xlim_max),axis1(ylim_min:ylim_max),abs(Z1plot(ylim_min:ylim_max,xlim_min:xlim_max)),'EdgeColor','none'); set(gca,'Ydir','Normal');
 end
 title('S1 Absolute Value')
-
-colormap(parula)
+colormap(sunset)
+%colormap(parula)
 %colormap(viridis)
 %colormap(beach)
 %colormap(flipud(bone))
@@ -595,6 +596,7 @@ if (CrtlFlags(1) == 2) & (CrtlFlags(3) == 2)
    % x = linspace(axis2(1),axis2(end),20); y = -x; line(x,y,'Color','White')%,'LineStyle', ':','MarkerSize',16)
 end
 colorbar();
+colormap(sunset)
 % ylabel('${\hbar\omega_{\tau}}$', 'interpreter','latex','FontSize',18)
 % xlabel('${\hbar\omega_{t}}$', 'interpreter','latex','FontSize',18)
 ylabel(axis1label, 'FontSize',12)
@@ -690,15 +692,17 @@ if isSaveProcessedData
     if CrtlFlags(1) == 1 || CrtlFlags(1) == 2
         dlmwrite([OutDataPath 'axis1S2.txt'], axis1S2');
     end
-    processing_parameters = ["ref_freq="+ ref_freq;"Delay_t0_um="+ Delay_t0_um; ...
-        "isFFTshift ="+ isFFTshift; "isPadding="+isPadding; "numpad=" +numpad;...
-        "Undersample_win=" + Undersample_win; "isContourPlot = "+ isContourPlot; "NbContours=" +NbContours;...
-        "CrtlFlags="+CrtlFlags; "PlotIndx=" + PlotIndx; "StepLimit=" + StepLimit;...
-        "isCorrectOverallPhase="+ isCorrectOverallPhase; "PhaseCorrectionIndx="+PhaseCorrectionIndx;...
-        "isS1andS2="+isS1andS2; "isFrequencyUnits = " +isFrequencyUnits; "isWindowFunction_tau=" + isWindowFunction_tau;...
-       "isWindowFunction_T = "isWindowFunction_T ; "isWindowFunction_t="+isWindowFunction_t;...
-       "isWindowPhotonEcho="+isWindowPhotonEcho;"TukeyAlpha_tau="+TukeyAlpha_tau;...
-       "TukeyAlpha_T="+TukeyAlpha_T; "TukeyAlpha_t="+TukeyAlpha_t; "sigma_diag="+sigma_diag;...
-       "sigma_cross_diag = "+sigma_cross_diag;"x_offset="+x_offset];
-   dlmwrite([OutDataPath 'processing_parameters.txt'],processing_parameters)
+   processing_parameters = ["ref_freq="+ ref_freq;"Delay_t0_um="+ Delay_t0_um; ...
+        "isFFTshift ="+ isFFTshift; "isPadding="+ isPadding; "numpad=" + numpad;...
+        "Undersample_win=" + Undersample_win; "isContourPlot = "+ isContourPlot; "NbContours=" + NbContours;...
+        "CrtlFlags="+ mat2str(CrtlFlags); "PlotIndx=" + mat2str(PlotIndx); "StepLimit=" + mat2str(StepLimit);...
+        "isCorrectOverallPhase="+ isCorrectOverallPhase; "PhaseCorrectionIndx="+ mat2str(PhaseCorrectionIndx);...
+        "isS1andS2="+ isS1andS2; "isFrequencyUnits = " + isFrequencyUnits; "isWindowFunction_tau=" + isWindowFunction_tau;...
+       "isWindowFunction_T = "+ isWindowFunction_T ; "isWindowFunction_t="+ isWindowFunction_t;...
+       "isWindowPhotonEcho="+ isWindowPhotonEcho;"TukeyAlpha_tau="+ TukeyAlpha_tau;...
+       "TukeyAlpha_T="+ TukeyAlpha_T; "TukeyAlpha_t="+ TukeyAlpha_t; "sigma_diag="+ sigma_diag;...
+       "sigma_cross_diag = "+ sigma_cross_diag;"x_offset="+ x_offset];
+fid = fopen(strcat(file_path,'Processed_Output/','processing_parameters.txt'),'wt');
+fprintf(fid, '%s\n%s\n%s', processing_parameters);
+fclose(fid);
 end

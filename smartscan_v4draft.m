@@ -319,7 +319,7 @@ if is_writetoFile ==1
 
     coordinate_file = strcat('MD_Calculated_coordinates.txt');
     dlmwrite(coordinate_file,global_coordinate,'\t');
-    disp('done')
+    disp('done writing')
 end
 
 
