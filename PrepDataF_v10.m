@@ -1,3 +1,6 @@
+%PrepDataF_v10: copied from _v9 by Matt Day, 06,06,2018
+
+
 function  [MatrixX1,MatrixY1,MatrixX2,MatrixY2,MatrixX3,MatrixY3,MatrixX4,MatrixY4,MatrixX5,MatrixY5,MatrixX6,MatrixY6] = PrepDataF_v10(file_path)
 
 Data_path = [file_path 'MD_output.txt'];
@@ -35,11 +38,13 @@ X5 = Data(:,9);
 Y5 = -Data(:,10);
 X6 = Data(:,11);
 Y6 = -Data(:,12);
-RefFreq1= Data(:,13); %applying to Demodulators 1-3
-RefFreq2= Data(:,14); %applying to Demodulators 4-6
+RefFreq1= Data(:,13); %applying to Demodulators 1-3, depricated
+RefFreq2= Data(:,14); %applying to Demodulators 4-6, depricated
 AuxIn0= Data(:,15);
 AuxIn1= Data(:,16);
 
+
+%inserting zeros for incomplete scans
 [m n] = size(X1);
 if(m <= NumSteps_t*NumSteps_tau*NumSteps_T*NumSteps_V*NumSteps_aux*NumSteps_pwr*NumSteps_aux2)
     X1(m+1:(NumSteps_scan)) = 0;
@@ -60,7 +65,9 @@ if(m <= NumSteps_t*NumSteps_tau*NumSteps_T*NumSteps_V*NumSteps_aux*NumSteps_pwr*
     AuxIn1(m+1:(NumSteps_scan)) = 0;
 end
 
-
+%Each quadrant of each demodulator gets its own 7-dimensional matrix, set
+%by the vectors (X1...Y6), but is no longer than needed incase scan is
+%incomplete
 for i = 1:NumSteps_scan
     if coordinates(i,2) ~= round(coordinates(i,2))
         coordinates(i,2) = 1;

@@ -1,4 +1,4 @@
-%Updated for Mac from v2a by Chris Smallwood starting 2015-12-02.
+ %Updated for Mac from v2a by Chris Smallwood starting 2015-12-02.
 %Revised from version3b by Chris Smallwood on 2017-03-16.
 %Version 5: revised 2017-04-27 by Chris Smallwood so that ArbAxisPlot is not a separate function.
     %Plots are no longer contour plots.
@@ -77,7 +77,7 @@ numpad = 1024;  %fft prefers 2^n points
 Undersample_win = 0;
 isContourPlot = 0;
 NbContours=10;  %Sets the number of contours if using contour plots.
-CrtlFlags = [0,4,1,0,0,0];
+CrtlFlags = [0,4,2,0,0,0];
     %Flags correspond to [tau,T,t,V,aux2,aux1],  Flags used to correspond to [tau,T,t,V,aux,pwr] - CLS, 2017-10-25.
     %Value of 0 means do nothing                        
     %Value of 1 means plot time domain
@@ -134,7 +134,7 @@ parameters_path = [file_path 'MD_parameters.txt'];
 % [a,b] = size(pwr);
 
 %Call data from PrepDataF_v9 reading in all demodulators at once.
-[MatrixX1,MatrixY1,MatrixX2,MatrixY2,MatrixX3,MatrixY3,MatrixX4,MatrixY4,MatrixX5,MatrixY5,MatrixX6,MatrixY6] = PrepDataF_v9(file_path);
+[MatrixX1,MatrixY1,MatrixX2,MatrixY2,MatrixX3,MatrixY3,MatrixX4,MatrixY4,MatrixX5,MatrixY5,MatrixX6,MatrixY6] = PrepDataF_v10(file_path);
 parameters = FindParameters2D_v5(parameters_path); %NB! This also gets executed internally in PrepData above. Not sure if could be faster. I think PrepData does not need to be a separate function.
 NumSteps_pwr = 1;        
 %Define Number of Steps, allow for both scan limiting and interrupted scans
