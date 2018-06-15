@@ -1,15 +1,17 @@
 tic;
+clear
 steps = struct;
 stepsize = struct;
 initial_pos=struct;
-is_writetoFile =0;
+is_writetoFile =1;
 %set diagonal scan parameters
-steps.t_prime= 30;
-stepsize.t_prime = 20;
+
+steps.t_prime= 73;
+stepsize.t_prime = 1500; %um, must be positive; t and T position vectors will be created with proper sign at the end
 stepsize.tau_prime = 20;
-cutoff_idx = 3;
+cutoff_idx = 0;
 cut_neg_t =1;
-cut_neg_tau = 0;
+cut_neg_tau = 1;
 shortside = 2*cutoff_idx+1;
 
 %set other scan parameters
@@ -28,8 +30,8 @@ initialpos.LCVolt = 5;
 LCVolt = [];
 
 %Microscope stages NEED TO AGREE WITH LABVIEW
-initial_pos.aux1 = -28732.9; %x (µm)
-initial_pos.aux2 = -27183.7; %y (µm)
+initial_pos.aux1 = -25789.3; %x (µm)
+initial_pos.aux2 = -27032.9; %y (µm)
 
 stepsize_aux = 0;
 stepsize_aux2 = 0;
@@ -50,7 +52,7 @@ coords.t_prime = col-1;
 %constructing primed positions
 positions = struct;
 positions.tau_prime = (coords.tau_prime)*stepsize.tau_prime;
-positions.t_prime = (coords.t_prime)*stepsize.t_prime;
+positions.t_prime = (coords.t_prime)*abs(stepsize.t_prime);
 %constructing unprimed using transfomr t=t'+tau', tau = t-tau, sqrts of two
 %will divide out since, for example, we have stepsize_tau' =stepsize_tau*sqrt(2), and the transfomation will have a 
 %1/sqrt(2) out front 
@@ -85,7 +87,7 @@ end
 %proper axis
 stepsize.tau = abs(abs(positions.tau(4)) -abs(positions.tau(3))) ;
 stepsize.t =abs(abs(positions.t(4)) - abs(positions.t(3)))
-coordinates = [(pos(:,1)/stepsize.tau)+1,(pos(:,2)/stepsize.t)+1];
+coordinates = [(pos(:,1)/stepsize.tau)+1,(pos(:,2)/abs(stepsize.t))+1];
 
 
 %% Case Structure for making vectors of unused dimensions
@@ -156,7 +158,7 @@ disp('all position vectors done')
 global_position = zeros(size(pos,1),7);
 global_position(:,1) = pos(:,1);
 global_position(:,2) = T_position_vector;
-global_position(:,3) = pos(:,2);
+global_position(:,3) = -pos(:,2);
 global_position(:,4) = V_position_vector;
 global_position(:,5) = LCVolt_position_vector;
 global_position(:,6) = aux_position_vector;

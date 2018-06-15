@@ -37,7 +37,8 @@ planck = 4.135667662e-3;  % eV*ps, or eV/THz, from NIST. Uncertainty is in the l
 
 %ref_freq = speedC/(850); % c/(wavelength in nm). Answer is in THz.
 %ref_freq = speedC/(738.9-0.25); % c/(wavelength in nm). Answer is in THz.
-ref_freq = speedCvac/738.452; 
+%ref_freq = speedCvac/738.452; 
+ref_freq = speedCvac/737.82;
 %ref_freq = speedCvac/737.815555; %use for 2017_11_10, scan21
 %ref_freq = speedCvac/737.81961; %use for 2017_11_10, scan16
 %ref_freq = speedCvac/738.452132;
@@ -56,14 +57,14 @@ ref_freq = speedCvac/738.452;
 %dir_path = ['/Volumes/cundiff/COPS/Data/2018/2018_05/2018_05_10'];
 %dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_11/2017_11_10 SiV PL'];
 %dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_08/2017_08_15 SiV PL'];
-dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_08/2017_08_15 SiV PL'];
+dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_11/2017_11_10 SiV PL'];
 %dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_11/2017_11_10 inc'];
 %dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_10/2017_10_23 inc'];
 %dir_path = ['R:/COPS/Data/2017/2017_08/2017_08_10 in prog'];
 %dir_path = ['R:/COPS/Data/2017/2017_10/2017_10_23'];
 %dir_path = ['.'];
 %dir_path = pwd;
-scan_num = '30';
+scan_num = '12';
 %scan_num = '05';
 %scan_num = '09 - hi res cocirc';
 %scan_num = '09 - 3D 5uW';
@@ -77,7 +78,7 @@ numpad = 1024;  %fft prefers 2^n points
 Undersample_win = 0;
 isContourPlot = 0;
 NbContours=10;  %Sets the number of contours if using contour plots.
-CrtlFlags = [0,4,2,0,0,0];
+CrtlFlags = [2,0,2,0,0,0];
     %Flags correspond to [tau,T,t,V,aux2,aux1],  Flags used to correspond to [tau,T,t,V,aux,pwr] - CLS, 2017-10-25.
     %Value of 0 means do nothing                        
     %Value of 1 means plot time domain
@@ -89,7 +90,7 @@ StepLimit = [0,0,0]; %Step limit for [tau, T, t]. Entering 0 leaves them at full
 isCorrectOverallPhase = 1; %Enter 1 to correct everything by the Tstep specified by PhaseCorrectionIndx, 2 to correct each Tstep independently, 0 for no correction.
 PhaseCorrectionIndx = 1;
 isS1andS2 = 0; %Enter 1 if both S1 and S2 data sets were collected, 0 if only S1.
-isFrequencyUnits = 0; %Enter 1 for frequency units (THz). Enter 0 for energy units (meV).
+isFrequencyUnits = 1; %Enter 1 for frequency units (THz). Enter 0 for energy units (meV).
 isWindowFunction_tau = 0; %Enter 1 to window along the tau axis.
 isWindowFunction_T = 0; %Enter 1 to window along the T axis.
 isWindowFunction_t = 0; %Enter 1 to window along the t axis.
@@ -687,8 +688,8 @@ if isSaveProcessedData
 %     dlmwrite([OutDataPath 'ZS4Imag.txt'],imag(ZS4));
     dlmwrite([OutDataPath 'ZS4Real.txt'],squeeze(real(ZS4)));
     dlmwrite([OutDataPath 'ZS4Imag.txt'],squeeze(imag(ZS4)));
-    dlmwrite([OutDataPath 'axis1.txt'], axis1');
-    dlmwrite([OutDataPath 'axis2.txt'], axis2');
+    dlmwrite([OutDataPath 'axis1.txt'], axis1','precision',8);
+    dlmwrite([OutDataPath 'axis2.txt'], axis2','precision',8);
     if CrtlFlags(1) == 1 || CrtlFlags(1) == 2
         dlmwrite([OutDataPath 'axis1S2.txt'], axis1S2');
     end
