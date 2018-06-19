@@ -12,7 +12,7 @@
 clear all;
 %clf;%file_path = ['E:/Data/2018/2018_04/2018_04_09/scan22/'];
 
-file_path = ['E:/Data/2018/2018_05/2018_05_07/scan03/'];
+file_path = ['E:/Data/2018/2018_06/2018_06_12/scan15/bknd/'];
 %file_path = ['/Users/Chris2/Desktop/Data/2015/2015_12/2015_12_01/scan13/'];
 %file_path = ['/Volumes/cundiff/COPS/Data/2018/2018_05/2018_05_02/scan02/'];
 %file_path = ['/Volumes/cundiff/COPS/Data/2018/2017_01/2017_01_02/scan00'];
