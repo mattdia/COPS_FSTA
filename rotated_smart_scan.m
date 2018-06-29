@@ -6,7 +6,7 @@ initial_pos=struct;
 is_writetoFile =1;
 %set diagonal scan parameters
 
-steps.t_prime= 73;
+steps.t_prime= 72;
 stepsize.t_prime = 1500; %um, must be positive; t and T position vectors will be created with proper sign at the end
 stepsize.tau_prime = 20;
 cutoff_idx = 0;
@@ -30,8 +30,8 @@ initialpos.LCVolt = 5;
 LCVolt = [];
 
 %Microscope stages NEED TO AGREE WITH LABVIEW
-initial_pos.aux1 = -25789.3; %x (µm)
-initial_pos.aux2 = -27032.9; %y (µm)
+initial_pos.aux1 = -19690.18; %x (µm)
+initial_pos.aux2 = -25260.74; %y (µm)
 
 stepsize_aux = 0;
 stepsize_aux2 = 0;
