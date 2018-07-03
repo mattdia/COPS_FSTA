@@ -20,7 +20,7 @@ windowed T steps for 3D scans
 
 
 %% Flags
-inhom_flag = 0; %Purely inhomogeneous mask
+inhom_flag = 1; %Purely inhomogeneous mask
 hom_flag = 0; %Purely homogeneous mask
 other_flag = 0; %Change to 1 to load custom scan mask
 
@@ -28,18 +28,18 @@ other_flag = 0; %Change to 1 to load custom scan mask
 is_writetoFile = 1;
 %% Scan Parameters
 
-NumPnts_tau = 10;
+NumPnts_tau = 400;
 NumPnts_T = 1;
-NumPnts_t = 10;
-stepsize_tau= 3;
-stepsize_T = -45;
-stepsize_t= -3;
+NumPnts_t = 800;
+stepsize_tau= 240;
+stepsize_T = -50;
+stepsize_t= -120;
 tau_init= 0;
-T_init= -90;
+T_init= -50;
 t_init=0;
 t_offset = 0;
 
-tau_cutoff_index = 1; %Number of points on either side of the 
+tau_cutoff_index = 50; %Number of points on either side of the 
 %diagonal to take for a purely inhomogeneous scan
 
 %Misc scan parameters
@@ -52,8 +52,8 @@ LCVolt_init = 5;
 LCVolt = [];
 
 %Microscope stages NEED TO AGREE WITH LABVIEW
-aux_init = -28732.9; %x (µm)
-aux2_init = -27183.7; %y (µm)
+aux_init = -19620.8; %x (µm)
+aux2_init = -25034.8; %y (µm)
 
 stepsize_aux = 0;
 stepsize_aux2 = 0;
