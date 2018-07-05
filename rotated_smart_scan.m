@@ -30,8 +30,8 @@ initialpos.LCVolt = 5;
 LCVolt = [];
 
 %Microscope stages NEED TO AGREE WITH LABVIEW
-initial_pos.aux1 = -19621; %x (µm)
-initial_pos.aux2 = -25035; %y (µm)
+initial_pos.aux1 = -23057; %x (ï¿½m)
+initial_pos.aux2 = -24722; %y (ï¿½m)
 
 stepsize_aux = 0;
 stepsize_aux2 = 0;
@@ -42,7 +42,7 @@ steps.aux2 = 1;
 
 
 %creating mask IN ROTATED FRAME
-mask = ones(shortside,steps.t_prime); 
+mask = ones(shortside,steps.t_prime);
 %constructing coordinates
 coords = struct;
 [row,col] = find(mask>0);
@@ -54,8 +54,8 @@ positions = struct;
 positions.tau_prime = (coords.tau_prime)*stepsize.tau_prime;
 positions.t_prime = (coords.t_prime)*abs(stepsize.t_prime);
 %constructing unprimed using transfomr t=t'+tau', tau = t-tau, sqrts of two
-%will divide out since, for example, we have stepsize_tau' =stepsize_tau*sqrt(2), and the transfomation will have a 
-%1/sqrt(2) out front 
+%will divide out since, for example, we have stepsize_tau' =stepsize_tau*sqrt(2), and the transfomation will have a
+%1/sqrt(2) out front
 
 positions.t = positions.t_prime+positions.tau_prime;
 positions.tau=positions.t_prime-positions.tau_prime;
@@ -80,7 +80,7 @@ end
 
 if cutoff_idx ~=0
     pos = [positions.tau(cut_t),positions.t(cut_t)];
-else 
+else
     pos = [positions.tau(cut_t)',positions.t(cut_t)'];
 end
 %calculate coordinate matrix; coordinate = (position/stepsize)+1 of the
@@ -95,7 +95,7 @@ coordinates = [(pos(:,1)/stepsize.tau)+1,(pos(:,2)/abs(stepsize.t))+1];
 %which just repeats in value for the mask. WILL BREAK UNLESS UPDATED FOR
 %UNUSED DIMENSIONS WHEN REQUIRED (for example a position scan)
 
-if steps.T ==1 
+if steps.T ==1
     for i = 1:size(pos,1)
         T_position_vector(i) = initial_pos.T;
         T_coordinate_vector(i) = 1;
@@ -114,11 +114,11 @@ if steps.V == 1
     V_position_vector=reshape(V_position_vector,[],1);
     V_coordinate_vector=reshape(V_coordinate_vector,[],1);
 end
-           
+
 if steps.aux1 == 1
     aux_position_vector =[];
     aux_coordinate_vector = [];
-    
+
     for i = 1:size(pos,1)
         aux_position_vector(i) = initial_pos.aux1;
         aux_coordinate_vector(i) = 1;
