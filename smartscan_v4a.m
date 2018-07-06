@@ -5,18 +5,18 @@ clear
 %This file generates a 7 column long matrix which is read into LabView
 %and which can set the scan parameters. This file is to replace a slower
 %version of SmartScan which lives in the COPS old software folder.
-%Changes after v3: 
+%Changes after v3:
 %{
 v4a: updated the Inhomogeneous windowing to work for an arbitrary stepsize
-in t/tau. 
+in t/tau.
 
-things to do: 
+things to do:
 ?update such that we can take multiple inhomogeneously
 windowed T steps for 3D scans
 ?update such that we can take multiple steps in the aux directions
 
 %}
-   
+
 
 
 %% Flags
@@ -28,18 +28,18 @@ other_flag = 0; %Change to 1 to load custom scan mask
 is_writetoFile = 1;
 %% Scan Parameters
 
-NumPnts_tau = 400;
+NumPnts_tau = 250;
 NumPnts_T = 1;
-NumPnts_t = 800;
+NumPnts_t = 500;
 stepsize_tau= 240;
-stepsize_T = -50;
+stepsize_T = -90;
 stepsize_t= -120;
 tau_init= 0;
-T_init= -50;
+T_init= -90;
 t_init=0;
 t_offset = 0;
 
-tau_cutoff_index = 50; %Number of points on either side of the 
+tau_cutoff_index = 50; %Number of points on either side of the
 %diagonal to take for a purely inhomogeneous scan
 
 %Misc scan parameters
@@ -52,8 +52,8 @@ LCVolt_init = 5;
 LCVolt = [];
 
 %Microscope stages NEED TO AGREE WITH LABVIEW
-aux_init = -19620.8; %x (µm)
-aux2_init = -25034.8; %y (µm)
+aux_init = -23057; %x (ï¿½m)
+aux2_init = -24722; %y (ï¿½m)
 
 stepsize_aux = 0;
 stepsize_aux2 = 0;
@@ -61,7 +61,7 @@ stepsize_aux2 = 0;
 NumPnts_aux = 1;
 NumPnts_aux2 = 1;
 
- 
+
 %Variable initialization
 num_pnts_total = NumPnts_tau*NumPnts_T*NumPnts_t;
 position_matrix = zeros(NumPnts_t,NumPnts_tau);
@@ -78,7 +78,7 @@ t_position = [];
 
 mask = zeros(NumPnts_t,NumPnts_tau);
 
-%% no mask 
+%% no mask
 if inhom_flag==0 && hom_flag==0 &&other_flag==0
 
     for i = 1:NumPnts_tau
@@ -101,49 +101,49 @@ end
 clear i j
 
 %% Inhom masking (along diagonal pixel, plus/minus index cutoff in t direction)
-if inhom_flag == 1    
+if inhom_flag == 1
     %this part of the code works for photon echo masks of unequal t,tau
-    %stepsize. 
-        
+    %stepsize.
+
         for i = 1:NumPnts_t
-            
+
                 tau_center = floor(abs((i-1)*stepsize_t)/abs(stepsize_tau))*stepsize_tau;
                 tau_center_non_integer = (abs((i-1)*stepsize_t)/abs(stepsize_tau))*stepsize_tau;
                 tau_upper = tau_center+abs(tau_cutoff_index*stepsize_tau);
                 tau_lower = tau_center-abs(tau_cutoff_index*stepsize_tau);
-               
+
                 if tau_cutoff_index ==0
                     vec = tau_lower;
-                else 
+                else
                    for j = 1:(2*tau_cutoff_index)+1
                         vec(j) = tau_lower + (j-1)*stepsize_tau;
                    end
                 end
-                   
-                   
+
+
                  vec(vec/stepsize_tau < 0) = NaN;
                  vec(abs(vec)> abs(NumPnts_t * stepsize_t)) = NaN;
-                 
+
                  t_vec(1:size(vec,2)) = (i-1)*stepsize_t;
-                 
+
                 t_position_vector = [t_position_vector, t_vec];
                 tau_position_vector = [tau_position_vector,vec];
-                
-                
-        
+
+
+
         end
         corrected_tau_idx = find(isnan(tau_position_vector)==0);
         tau_position_vector = tau_position_vector(corrected_tau_idx);
         t_position_vector = t_position_vector(corrected_tau_idx);
-end       
-        
+end
+
 
 
         tau_position_vector = tau_position_vector';
         t_position_vector = t_position_vector';
     %   t_position_matrix = t_position_matrix'; %needs to be transposed because t is the slow axis.
 
-     %These matricies have nonzero offsets because the masking program cuts out zero elements, 
+     %These matricies have nonzero offsets because the masking program cuts out zero elements,
      %so we need to get rid of offsets to start at zero.
 
         disp('t/tau mask done')
@@ -157,7 +157,7 @@ if hom_flag==1
     mask = ones(NumPnts_tau,NumPnts_t);
 for i = 1:NumPnts_tau
     for j = 1:NumPnts_t
-        if (j-1) + round(NumPnts_tau/NumPnts_t)*(i-1) >= NumPnts_tau 
+        if (j-1) + round(NumPnts_tau/NumPnts_t)*(i-1) >= NumPnts_tau
             mask(i,j)=0;
         end
     end
@@ -169,22 +169,22 @@ if NumPnts_T ~=1
     for k = 1:NumPnts_T
         md_mask(:,:,k) = mask;
     end
-    
+
     [row, col, page] = ind2sub(size(md_mask),find(md_mask>0));
     tau_coordinate_vector = reshape(row,[],1);%make coordniate vectors
     t_coordinate_vector = reshape(col,[],1);
     T_coordinate_vector = reshape(page,[],1);
-    
+
     for i = 1:numel(tau_coordinate_vector) %make position vectors
         tau_position_vector = (i-1)*tau_coordinate_vector(i);
         t_position_vector = (i-1)*t_coordinate_vector(i);
         T_position_vector = (i-1)*T_coordinate_vector(i);
     end
 else
-    
+
     [row, col] = find(md_mask>0);
     tau_coordinate_vector = reshape(row,[],1);%make coordniate vectors
-    t_coordinate_vector = reshape(col,[],1);   
+    t_coordinate_vector = reshape(col,[],1);
     for i = 1:numel(tau_coordinate_vector) %make position vectors
         tau_position_vector = (i-1)*tau_coordinate_vector(i);
         t_position_vector = (i-1)*t_coordinate_vector(i);
@@ -202,7 +202,7 @@ if other_flag ==1 %takes mask (for now just a 3D matrix with tau,t,T coordinates
     tau_coordinate_vector = reshape(row,[],1);%make coordniate vectors
     t_coordinate_vector = reshape(col,[],1);
     T_coordinate_vector = reshape(page,[],1);
-    
+
     for i = 1:numel(tau_coordinate_vector) %make position vectors
         tau_position_vector = (i-1)*tau_coordinate_vector(i);
         t_position_vector = (i-1)*t_coordinate_vector(i);
@@ -215,7 +215,7 @@ end
 %% Creating Correct T for Inhomogeneous scans (if a 3D scan is desired)
 size_tau = size(tau_position_vector,1);
 clear k i j mask
-if NumPnts_T ~=1 
+if NumPnts_T ~=1
     for k = 1:NumPnts_T
         T_position_matrix(:,k) = [ones(size_tau,1)]*(k-1)*stepsize_T;
         tau_composite_matrix(:,k) = tau_position_vector;
@@ -232,7 +232,7 @@ end
 %which just repeats in value for the mask. WILL BREAK UNLESS UPDATED FOR
 %UNUSED DIMENSIONS
 
-if NumPnts_T ==1 
+if NumPnts_T ==1
     for i = 1:size(t_position_vector)
         T_position_vector(i) = T_init;
         T_coordinate_vector(i) = 1;
@@ -251,11 +251,11 @@ if NumPnts_V == 1
     V_position_vector=reshape(V_position_vector,[],1);
     V_coordinate_vector=reshape(V_coordinate_vector,[],1);
 end
-           
+
 if NumPnts_aux == 1
     aux_position_vector =[];
     aux_coordinate_vector = [];
-    
+
     for i = 1:size(t_position_vector)
         aux_position_vector(i) = aux_init;
         aux_coordinate_vector(i) = 1;
@@ -321,7 +321,3 @@ if is_writetoFile ==1
     dlmwrite(coordinate_file,global_coordinate,'\t');
     disp('done writing')
 end
-
-
-
-

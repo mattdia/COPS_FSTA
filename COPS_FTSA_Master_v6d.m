@@ -24,7 +24,7 @@
     %Version 6 also includes the ability to plot as a function of frequency instead of just energy.
 %Version 6a: Revised 2017-10-25 by Chris Smallwood.
     %Generalize so that program is capable of extracting MD data sets of (for example) 1 time dimension and 1 frequency dimension.
-    
+
 %Version6c: Revised 2017-04-03 by Matt Day
     % Fixed photon echo windowing so the windowing occurs along the proper
     % rotated coordinates in the time-time domain
@@ -37,9 +37,9 @@ planck = 4.135667662e-3;  % eV*ps, or eV/THz, from NIST. Uncertainty is in the l
 
 %ref_freq = speedC/(850); % c/(wavelength in nm). Answer is in THz.
 %ref_freq = speedC/(738.9-0.25); % c/(wavelength in nm). Answer is in THz.
-%ref_freq = speedCvac/738.452; 
-ref_freq = speedCvac/737.82;
-%ref_freq = speedCvac/737.815555; %use for 2017_11_10, scan21
+%ref_freq = speedCvac/738.452;
+%ref_freq = speedCvac/738.35936;
+ref_freq = speedCvac/737.815555; %use for 2017_11_10, scan21
 %ref_freq = speedCvac/737.81961; %use for 2017_11_10, scan16
 %ref_freq = speedCvac/738.452132;
 %ref_freq = speedCvac/738.32071; %use for 2018_02_27
@@ -57,14 +57,14 @@ ref_freq = speedCvac/737.82;
 %dir_path = ['/Volumes/cundiff/COPS/Data/2018/2018_05/2018_05_10'];
 %dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_11/2017_11_10 SiV PL'];
 %dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_08/2017_08_15 SiV PL'];
-dir_path = ['/Volumes/cundiff/COPS/Data/2018/2018_06/2018_06_22'];
-%dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_11/2017_11_10 inc'];
+dir_path = ['/Volumes/cundiff/COPS/Data/2018/2018_07/2018_07_05'];
+%dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_11/2017_11_10 SiV PL'];
 %dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_10/2017_10_23 inc'];
 %dir_path = ['R:/COPS/Data/2017/2017_08/2017_08_10 in prog'];
 %dir_path = ['R:/COPS/Data/2017/2017_10/2017_10_23'];
 %dir_path = ['.'];
 %dir_path = pwd;
-scan_num = '12';
+scan_num = '08';
 %scan_num = '05';
 %scan_num = '09 - hi res cocirc';
 %scan_num = '09 - 3D 5uW';
@@ -78,9 +78,9 @@ numpad = 1024;  %fft prefers 2^n points
 Undersample_win = 0;
 isContourPlot = 0;
 NbContours=10;  %Sets the number of contours if using contour plots.
-CrtlFlags = [2,0,2,0,0,0];
+CrtlFlags = [1,0,1,0,0,0];
     %Flags correspond to [tau,T,t,V,aux2,aux1],  Flags used to correspond to [tau,T,t,V,aux,pwr] - CLS, 2017-10-25.
-    %Value of 0 means do nothing                        
+    %Value of 0 means do nothing
     %Value of 1 means plot time domain
     %Value of 2 means plot frequency domain for S1/S2.
     %Value of 3 means plot S3 (only for T)
@@ -126,7 +126,7 @@ file_path = [dir_path '/scan'];
 %    laserspec_path = [file_path '00\absFFT_Z.txt'];
 %    laserwave_path = [file_path '00\Wavelength.txt'];
 %     laser_spec = load(laserspec_path);
-%     laser_wav = load(laserwave_path); 
+%     laser_wav = load(laserwave_path);
 
 file_path = [file_path scan_num '/'];
 parameters_path = [file_path 'MD_parameters.txt'];
@@ -137,15 +137,15 @@ parameters_path = [file_path 'MD_parameters.txt'];
 %Call data from PrepDataF_v9 reading in all demodulators at once.
 [MatrixX1,MatrixY1,MatrixX2,MatrixY2,MatrixX3,MatrixY3,MatrixX4,MatrixY4,MatrixX5,MatrixY5,MatrixX6,MatrixY6] = PrepDataF_v10(file_path);
 parameters = FindParameters2D_v5(parameters_path); %NB! This also gets executed internally in PrepData above. Not sure if could be faster. I think PrepData does not need to be a separate function.
-NumSteps_pwr = 1;        
+NumSteps_pwr = 1;
 %Define Number of Steps, allow for both scan limiting and interrupted scans
 %in time axes and scan limiting in all six axes.
 NumSteps3d = ones([1,6]);
 for (i= 1:6)
    if i<=3
         if StepLimit(i)==0
-            NumSteps3d(i) = size(MatrixX1,i);           
-        elseif StepLimit(i)~=0 
+            NumSteps3d(i) = size(MatrixX1,i);
+        elseif StepLimit(i)~=0
             NumSteps3d(i) = StepLimit(i);
         elseif ScanInterrupted(i)~=0
             NumSteps3d(i) = size(MatrixX1,i);
@@ -155,17 +155,17 @@ for (i= 1:6)
 %    elseif i>3
 %       NumSteps3d(4) =  parameters(28,:);
 %       NumSteps3d(5) =  parameters(34,:);
-%       NumSteps3d(6) =  parameters(31,:); 
-   end    
+%       NumSteps3d(6) =  parameters(31,:);
+   end
 end
-NumSteps_tau = NumSteps3d(1); 
-NumSteps_T = NumSteps3d(2); 
+NumSteps_tau = NumSteps3d(1);
+NumSteps_T = NumSteps3d(2);
 NumSteps_t = NumSteps3d(3);
 NumSteps_V = NumSteps3d(4);
 NumSteps_aux = NumSteps3d(6); %NB! The last two dimensions are swapped relative to what you would think they should look like in LabView. Gross! - CLS, 2017-10-25
 NumSteps_aux2 = NumSteps3d(5);
-%NumSteps_tau = parameters(7,:); 
-%NumSteps_T = parameters(8,:); 
+%NumSteps_tau = parameters(7,:);
+%NumSteps_T = parameters(8,:);
 %NumSteps_t = parameters(9,:);
 %NumSteps_V = parameters(28,:);
 %NumSteps_aux = parameters(31,:);
@@ -184,7 +184,7 @@ aux2_init = parameters(32,1);
 %Cut data to fit the step limit
 
 %Define StepMatrix
-%StepMatrix = [NumSteps_tau,NumSteps_T,NumSteps_t,NumSteps_V,NumSteps_aux,NumSteps_pwr]; 
+%StepMatrix = [NumSteps_tau,NumSteps_T,NumSteps_t,NumSteps_V,NumSteps_aux,NumSteps_pwr];
 StepMatrix = [NumSteps_tau,NumSteps_T,NumSteps_t,NumSteps_V,NumSteps_aux2,NumSteps_aux]; %NB! The last two dimensions are swapped relative to what you would think they should look like in LabView. Gross! - CLS, 2017-10-25
 
 %Photon echo windowing parameters. These need to be integers.
@@ -200,7 +200,7 @@ StepMatrix = [NumSteps_tau,NumSteps_T,NumSteps_t,NumSteps_V,NumSteps_aux2,NumSte
 % ZS4_m = complex(MatrixX4(1:NumSteps_tau,1:NumSteps_T,1:NumSteps_t,:,:,:),MatrixY4(1:NumSteps_tau,1:NumSteps_T,1:NumSteps_t,:,:,:));
 
 % ZS1_phase = angle(ZS1_m);
-% ZS4_phase = angle(ZS4_m);      
+% ZS4_phase = angle(ZS4_m);
 % for(l=1:1:NumSteps_aux2)
 % for(m=1:1:NumSteps_pwr)
 % for(j=1:1:NumSteps_aux)
@@ -211,7 +211,7 @@ StepMatrix = [NumSteps_tau,NumSteps_T,NumSteps_t,NumSteps_V,NumSteps_aux2,NumSte
 % end
 % end
 % end
-     
+
 %ZS1_m = abs(ZS1_m).*exp(complex(0,1)*ZS1_phase);
 %ZS4_m = abs(ZS4_m).*exp(complex(0,1)*ZS4_phase);
 
@@ -237,7 +237,7 @@ aux = ((aux_init:aux_stepsize:((NumSteps_aux-1)* aux_stepsize+aux_init)));
 aux2 = ((aux2_init:aux2_stepsize:((NumSteps_aux2-1)* aux2_stepsize+aux2_init)));
 [m ,n] = size(bias);
 if(m==0)
-   bias = V_init; 
+   bias = V_init;
 end
 
 %Set global phase using phase at time zero by taking the input data into
@@ -291,7 +291,7 @@ end
 %             end
 %         end
 %     end
-clear offs i j k j_offs i_offs norm 
+clear offs i j k j_offs i_offs norm
 end
 
 
@@ -301,7 +301,7 @@ pwr = 1;
 ZS1_m1 = ZS1_m(:,:,:,:,:,:);
 ZS4_m1 = ZS4_m(:,:,:,:,:,:);
 
-if isWindowFunction_tau 
+if isWindowFunction_tau
     alpha = TukeyAlpha_tau;
     alphaStepMatrix = round(alpha*StepMatrix(1));
     WindowFunc_tau(1:alphaStepMatrix) = 0.5*(1+cos(pi*(2*(0:alphaStepMatrix-1)/2/alphaStepMatrix-1)));
@@ -379,7 +379,7 @@ if isPadding
     Pad = zeros(a,b,m,StepMatrix(4),StepMatrix(5),StepMatrix(6));
 end
 ZS1 = Pad;
-ZS4 = Pad;         
+ZS4 = Pad;
 ZS1(1:p,1:o,1:u,1:StepMatrix(4),1:StepMatrix(5),1:StepMatrix(6))  = ZS1_m1;
 ZS4(1:StepMatrix(1),1:o,1:StepMatrix(3),1:StepMatrix(4),1:StepMatrix(5),1:StepMatrix(6))  = ZS4_m1;
 % ZS1(1:StepMatrix(1),1:56,1:60,1:StepMatrix(4),1:StepMatrix(5),1:StepMatrix(6))  = ZS1_m1;
@@ -406,12 +406,12 @@ if isFFTshift
 else
     [ E_tauS1,freq_tauS1,lambda_tauS1] = AxisGenF_v2a(tau,isPadding,numpad,isFFTshift,StepSizeMatrix(1),-ref_freq-speedC/(2e+3*tau_stepsize),Undersample_win,[0,0]);
 end
-[ E_tauS2,freq_tauS2,lambda_tauS2] = AxisGenF_v2a(tau,isPadding,numpad,isFFTshift,StepSizeMatrix(1),ref_freq,Undersample_win,[0,0]); 
-   
-       
-%% Determine Axis to use  
+[ E_tauS2,freq_tauS2,lambda_tauS2] = AxisGenF_v2a(tau,isPadding,numpad,isFFTshift,StepSizeMatrix(1),ref_freq,Undersample_win,[0,0]);
 
-i=1;  
+
+%% Determine Axis to use
+
+i=1;
 if(CrtlFlags(1) == 1)
     axis{1} = tau;
     axislabel{1} = '\tau (ps)';
@@ -481,7 +481,7 @@ elseif((CrtlFlags(3) == 2) & (i < 3))
         axis{i} = E_t;
         axislabel{i} = 'Detection frequency (meV)';
     end
-    ZS1 = ifft(ZS1,[],3);    
+    ZS1 = ifft(ZS1,[],3);
     ZS4 = ifft(ZS4,[],3);
     Delay_t0 = Delay_t0_um * 2e+3/speedC;
     ReducedFreq = freq_t - ref_freq;
@@ -491,7 +491,7 @@ elseif((CrtlFlags(3) == 2) & (i < 3))
         ZS4(:,:,r) = ZS4(:,:,r) * PhaseAdjustment_t0(r);
     end
     if isFFTshift
-        ZS1 = fftshift(ZS1,3);    
+        ZS1 = fftshift(ZS1,3);
         ZS4 = fftshift(ZS4,3);
     end
     i=i+1;
@@ -508,7 +508,7 @@ if((CrtlFlags(5) == 1) & (i < 3))
     axis{i} = aux2;
     axislabel{i} = 'aux2';
     i=i+1;
-end  
+end
 if((CrtlFlags(6) == 1) & (i < 3))
     axis{i} = aux;
     axislabel{i} = 'aux';
@@ -530,19 +530,19 @@ elseif (CrtlFlags(2) ~= 0) & (CrtlFlags(3) ~= 0) %Then T vs. t
 elseif (CrtlFlags(1) ~= 0) & (CrtlFlags(2) ~= 0) %Then tau vs. T
     Z1plot = ZS1(:,:,PlotIndx(3),PlotIndx(4),PlotIndx(5),PlotIndx(6));
     Z4plot = ZS4(:,:,PlotIndx(3),PlotIndx(4),PlotIndx(5),PlotIndx(6));
-elseif (CrtlFlags(3) ~= 0) & (CrtlFlags(6) ~= 0) %Then t vs. aux 
+elseif (CrtlFlags(3) ~= 0) & (CrtlFlags(6) ~= 0) %Then t vs. aux
     Z1plot = ZS1(PlotIndx(1),PlotIndx(2),:,PlotIndx(4),PlotIndx(5),:);
     Z4plot = ZS4(PlotIndx(1),PlotIndx(2),PlotIndx(3),PlotIndx(4),PlotIndx(5),PlotIndx(6));
-elseif (CrtlFlags(3) ~= 0) & (CrtlFlags(6) ~= 0) %Then t vs. aux2 
+elseif (CrtlFlags(3) ~= 0) & (CrtlFlags(6) ~= 0) %Then t vs. aux2
     Z1plot = ZS1(PlotIndx(1),PlotIndx(2),:,PlotIndx(4),:,PlotIndx(6));
     Z4plot = ZS4(PlotIndx(1),PlotIndx(2),:,PlotIndx(4),:,PlotIndx(6));
-elseif (CrtlFlags(3) ~= 0) & (CrtlFlags(6) ~= 0) %Then tau vs. aux 
+elseif (CrtlFlags(3) ~= 0) & (CrtlFlags(6) ~= 0) %Then tau vs. aux
     Z1plot = ZS1(:,PlotIndx(2),PlotIndx(3),PlotIndx(4),PlotIndx(5),:);
     Z4plot = ZS4(:,PlotIndx(2),PlotIndx(3),PlotIndx(4),PlotIndx(5),:);
-elseif (CrtlFlags(3) ~= 0) & (CrtlFlags(6) ~= 0) %Then tau vs. aux2 
+elseif (CrtlFlags(3) ~= 0) & (CrtlFlags(6) ~= 0) %Then tau vs. aux2
     Z1plot = ZS1(:,PlotIndx(2),PlotIndx(3),PlotIndx(4),:,PlotIndx(6));
     Z4plot = ZS4(:,PlotIndx(2),PlotIndx(3),PlotIndx(4),:,PlotIndx(6));
-elseif (CrtlFlags(3) ~= 0) & (CrtlFlags(6) ~= 0) %Then aux2 vs. aux 
+elseif (CrtlFlags(3) ~= 0) & (CrtlFlags(6) ~= 0) %Then aux2 vs. aux
     Z1plot = ZS1(PlotIndx(1),PlotIndx(2),PlotIndx(3),PlotIndx(4),:,:);
     Z4plot = ZS4(PlotIndx(1),PlotIndx(2),PlotIndx(3),PlotIndx(4),:,:);
 end
@@ -593,7 +593,7 @@ colormap(sunset)
 %colormap(flipud(bone))
 %colormap(gray)
 %colormap(flipud(gray))
-if (CrtlFlags(1) == 2) & (CrtlFlags(3) == 2) 
+if (CrtlFlags(1) == 2) & (CrtlFlags(3) == 2)
    % x = linspace(axis2(1),axis2(end),20); y = -x; line(x,y,'Color','White')%,'LineStyle', ':','MarkerSize',16)
 end
 colorbar();
@@ -611,7 +611,7 @@ else
     hFigReal = imagesc(axis2(xlim_min:xlim_max),axis1(ylim_min:ylim_max),real(Z1plot(ylim_min:ylim_max,xlim_min:xlim_max)),[-VmaxZ1,VmaxZ1]); set(gca,'Ydir','Normal');
 end
 title('S1 Real part')
-if (CrtlFlags(1) == 2) & (CrtlFlags(3) == 2) 
+if (CrtlFlags(1) == 2) & (CrtlFlags(3) == 2)
     x = linspace(axis2(1),axis2(end),20); y = -x; line(x,y,'Color','Black','LineStyle', ':')%,'MarkerSize',16)
 end
 colorbar();
@@ -638,13 +638,13 @@ if isS1andS2
     if(isContourPlot)
         contourf(axis2(1:n),axis1S2(1:m),real(Z4plot)/VmaxZ4,linspace(-1,1,NbContours),'linestyle','none');
     else
-        hFigReal = imagesc(axis2(xlim_min:xlim_max),axis1S2(ylim_min:ylim_max),real(Z4plot(ylim_min:ylim_max,xlim_min:xlim_max)),[-VmaxZ4,VmaxZ4]); set(gca,'Ydir','Normal'); 
+        hFigReal = imagesc(axis2(xlim_min:xlim_max),axis1S2(ylim_min:ylim_max),real(Z4plot(ylim_min:ylim_max,xlim_min:xlim_max)),[-VmaxZ4,VmaxZ4]); set(gca,'Ydir','Normal');
     end
     title('S2 Real Part')
     x = linspace(axis2(1),axis2(end),20); y = x; line(x,y,'Color','Black','LineStyle', ':')%,'MarkerSize',16)
     colorbar();
     ylabel(axis1label, 'FontSize',12)
-    xlabel(axis2label,'FontSize',12) 
+    xlabel(axis2label,'FontSize',12)
 end
 
 %% Extra linear plots
@@ -655,7 +655,7 @@ end
 %     contourf(axis2(1:n),axis1(1:m),(abs(Z4plot))/VmaxZ4,linspace(-1,1,NbContours),'linestyle','none')
 % else
 % end
-% colorbar(); 
+% colorbar();
 % % ylim([1450,1480])
 % % %xlim([1450,1480])
 % ylabel('${\hbar\omega_{\tau}}$', 'interpreter','latex','FontSize',18)
@@ -677,7 +677,7 @@ end
 %% Save Processed data
 
 if isSaveProcessedData
-    
+
     OutDataPath = strcat(file_path, 'Processed_Output/');
     if ~isdir(OutDataPath) mkdir(file_path, 'Processed_Output'); end
 %     dlmwrite([OutDataPath 'ZS1Real.txt'],real(ZS1));

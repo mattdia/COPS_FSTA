@@ -6,8 +6,8 @@ initial_pos=struct;
 is_writetoFile =1;
 %set diagonal scan parameters
 
-steps.t_prime= 72;
-stepsize.t_prime = 1500; %um, must be positive; t and T position vectors will be created with proper sign at the end
+steps.t_prime= 200;
+stepsize.t_prime = 100; %um, must be positive; t and T position vectors will be created with proper sign at the end
 stepsize.tau_prime = 20;
 cutoff_idx = 0;
 cut_neg_t =1;
