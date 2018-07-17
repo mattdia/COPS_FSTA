@@ -30,8 +30,8 @@ initialpos.LCVolt = 5;
 LCVolt = [];
 
 %Microscope stages NEED TO AGREE WITH LABVIEW
-initial_pos.aux1 = -23057; %x (�m)
-initial_pos.aux2 = -24722; %y (�m)
+initial_pos.aux1 = -23370; %x (µm)
+initial_pos.aux2 = -24769; %y (µm)
 
 stepsize_aux = 0;
 stepsize_aux2 = 0;

@@ -37,9 +37,9 @@ planck = 4.135667662e-3;  % eV*ps, or eV/THz, from NIST. Uncertainty is in the l
 
 %ref_freq = speedC/(850); % c/(wavelength in nm). Answer is in THz.
 %ref_freq = speedC/(738.9-0.25); % c/(wavelength in nm). Answer is in THz.
-%ref_freq = speedCvac/738.452;
+ref_freq = speedCvac/738.452;
 %ref_freq = speedCvac/738.35936;
-ref_freq = speedCvac/737.815555; %use for 2017_11_10, scan21
+%ref_freq = speedCvac/737.815555; %use for 2017_11_10, scan21
 %ref_freq = speedCvac/737.81961; %use for 2017_11_10, scan16
 %ref_freq = speedCvac/738.452132;
 %ref_freq = speedCvac/738.32071; %use for 2018_02_27
@@ -57,14 +57,14 @@ ref_freq = speedCvac/737.815555; %use for 2017_11_10, scan21
 %dir_path = ['/Volumes/cundiff/COPS/Data/2018/2018_05/2018_05_10'];
 %dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_11/2017_11_10 SiV PL'];
 %dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_08/2017_08_15 SiV PL'];
-dir_path = ['/Volumes/cundiff/COPS/Data/2018/2018_07/2018_07_05'];
+dir_path = ['/Volumes/cundiff/COPS/Data/2018/2018_06/2018_06_22'];
 %dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_11/2017_11_10 SiV PL'];
 %dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_10/2017_10_23 inc'];
 %dir_path = ['R:/COPS/Data/2017/2017_08/2017_08_10 in prog'];
 %dir_path = ['R:/COPS/Data/2017/2017_10/2017_10_23'];
 %dir_path = ['.'];
 %dir_path = pwd;
-scan_num = '08';
+scan_num = '27';
 %scan_num = '05';
 %scan_num = '09 - hi res cocirc';
 %scan_num = '09 - 3D 5uW';
@@ -106,7 +106,7 @@ x_offset = 2; %(right: +, left:-) (along t_axis in pixels)
 %stdev_window_time = 2.5; %in ps, t axis;
 %time_slope = 1; %in ps/ps
 %time_offset = -.5; %in ps/ps
-isSaveProcessedData = 1; %Set to 1 to save processed data.
+isSaveProcessedData = 0; %Set to 1 to save processed data.
 
 % Eliminate the dialog box below in favor of hard-coding the values.
 % isub = [d(:).isdir];
