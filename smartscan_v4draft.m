@@ -21,25 +21,25 @@ windowed T steps for 3D scans
 
 %% Flags
 inhom_flag = 1; %Purely inhomogeneous mask
-hom_flag = 0; %Purely homogeneous mask
+hom_flag = 1; %Purely homogeneous mask
 other_flag = 0; %Change to 1 to load custom scan mask
 
 %% Write parameters to File
 is_writetoFile = 1;
 %% Scan Parameters
 
-NumPnts_tau = 41;
+NumPnts_tau = 400;
 NumPnts_T = 1;
-NumPnts_t = 100;
-stepsize_tau= 20;
-stepsize_T = -90;
-stepsize_t= -1000;
+NumPnts_t = 800;
+stepsize_tau= 240;
+stepsize_T = -30;
+stepsize_t= -120;
 tau_init= 0;
 T_init= -90;
 t_init=0;
 t_offset = 0;
 
-tau_cutoff_index = 20; %Number of points on either side of the 
+tau_cutoff_index = 50; %Number of points on either side of the 
 %diagonal to take for a purely inhomogeneous scan
 
 %Misc scan parameters
@@ -52,14 +52,14 @@ LCVolt_init = 5;
 LCVolt = [];
 
 %Microscope stages NEED TO AGREE WITH LABVIEW
-aux_init = -28733; %x (µm)
-aux2_init = -27184; %y (µm)
+aux_init = 20577; %x (µm)
+aux2_init = 21948; %y (µm)
 
 stepsize_aux = 0;
-stepsize_aux2 = 0;
+stepsize_aux2 = 100;
 
 NumPnts_aux = 1;
-NumPnts_aux2 = 1;
+NumPnts_aux2 = 4;
 
  
 %Variable initialization
@@ -163,9 +163,10 @@ for i = 1:NumPnts_tau
     end
 end
 
+    md_mask = [];
 if NumPnts_T ~=1
     mask_threed = zeros(NumPnts_tau,NumPnts_t,NumPnts_T);
-    md_mask = [];
+    
     for k = 1:NumPnts_T
         md_mask(:,:,k) = mask;
     end
@@ -182,7 +183,7 @@ if NumPnts_T ~=1
     end
 else
     
-    [row, col] = find(md_mask>0);
+    [row, col,~] = find(md_mask>0);
     tau_coordinate_vector = reshape(row,[],1);%make coordniate vectors
     t_coordinate_vector = reshape(col,[],1);   
     for i = 1:numel(tau_coordinate_vector) %make position vectors
@@ -225,6 +226,23 @@ T_position_vector = reshape(T_position_matrix,[],1);
 t_position_vector = reshape(t_composite_matrix,[],1);
 tau_position_vector = reshape(tau_composite_matrix,[],1);
 disp('all three masks done')
+end
+
+%% Creating Aux2 vector
+
+size_tau = size(tau_position_vector,1);
+clear k i j mask
+if NumPnts_aux2 ~=1 
+    for k = 1:NumPnts_aux2
+        aux2_position_matrix(:,k) = [ones(size_tau,1)]*(k-1)*stepsize_aux2 + aux2_init;
+        aux2_coordinate_matrix(:,k) = [ones(size_tau,1)]*(k);
+        tau_composite_matrix(:,k) = tau_position_vector;
+        t_composite_matrix(:,k) = t_position_vector;
+    end
+aux2_position_vector = reshape(aux2_position_matrix,[],1);
+aux2_coordinate_vector = reshape(aux2_coordinate_matrix,[],1);
+t_position_vector = reshape(t_composite_matrix,[],1);
+tau_position_vector = reshape(tau_composite_matrix,[],1);
 end
 
 %% Case Structure for making vectors of unused dimensions
@@ -307,7 +325,7 @@ global_coordinate(:,3) = abs(t_position_vector/stepsize_t) + 1;
 global_coordinate(:,4) = V_position_vector/V_init;
 global_coordinate(:,5) = LCVolt_position_vector/LCVolt_init;
 global_coordinate(:,6) = aux_position_vector/aux_init;
-global_coordinate(:,7) = aux2_position_vector/aux2_init;
+global_coordinate(:,7) = aux2_coordinate_vector;
 
 if is_writetoFile ==1
     disp('creating files')

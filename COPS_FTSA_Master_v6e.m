@@ -29,6 +29,13 @@
     % Fixed photon echo windowing so the windowing occurs along the proper
     % rotated coordinates in the time-time domain
     % Changed code to save processing parameters
+    
+ %Version 6e: Revised 2018-08-28 by Matt Day
+    %Partial fix of data loading, as prepdata spits out a 7D matrix, but
+    %this program only looks at the first 6 dimensions of the data spit out
+    %of PrepData, so added the 7th dimension. The last four dimensions
+    %still need to be rearranged to make more sense and mesh better with
+    %the labview outputs.
 
 clear all; clc; %clf;% Clear variables, close MuPad engine, clear command window.
 speedC = 2.99709e+5; % nm/ps, speed of light in air.
@@ -38,7 +45,8 @@ planck = 4.135667662e-3;  % eV*ps, or eV/THz, from NIST. Uncertainty is in the l
 %ref_freq = speedC/(850); % c/(wavelength in nm). Answer is in THz.
 %ref_freq = speedC/(738.9-0.25); % c/(wavelength in nm). Answer is in THz.
 %ref_freq = speedCvac/738.35050 ;
-ref_freq = speedCvac/738.452;
+%ref_freq = speedCvac/738.452;
+ref_freq = speedCvac/829.0618;
 %ref_freq = speedCvac/737.815555; %use for 2017_11_10, scan21
 %ref_freq = speedCvac/737.81961; %use for 2017_11_10, scan16
 %ref_freq = speedCvac/738.452132;
@@ -54,9 +62,10 @@ ref_freq = speedCvac/738.452;
 %ref_freq = speedC/(737.3-0.25); % c/(wavelength in nm). Answer is in THz.
 %dir_path = ['E:/Data/2018/2018_01/2018_01_17'];
 %dir_path = ['/Users/Chris2/Desktop/Data/2015/2015_12/2017_04_25'];
-dir_path = ['/Volumes/cundiff/COPS/Data/2018/2018_08/2018_08_17'];
+%dir_path = ['/Volumes/cundiff/COPS/Data/2018/2018_08/2018_08_17'];
 %dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_11/2017_11_10 SiV PL'];
 %dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_08/2017_08_15 SiV PL'];
+dir_path = ['/Volumes/cundiff/COPS/Data/2018/2018_11/2018_11_07'];
 %dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_11/2017_11_10 SiV PL'];
 %dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_11/2017_11_10 inc'];
 %dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_10/2017_10_23 inc'];
@@ -64,7 +73,7 @@ dir_path = ['/Volumes/cundiff/COPS/Data/2018/2018_08/2018_08_17'];
 %dir_path = ['R:/COPS/Data/2017/2017_10/2017_10_23'];
 %dir_path = ['.'];
 %dir_path = pwd;
-scan_num = '20'
+scan_num = '10'
 %scan_num = '05';
 %scan_num = '09 - hi res cocirc';
 %scan_num = '09 - 3D 5uW';
@@ -72,7 +81,7 @@ scan_num = '20'
 %scan_num = '03';
 
 Delay_t0_um = 0; %um. Use this for Local oscillator measurement.
-isFFTshift = 0;
+isFFTshift = 1;
 isPadding = 2; %Pad with zeros up to numpad if set to 1. Pad by factor of 2 if set to 2.
 numpad = 1024;  %fft prefers 2^n points
 Undersample_win = 0;
@@ -90,14 +99,14 @@ StepLimit = [0,0,0]; %Step limit for [tau, T, t]. Entering 0 leaves them at full
 isCorrectOverallPhase = 1; %Enter 1 to correct everything by the Tstep specified by PhaseCorrectionIndx, 2 to correct each Tstep independently, 0 for no correction.
 PhaseCorrectionIndx = 1;
 isS1andS2 = 0; %Enter 1 if both S1 and S2 data sets were collected, 0 if only S1.
-isFrequencyUnits = 1; %Enter 1 for frequency units (THz). Enter 0 for energy units (meV).
-isWindowFunction_tau = 0; %Enter 1 to window along the tau axis.
+isFrequencyUnits = 0; %Enter 1 for frequency units (THz). Enter 0 for energy units (meV).
+isWindowFunction_tau = 1; %Enter 1 to window along the tau axis.
 isWindowFunction_T = 0; %Enter 1 to window along the T axis.
-isWindowFunction_t = 0; %Enter 1 to window along the t axis.
+isWindowFunction_t = 1; %Enter 1 to window along the t axis.
 isWindowPhotonEcho = 0; %Enter 1 for photon echo windowing across AND along the t/tau diagonal, enter 2 for across.
-TukeyAlpha_tau = .9;     % Select a decimal between 0 (no window) and 1 (Hanning window).
+TukeyAlpha_tau = .5;     % Select a decimal between 0 (no window) and 1 (Hanning window).
 TukeyAlpha_T =.8;     % Select a decimal between 0 (no window) and 1 (Hanning window).
-TukeyAlpha_t = .9;     % Select a decimal between 0 (no window) and 1 (Hanning window).
+TukeyAlpha_t = .5;     % Select a decimal between 0 (no window) and 1 (Hanning window).
 
 sigma_diag = 1000000; %px
 sigma_cross_diag = 100; %px
@@ -107,7 +116,7 @@ x_offset = 2; %(right: +, left:-) (along t_axis in pixels)
 %time_slope = 1; %in ps/ps
 %time_offset = -.5; %in ps/ps
 isSaveProcessedData =1; %Set to 1 to save processed data.
-
+isRemoveCW = 1;
 % Eliminate the dialog box below in favor of hard-coding the values.
 % isub = [d(:).isdir];
 % nameFolds = {d(isub).name}';
@@ -266,6 +275,22 @@ end
 
 ZS1_m = complex(MatrixX1(1:NumSteps_tau,1:NumSteps_T,1:NumSteps_t,:,:,:,:),MatrixY1(1:NumSteps_tau,1:NumSteps_T,1:NumSteps_t,:,:,:,:));
 ZS4_m = complex(MatrixX4(1:NumSteps_tau,1:NumSteps_T,1:NumSteps_t,:,:,:,:),MatrixY4(1:NumSteps_tau,1:NumSteps_T,1:NumSteps_t,:,:,:,:));
+if isRemoveCW == 1
+  ZS1_mr = real(ZS1_m);
+  ZS1_mi = imag(ZS1_m);
+  ZS4_mr = real(ZS4_m);
+  ZS4_mi = imag(ZS4_m);
+  
+  
+  ZS1_mr = ZS1_mr - mean(mean(ZS1_mr));
+  ZS1_mi = ZS1_mi - mean(mean(ZS1_mi));
+  
+  ZS4_mr = ZS4_mr - mean(mean(ZS4_mr));
+  ZS4_mr = ZS4_mr - mean(mean(ZS4_mr));
+ 
+  ZS1_m  = ZS1_mr + complex(0,1)*ZS1_mi;
+  ZS4_m  = ZS4_mr + complex(0,1)*ZS4_mi;
+end
 
 if isWindowPhotonEcho ~= 0
     slope = abs(t_stepsize/tau_stepsize);
