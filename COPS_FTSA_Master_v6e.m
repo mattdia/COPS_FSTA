@@ -115,7 +115,7 @@ x_offset = 2; %(right: +, left:-) (along t_axis in pixels)
 %stdev_window_time = 2.5; %in ps, t axis;
 %time_slope = 1; %in ps/ps
 %time_offset = -.5; %in ps/ps
-isSaveProcessedData =1; %Set to 1 to save processed data.
+isSaveProcessedData =0; %Set to 1 to save processed data.
 isRemoveCW = 1;
 % Eliminate the dialog box below in favor of hard-coding the values.
 % isub = [d(:).isdir];
@@ -592,10 +592,19 @@ end
 [m,n] = size(Z1plot);
 
 fig8 = figure(8);
-set( gcf, 'Color', 'White', 'Unit', 'Normalized', ...
-'Position', [0.1,0.1,.8,.8] ) ;
+if isS1andS2
+    set( gcf, 'Color', 'White', 'Unit', 'Normalized', ...
+        'Position', [0.1,0.1,.8,.8] ) ;
+else
+    set( gcf, 'Color', 'White', 'Unit', 'Normalized', ...
+        'Position', [0.1,0.1,.8,.4] ) ;
+end
 
-ax1 = subplot(2,2,1);
+if isS1andS2
+    ax1 = subplot(2,2,1);
+else
+    ax1 = subplot(1,2,1);
+end
 xlim_min = 1;
 xlim_max = n;
 ylim_min = 1;
@@ -629,7 +638,11 @@ colormap(sunset)
 ylabel(axis1label, 'FontSize',12)
 xlabel(axis2label,'FontSize',12)
 
-ax2 = subplot(2,2,2);
+if isS1andS2
+    ax2 = subplot(2,2,2);
+else
+    ax2 = subplot(1,2,2);
+end
 if(isContourPlot)
     contourf(axis2(1:n),axis1(1:m),real(Z1plot)/VmaxZ1,linspace(-1,1,NbContours),'linestyle','none');
 else
