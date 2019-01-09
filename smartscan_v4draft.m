@@ -21,8 +21,9 @@ windowed T steps for 3D scans
 
 %% Flags
 inhom_flag = 1; %Purely inhomogeneous mask
-hom_flag = 1; %Purely homogeneous mask
+hom_flag = 0; %Purely homogeneous mask
 other_flag = 0; %Change to 1 to load custom scan mask
+cont_scan = 1; %Change to 1 for continuous scanning
 
 %% Write parameters to File
 is_writetoFile = 1;
@@ -59,7 +60,7 @@ stepsize_aux = 0;
 stepsize_aux2 = 100;
 
 NumPnts_aux = 1;
-NumPnts_aux2 = 4;
+NumPnts_aux2 = 1;
 
  
 %Variable initialization
@@ -308,6 +309,7 @@ disp('all position vectors done')
 % Column 1 is tau, 2 is T, 3 is t, 4 is V, 5 is LCVolt, 6 is aux, 7 is aux2
 
 global_position = zeros(size(t_position_vector,1),7);
+
 global_position(:,1) = tau_position_vector;
 global_position(:,2) = T_position_vector;
 global_position(:,3) = t_position_vector+t_offset;
@@ -316,6 +318,13 @@ global_position(:,5) = LCVolt_position_vector;
 global_position(:,6) = aux_position_vector;
 global_position(:,7) = aux2_position_vector;
 
+if cont_scan
+    locs = find([1; diff(tau_position_vector)<0; 1]);
+    cont_position = zeros(length(locs) - 1,8);
+    for i = 1:length(locs) - 1
+        cont_position(i,:) = [global_position(locs(i),1),global_position(locs(i + 1) - 1,1),global_position(locs(i),2:7)];
+    end
+end
 
 global_coordinate = zeros(size(t_position_vector,1),7);
 
@@ -329,11 +338,15 @@ global_coordinate(:,7) = aux2_coordinate_vector;
 
 if is_writetoFile ==1
     disp('creating files')
+    
     mask_file = strcat('MD_SmartScan_Mask.txt');
     dlmwrite(mask_file,global_position,'\t');
 
     position_file = strcat('MD_Calculated_Positions.txt');
     dlmwrite(position_file,global_position,'\t');
+    
+    cont_file = strcat('MD_ContinuousScan_Positions.txt');
+    dlmwrite(cont_file,cont_position,'\t');
 
     coordinate_file = strcat('MD_Calculated_coordinates.txt');
     dlmwrite(coordinate_file,global_coordinate,'\t');
