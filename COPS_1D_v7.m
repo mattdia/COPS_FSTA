@@ -1,4 +1,4 @@
-% Updated by Chris Smallwood starting 2015-12-02.
+%% Updated by Chris Smallwood starting 2015-12-02.
 % Changes from v3c:
 %   - Using speed of light in air, not vacuum.
 %   - Deleted many things that had been commented out.
@@ -10,24 +10,32 @@
 %   - Corrected frequency sign starting in version 6b to go with ifft.
 % Changes in v7:
 %   - Changed to FindParameters1D_v4 (for 2D-COPS_v6.vi) (3/12/19)
+%   - Made fitting optional
+%   - Export data in a .mat file
 
+%%
 clear all;
 %clf;%file_path = ['E:/Data/2018/2018_04/2018_04_09/scan22/'];
 
-file_path = ['/Volumes/cundiff/COPS/Cops Labview/2D-COPS/Testing/scan00/'];
+% file_path = ['/Volumes/cundiff/COPS/Cops Labview/2D-COPS/Testing/scan00/'];
 %file_path = ['/Users/Chris2/Desktop/Data/2015/2015_12/2015_12_01/scan13/'];
-%file_path = ['/Volumes/cundiff/COPS/Data/2018/2018_05/2018_05_02/scan02/'];
+file_path = ['/Volumes/cundiff/COPS/Data/2019/2019_04/2019_04_24/scan04/'];
 %file_path = ['/Volumes/cundiff/COPS/Data/2018/2017_01/2017_01_02/scan00'];
 %file_path = ['/Volumes/cundiff/COPS/Data/2017/2017_11/2017_11_10 inc/scan05/'];
 data_path = [file_path '1D_output.txt'];
 parameters_path = [file_path '1D_parameters.txt'];
 Data = load(data_path);
 
-prompt = {'Demodulator','Measuring tau? (change to 0 if measuring T or t)','Phase gradient option (choose 1, 2, or 3)'};
-INPUT = inputdlg(prompt,'Input',1,{'1','0','1'});
+prompt = { ...
+    'Demodulator', ...
+    'Measuring tau? (change to 1 if measuring tau)', ...
+    'Phase gradient option (choose 1, 2, or 3)', ...
+    'Fit data? (changle to 0 to skip fitting)'};
+INPUT = inputdlg(prompt,'Input',1,{'1','0','1','1'});
 Demod = str2num(INPUT{1});
 Measuring_tau = str2num(INPUT{2});
 phase_gradient_option = str2num(INPUT{3});
+fit_data = str2num(INPUT{4});
 
 speedC = 2.99709e+5; %(nm/ps), speed of light in air. This value is from Wolfram Alpha. 
 speedCvac = 2.99792458e+5; % nm/ps, speed of light in vacuum. For wavemeter measurements.
@@ -141,10 +149,14 @@ position=position_calculated;
 
 %% fitting time domain signal with a gaussian to find 0 delay
 
-fit_gaussian = fittype('gauss1');
-gaussian_fit = fit(position,R_,fit_gaussian);
-[W_coef] = coeffvalues(gaussian_fit); %First element is amplitude, second is x0, third is 1/e half-width.
-FittedPositionOfZeroDelay = W_coef(2)
+if fit_data
+    fit_gaussian = fittype('gauss1');
+    gaussian_fit = fit(position,R_,fit_gaussian);
+    [W_coef] = coeffvalues(gaussian_fit); %First element is amplitude, second is x0, third is 1/e half-width.
+    FittedPositionOfZeroDelay = W_coef(2);
+else
+    FittedPositionOfZeroDelay = 0;
+end
 
 %% scaling data into delays [ps], frequency [THz], wavelength [nm]
 
@@ -213,18 +225,19 @@ end
   
 n=0;  %Number of  Digits in after (1um) Actual Position
 q = 10^n;
-Apos = round(FittedPositionOfZeroDelay*q)/q
+Apos = round(FittedPositionOfZeroDelay*q)/q;
 %pos_dif = (PositionOfZeroDelay - Apos)
 
 %%
 
-fig1 = figure(8);
+fig1 = figure(8); hold on
 plot(position,R_,'k')
-hold on
- plot(gaussian_fit,'c')
+if fit_data
+    plot(gaussian_fit,'c')
+end
 plot(position,real(Z_),'r')
-  xlabel('Position (um)')
-  ylabel('Volts (V)')
+xlabel('Position (um)')
+ylabel('Volts (V)')
  %     ylim([0 .002])
 tdomainr(:,1) = position;
 tdomainr(:,2) = R_;
@@ -262,3 +275,7 @@ dataz(:,1) = Wavelength_nm;
 dataz(:,2) = flipud(abs(FFT_Z));
 savezpath = [file_path 'data.txt'];
 dlmwrite(savezpath,dataz);
+
+%%
+
+save([file_path 'pData.mat'],'tdomainr','tdomainx','tdomainy','Wavelength_nm','FFT_Z');
