@@ -49,7 +49,6 @@ fid=fopen(parFilename);
 tline = fgetl(fid);
 
 while tline ~= -1
-    tline
     
     if contains(tline,'Axis 1 initial position [microns]')
         pos = tline;
