@@ -1,4 +1,4 @@
- %Updated for Mac from v2a by Chris Smallwood starting 2015-12-02.
+%% Updated for Mac from v2a by Chris Smallwood starting 2015-12-02.
 %Revised from version3b by Chris Smallwood on 2017-03-16.
 %Version 5: revised 2017-04-27 by Chris Smallwood so that ArbAxisPlot is not a separate function.
     %Plots are no longer contour plots.
@@ -41,6 +41,8 @@
 %   - Changed to FindParameters2D_v6 (for 2D-COPS_v6.vi) (3/12/19)
 %   - Changed to PrepDataF_v11 (3/12/19)
 
+%% Variables
+
 clear all; clc; %clf;% Clear variables, close MuPad engine, clear command window.
 speedC = 2.99709e+5; % nm/ps, speed of light in air.
 speedCvac = 2.99792458e+5; % nm/ps, speed of light in vacuum. For wavemeter measurements.
@@ -50,7 +52,7 @@ planck = 4.135667662e-3;  % eV*ps, or eV/THz, from NIST. Uncertainty is in the l
 %ref_freq = speedC/(738.9-0.25); % c/(wavelength in nm). Answer is in THz.
 %ref_freq = speedCvac/738.35050 ;
 %ref_freq = speedCvac/738.452;
-ref_freq = speedCvac/829.0618;
+ref_freq = speedCvac/736.7233;
 %ref_freq = speedCvac/737.815555; %use for 2017_11_10, scan21
 %ref_freq = speedCvac/737.81961; %use for 2017_11_10, scan16
 %ref_freq = speedCvac/738.452132;
@@ -68,16 +70,16 @@ ref_freq = speedCvac/829.0618;
 %dir_path = ['/Users/Chris2/Desktop/Data/2015/2015_12/2017_04_25'];
 %dir_path = ['/Volumes/cundiff/COPS/Data/2018/2018_08/2018_08_17'];
 %dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_11/2017_11_10 SiV PL'];
-%dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_08/2017_08_15 SiV PL'];
-dir_path = ['/Volumes/cundiff/COPS/Cops Labview/2D-COPS/Testing'];
-%dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_11/2017_11_10 SiV PL'];
+% dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_08/2017_08_15 SiV PL'];
+% dir_path = ['/Volumes/cundiff/COPS/Cops Labview/2D-COPS/Testing'];
+dir_path = ['/Volumes/cundiff/COPS/Data/2019/2019_05/2019_05_17'];
 %dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_11/2017_11_10 inc'];
 %dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_10/2017_10_23 inc'];
 %dir_path = ['R:/COPS/Data/2017/2017_08/2017_08_10 in prog'];
 %dir_path = ['R:/COPS/Data/2017/2017_10/2017_10_23'];
 %dir_path = ['.'];
 %dir_path = pwd;
-scan_num = '01';
+scan_num = '04';
 %scan_num = '05';
 %scan_num = '09 - hi res cocirc';
 %scan_num = '09 - 3D 5uW';
@@ -91,7 +93,7 @@ numpad = 1024;  %fft prefers 2^n points
 Undersample_win = 0;
 isContourPlot = 0;
 NbContours=10;  %Sets the number of contours if using contour plots.
-CrtlFlags = [1,0,1,0,0,0];
+CrtlFlags = [0,0,2,0,0,1];
     %Flags correspond to [tau,T,t,V,aux2,aux1],  Flags used to correspond to [tau,T,t,V,aux,pwr] - CLS, 2017-10-25.
     %Value of 0 means do nothing
     %Value of 1 means plot time domain
@@ -103,24 +105,24 @@ StepLimit = [0,0,0]; %Step limit for [tau, T, t]. Entering 0 leaves them at full
 isCorrectOverallPhase = 1; %Enter 1 to correct everything by the Tstep specified by PhaseCorrectionIndx, 2 to correct each Tstep independently, 0 for no correction.
 PhaseCorrectionIndx = 1;
 isS1andS2 = 0; %Enter 1 if both S1 and S2 data sets were collected, 0 if only S1.
-isFrequencyUnits = 0; %Enter 1 for frequency units (THz). Enter 0 for energy units (meV).
-isWindowFunction_tau = 1; %Enter 1 to window along the tau axis.
+isFrequencyUnits = 1; %Enter 1 for frequency units (THz). Enter 0 for energy units (meV).
+isWindowFunction_tau = 0; %Enter 1 to window along the tau axis.
 isWindowFunction_T = 0; %Enter 1 to window along the T axis.
-isWindowFunction_t = 1; %Enter 1 to window along the t axis.
+isWindowFunction_t = 0; %Enter 1 to window along the t axis.
 isWindowPhotonEcho = 0; %Enter 1 for photon echo windowing across AND along the t/tau diagonal, enter 2 for across.
 TukeyAlpha_tau = .5;     % Select a decimal between 0 (no window) and 1 (Hanning window).
 TukeyAlpha_T =.8;     % Select a decimal between 0 (no window) and 1 (Hanning window).
 TukeyAlpha_t = .5;     % Select a decimal between 0 (no window) and 1 (Hanning window).
 
 sigma_diag = 1000000; %px
-sigma_cross_diag = 100; %px
+sigma_cross_diag = 40; %px
 %norm = 1/(sqrt(2*pi)*sigma);
-x_offset = 2; %(right: +, left:-) (along t_axis in pixels)
+x_offset = 0; %(right: +, left:-) (along t_axis in pixels)
 %stdev_window_time = 2.5; %in ps, t axis;
 %time_slope = 1; %in ps/ps
 %time_offset = -.5; %in ps/ps
-isSaveProcessedData =0; %Set to 1 to save processed data.
-isRemoveCW = 1;
+isSaveProcessedData =1; %Set to 1 to save processed data.
+isRemoveCW = 0;
 % Eliminate the dialog box below in favor of hard-coding the values.
 % isub = [d(:).isdir];
 % nameFolds = {d(isub).name}';
@@ -133,6 +135,8 @@ isRemoveCW = 1;
 % Undersample_win = str2num(INPUT{2});
 % S1_Demod = INPUT{3};
 % S2_Demod = INPUT{4};
+
+%% Prepping
 
 file_path = [dir_path '/scan'];
 %Load Laser Spectrum
@@ -254,6 +258,7 @@ if(m==0)
    bias = V_init;
 end
 
+%% Set global phase
 %Set global phase using phase at time zero by taking the input data into
 %polar coordinates and finding the phase of tau=t=0.
 [d1_theta,d1_r] = cart2pol(MatrixX1,MatrixY1);
@@ -279,12 +284,14 @@ end
 
 ZS1_m = complex(MatrixX1(1:NumSteps_tau,1:NumSteps_T,1:NumSteps_t,:,:,:,:),MatrixY1(1:NumSteps_tau,1:NumSteps_T,1:NumSteps_t,:,:,:,:));
 ZS4_m = complex(MatrixX4(1:NumSteps_tau,1:NumSteps_T,1:NumSteps_t,:,:,:,:),MatrixY4(1:NumSteps_tau,1:NumSteps_T,1:NumSteps_t,:,:,:,:));
+
+%% Remove CW
+
 if isRemoveCW == 1
   ZS1_mr = real(ZS1_m);
   ZS1_mi = imag(ZS1_m);
   ZS4_mr = real(ZS4_m);
   ZS4_mi = imag(ZS4_m);
-  
   
   ZS1_mr = ZS1_mr - mean(mean(ZS1_mr));
   ZS1_mi = ZS1_mi - mean(mean(ZS1_mi));
@@ -296,6 +303,7 @@ if isRemoveCW == 1
   ZS4_m  = ZS4_mr + complex(0,1)*ZS4_mi;
 end
 
+%% Photon Echo
 if isWindowPhotonEcho ~= 0
     slope = abs(t_stepsize/tau_stepsize);
     mask = zeros(size(ZS1_m));
@@ -323,7 +331,6 @@ end
 %     end
 clear offs i j k j_offs i_offs norm
 end
-
 
 %% Remaking of the function ArbAxisPlot (v4).
 
@@ -438,7 +445,6 @@ else
 end
 [ E_tauS2,freq_tauS2,lambda_tauS2] = AxisGenF_v2a(tau,isPadding,numpad,isFFTshift,StepSizeMatrix(1),ref_freq,Undersample_win,[0,0]);
 
-
 %% Determine Axis to use
 
 i=1;
@@ -548,7 +554,6 @@ if((CrtlFlags(6) == 1) & (i < 3))
     i=i+1;
 end
 
-
 %% Plot the figure.
 
 if (CrtlFlags(1) ~= 0) & (CrtlFlags(3) ~= 0) %Prefer tau vs. t
@@ -621,7 +626,8 @@ if(isContourPlot)
     hFig = contourf(axis2(1:n),axis1(1:m),abs(Z1plot),linspace(0,VmaxZ1,NbContours),'linestyle','none');
 else
     %hFig = imagesc(axis2(ylim_min:ylim_max),axis1(xlim_min:xlim_max),abs(Z1plot(ylim_min:ylim_max,xlim_min:xlim_max))); set(gca,'Ydir','Normal');
-    hFig = imagesc(axis2(xlim_min:xlim_max),axis1(ylim_min:ylim_max),abs(Z1plot(ylim_min:ylim_max,xlim_min:xlim_max))); set(gca,'Ydir','Normal');
+    hFig = imagesc(axis2(xlim_min:xlim_max),axis1(ylim_min:ylim_max),abs(Z1plot(ylim_min:ylim_max,xlim_min:xlim_max)));
+    set(gca,'Ydir','Normal');
     %hFig = surf(axis2(xlim_min:xlim_max),axis1(ylim_min:ylim_max),abs(Z1plot(ylim_min:ylim_max,xlim_min:xlim_max)),'EdgeColor','none'); set(gca,'Ydir','Normal');
 end
 title('S1 Absolute Value')
@@ -718,6 +724,7 @@ end
 % title('linear re')
 
 %% Save Processed data
+
 OutDataPath = strcat(file_path, 'Processed_Output/');
 if isSaveProcessedData
 
@@ -749,18 +756,29 @@ fprintf(fid, '%s\n', ['ref_freq = ' num2str(ref_freq)], ['Delay_t0_um = ' num2st
     ['sigma_cross_diag = ' num2str(sigma_cross_diag)], ['x_offset = ' num2str(x_offset)]);
 fclose(fid);
 
-
-
-
-save([OutDataPath 'pData.mat'],'ZS1','ZS4','axis1','axis2','axis1S2', ...
-    'ref_freq','Delay_t0_um', ...
-    'isFFTshift','isPadding','numpad',...
-    'Undersample_win','isContourPlot','NbContours',...
-    'CrtlFlags','PlotIndx','StepLimit',...
-    'isCorrectOverallPhase','PhaseCorrectionIndx',...
-    'isS1andS2','isFrequencyUnits','isWindowFunction_tau',...
-    'isWindowFunction_T','isWindowFunction_t',...
-    'isWindowPhotonEcho','TukeyAlpha_tau',...
-    'TukeyAlpha_T','TukeyAlpha_t','sigma_diag',...
-    'sigma_cross_diag','x_offset');
+if CrtlFlags(1) == 1 || CrtlFlags(1) == 2
+    save([OutDataPath 'pData.mat'],'ZS1','ZS4','axis1','axis2','axis1S2', ...
+        'ref_freq','Delay_t0_um', ...
+        'isFFTshift','isPadding','numpad',...
+        'Undersample_win','isContourPlot','NbContours',...
+        'CrtlFlags','PlotIndx','StepLimit',...
+        'isCorrectOverallPhase','PhaseCorrectionIndx',...
+        'isS1andS2','isFrequencyUnits','isWindowFunction_tau',...
+        'isWindowFunction_T','isWindowFunction_t',...
+        'isWindowPhotonEcho','TukeyAlpha_tau',...
+        'TukeyAlpha_T','TukeyAlpha_t','sigma_diag',...
+        'sigma_cross_diag','x_offset');
+else
+    save([OutDataPath 'pData.mat'],'ZS1','ZS4','axis1','axis2', ...
+        'ref_freq','Delay_t0_um', ...
+        'isFFTshift','isPadding','numpad',...
+        'Undersample_win','isContourPlot','NbContours',...
+        'CrtlFlags','PlotIndx','StepLimit',...
+        'isCorrectOverallPhase','PhaseCorrectionIndx',...
+        'isS1andS2','isFrequencyUnits','isWindowFunction_tau',...
+        'isWindowFunction_T','isWindowFunction_t',...
+        'isWindowPhotonEcho','TukeyAlpha_tau',...
+        'TukeyAlpha_T','TukeyAlpha_t','sigma_diag',...
+        'sigma_cross_diag','x_offset');
+end
 end
