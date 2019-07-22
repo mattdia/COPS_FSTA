@@ -239,7 +239,7 @@ while tline ~= -1
         V_init = str2num(Num_str_val);
     end
     
-    if contains(tline,'V step size  [V]')
+    if contains(tline,'V step size  [V]') || contains(tline,'V step size [V]')
         Num = tline;
         index = strfind(Num,'V]');
         Num_str_val = Num(1,index+2:end);
