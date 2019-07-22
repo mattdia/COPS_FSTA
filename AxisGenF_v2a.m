@@ -21,7 +21,7 @@ if(S3_flag == 0 && Zero_flag == 0) %S1 and S2
     lambda_t = speedC./freq_t;  %Units in nm
     E_t = freq_t*planck*(10^3); %Units in meV
 elseif(S3_flag == 1) %S3
-    freq_t = 2*(freq_t + ref_freq - Undersample_win*Fs); %THz %This might be wrong... I'm not sure freq_t should be doubled. TKTK
+    freq_t = freq_t + 2 * (ref_freq - Undersample_win * Fs); %THz
     lambda_t = speedC./freq_t;  %Units in nm
     E_t = freq_t*planck*(10^3); %Units in meV
 elseif(Zero_flag == 1) %Zero Quantum
