@@ -4,7 +4,7 @@
 %   - Changed to FindParameters2D_v6 (for 2D-COPS_v6.vi) (3/12/19)
 
 
-function  [MatrixX1,MatrixY1,MatrixX2,MatrixY2,MatrixX3,MatrixY3,MatrixX4,MatrixY4,MatrixX5,MatrixY5,MatrixX6,MatrixY6] = PrepDataF_v10(file_path)
+function  [MatrixX1,MatrixY1,MatrixX2,MatrixY2,MatrixX3,MatrixY3,MatrixX4,MatrixY4,MatrixX5,MatrixY5,MatrixX6,MatrixY6] = PrepDataF_v11(file_path)
 
 Data_path = [file_path 'MD_output.txt'];
 parameters_path = [file_path 'MD_parameters.txt'];
