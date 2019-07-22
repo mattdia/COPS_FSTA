@@ -65,7 +65,7 @@ pre_file_path = '/Volumes/cundiff/COPS/Data'; % Mac
 % pre_file_path = 'R:/COPS/Data';               % Windows
 
 file_path = [pre_file_path '/' year '/' year '_' month '/' year '_' month '_' day '/scan' scan_num '/'];
-% file_path = ['/Volumes/cundiff/COPS/Data/2019/2019_07/2019_07_11/scan19'];
+% file_path = ['/Volumes/cundiff/COPS/Data/2019/2019_07/2019_07_11/scan19/'];
 % file_path = pwd;
 % file_path = '.';
 
