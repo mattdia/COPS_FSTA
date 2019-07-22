@@ -48,43 +48,26 @@ speedC = 2.99709e+5; % nm/ps, speed of light in air.
 speedCvac = 2.99792458e+5; % nm/ps, speed of light in vacuum. For wavemeter measurements.
 planck = 4.135667662e-3;  % eV*ps, or eV/THz, from NIST. Uncertainty is in the last 2 digits.
 
-%ref_freq = speedC/(850); % c/(wavelength in nm). Answer is in THz.
-%ref_freq = speedC/(738.9-0.25); % c/(wavelength in nm). Answer is in THz.
-%ref_freq = speedCvac/738.35050 ;
-%ref_freq = speedCvac/738.452;
-ref_freq = speedCvac/736.7233;
-%ref_freq = speedCvac/737.815555; %use for 2017_11_10, scan21
-%ref_freq = speedCvac/737.81961; %use for 2017_11_10, scan16
-%ref_freq = speedCvac/738.452132;
-%ref_freq = speedCvac/738.32071; %use for 2018_02_27
-%ref_freq = speedCvac/738.3437; %use for 2018_03_15
-%ref_freq = speedCvac/738.3431; %use for  2018_03_15 scan 11
-%ref_freq = speedCvac/738.3468; %Use for 2018_03_15 scan13
-%ref_freq = speedCvac/738.35841; %Use for 2018_03_15 scan17
-%ref_freq = speedCvac/737.71447; %use for 2017_10_11 SiV PL scan17
-%ref_freq = speedCvac/737.81642;
-%ref_freq = speedCvac/930.80816;
-%ref_freq = speedCvac/737.77; % c/(wavelength in nm). Answer is in THz.
-%ref_freq = speedC/(737.3-0.25); % c/(wavelength in nm). Answer is in THz.
-%dir_path = ['E:/Data/2018/2018_01/2018_01_17'];
-%dir_path = ['/Users/Chris2/Desktop/Data/2015/2015_12/2017_04_25'];
-%dir_path = ['/Volumes/cundiff/COPS/Data/2018/2018_08/2018_08_17'];
-%dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_11/2017_11_10 SiV PL'];
-% dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_08/2017_08_15 SiV PL'];
-% dir_path = ['/Volumes/cundiff/COPS/Cops Labview/2D-COPS/Testing'];
-dir_path = ['/Volumes/cundiff/COPS/Data/2019/2019_05/2019_05_17'];
-%dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_11/2017_11_10 inc'];
-%dir_path = ['/Volumes/cundiff/COPS/Data/2017/2017_10/2017_10_23 inc'];
-%dir_path = ['R:/COPS/Data/2017/2017_08/2017_08_10 in prog'];
-%dir_path = ['R:/COPS/Data/2017/2017_10/2017_10_23'];
-%dir_path = ['.'];
-%dir_path = pwd;
-scan_num = '04';
-%scan_num = '05';
-%scan_num = '09 - hi res cocirc';
-%scan_num = '09 - 3D 5uW';
-%scan_num = '26 - high stats S1 3uW';
-%scan_num = '03';
+year     = '2019';
+month    = '07';
+day      = '11';
+scan_num = '19';
+fig_num  = str2num(scan_num);
+% fig_num  = 1;
+
+% ref_freq = speedCvac/736.57082;
+% ref_freq = speedCvac/739.93416;
+ref_freq = speedCvac/743.32835;
+
+% pre_file_path = 'E:/Data';                    % Lab computer
+% pre_file_path = '/Users/Chris2/Desktop/Data'; % Chris (outdated?)
+pre_file_path = '/Volumes/cundiff/COPS/Data'; % Mac
+% pre_file_path = 'R:/COPS/Data';               % Windows
+
+file_path = [pre_file_path '/' year '/' year '_' month '/' year '_' month '_' day '/scan' scan_num '/'];
+% file_path = ['/Volumes/cundiff/COPS/Data/2019/2019_07/2019_07_11/scan19'];
+% file_path = pwd;
+% file_path = '.';
 
 Delay_t0_um = 0; %um. Use this for Local oscillator measurement.
 isFFTshift = 1;
@@ -93,7 +76,7 @@ numpad = 1024;  %fft prefers 2^n points
 Undersample_win = 0;
 isContourPlot = 0;
 NbContours=10;  %Sets the number of contours if using contour plots.
-CrtlFlags = [0,0,2,0,0,1];
+CrtlFlags = [0,3,2,0,0,0];
     %Flags correspond to [tau,T,t,V,aux2,aux1],  Flags used to correspond to [tau,T,t,V,aux,pwr] - CLS, 2017-10-25.
     %Value of 0 means do nothing
     %Value of 1 means plot time domain
@@ -121,7 +104,7 @@ x_offset = 0; %(right: +, left:-) (along t_axis in pixels)
 %stdev_window_time = 2.5; %in ps, t axis;
 %time_slope = 1; %in ps/ps
 %time_offset = -.5; %in ps/ps
-isSaveProcessedData =1; %Set to 1 to save processed data.
+isSaveProcessedData =0; %Set to 1 to save processed data.
 isRemoveCW = 0;
 % Eliminate the dialog box below in favor of hard-coding the values.
 % isub = [d(:).isdir];
@@ -138,14 +121,12 @@ isRemoveCW = 0;
 
 %% Prepping
 
-file_path = [dir_path '/scan'];
 %Load Laser Spectrum
 %    laserspec_path = [file_path '00\absFFT_Z.txt'];
 %    laserwave_path = [file_path '00\Wavelength.txt'];
 %     laser_spec = load(laserspec_path);
 %     laser_wav = load(laserwave_path);
 
-file_path = [file_path scan_num '/'];
 parameters_path = [file_path 'MD_parameters.txt'];
 % power_path = [file_path 'MD_Power_measured.txt'];
 % pwr = load(power_path); % Power comes in from the bs
@@ -479,7 +460,7 @@ if(CrtlFlags(2) == 1)
     i=i+1;
 elseif(CrtlFlags(2) == 2 | CrtlFlags(2) == 3)
     if isFrequencyUnits == 1
-        axis{i} = freq_T
+        axis{i} = freq_T;
         axislabel{i} = 'f_T (THz)';
     else
         axis{i} = E_T;
@@ -568,18 +549,21 @@ elseif (CrtlFlags(1) ~= 0) & (CrtlFlags(2) ~= 0) %Then tau vs. T
 elseif (CrtlFlags(3) ~= 0) & (CrtlFlags(6) ~= 0) %Then t vs. aux
     Z1plot = ZS1(PlotIndx(1),PlotIndx(2),:,PlotIndx(4),PlotIndx(5),:);
     Z4plot = ZS4(PlotIndx(1),PlotIndx(2),PlotIndx(3),PlotIndx(4),PlotIndx(5),PlotIndx(6));
-elseif (CrtlFlags(3) ~= 0) & (CrtlFlags(6) ~= 0) %Then t vs. aux2
+elseif (CrtlFlags(3) ~= 0) & (CrtlFlags(5) ~= 0) %Then t vs. aux2
     Z1plot = ZS1(PlotIndx(1),PlotIndx(2),:,PlotIndx(4),:,PlotIndx(6));
     Z4plot = ZS4(PlotIndx(1),PlotIndx(2),:,PlotIndx(4),:,PlotIndx(6));
-elseif (CrtlFlags(3) ~= 0) & (CrtlFlags(6) ~= 0) %Then tau vs. aux
+elseif (CrtlFlags(1) ~= 0) & (CrtlFlags(6) ~= 0) %Then tau vs. aux
     Z1plot = ZS1(:,PlotIndx(2),PlotIndx(3),PlotIndx(4),PlotIndx(5),:);
     Z4plot = ZS4(:,PlotIndx(2),PlotIndx(3),PlotIndx(4),PlotIndx(5),:);
-elseif (CrtlFlags(3) ~= 0) & (CrtlFlags(6) ~= 0) %Then tau vs. aux2
+elseif (CrtlFlags(1) ~= 0) & (CrtlFlags(5) ~= 0) %Then tau vs. aux2
     Z1plot = ZS1(:,PlotIndx(2),PlotIndx(3),PlotIndx(4),:,PlotIndx(6));
     Z4plot = ZS4(:,PlotIndx(2),PlotIndx(3),PlotIndx(4),:,PlotIndx(6));
-elseif (CrtlFlags(3) ~= 0) & (CrtlFlags(6) ~= 0) %Then aux2 vs. aux
+elseif (CrtlFlags(5) ~= 0) & (CrtlFlags(6) ~= 0) %Then aux2 vs. aux
     Z1plot = ZS1(PlotIndx(1),PlotIndx(2),PlotIndx(3),PlotIndx(4),:,:);
     Z4plot = ZS4(PlotIndx(1),PlotIndx(2),PlotIndx(3),PlotIndx(4),:,:);
+elseif (CrtlFlags(3) ~= 0) & (CrtlFlags(4) ~= 0) %Then t vs. V
+    Z1plot = ZS1(PlotIndx(1),PlotIndx(2),:,:,PlotIndx(5),PlotIndx(6));
+    Z4plot = ZS4(PlotIndx(1),PlotIndx(2),:,:,PlotIndx(5),PlotIndx(6));
 end
 Z1plot = squeeze(Z1plot);
 Z4plot = squeeze(Z4plot);
@@ -600,7 +584,7 @@ elseif CrtlFlags(1) == 1
 end
 [m,n] = size(Z1plot);
 
-fig8 = figure(8);
+figure(fig_num);
 if isS1andS2
     set( gcf, 'Color', 'White', 'Unit', 'Normalized', ...
         'Position', [0.1,0.1,.8,.8] ) ;
