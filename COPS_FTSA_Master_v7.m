@@ -38,26 +38,37 @@
     %the labview outputs.
     
 % Changes in v7:
-%   - Changed to FindParameters2D_v6 (for 2D-COPS_v6.vi) (3/12/19)
-%   - Changed to PrepDataF_v11 (3/12/19)
+%   - Changed to FindParameters2D_v6 (for 2D-COPS_v6.vi) (3/12/19 K. Bates)
+%   - Changed to PrepDataF_v11 (3/12/19 K. Bates)
+%   - Added continuous scanning (11/5/10 K. Bates)
+%       - Creation of COPS_CS_Convert to convert continuous scanned data to
+%         format readable by COPS_FTSA_Master
+%       - Small changes at start of COPS_FTSA_Master for integerated
+%         running of COPS_CS_Convert
+%       - Small changes in FindParameters2D (generalized some
+%         capitalization)
 
 %% Variables
 
-clear all; clc; %clf;% Clear variables, close MuPad engine, clear command window.
+clear all; %clc; %clf;% Clear variables, close MuPad engine, clear command window.
 speedC = 2.99709e+5; % nm/ps, speed of light in air.
 speedCvac = 2.99792458e+5; % nm/ps, speed of light in vacuum. For wavemeter measurements.
 planck = 4.135667662e-3;  % eV*ps, or eV/THz, from NIST. Uncertainty is in the last 2 digits.
 
 year     = '2019';
-month    = '07';
-day      = '11';
-scan_num = '19';
+month    = '08';
+day      = '08';
+scan_num = '51';
 fig_num  = str2num(scan_num);
 % fig_num  = 1;
 
+cont_scan = 0;
+scan_step_size = .1;
+polar_interpolate = 0;
+
 % ref_freq = speedCvac/736.57082;
 % ref_freq = speedCvac/739.93416;
-ref_freq = speedCvac/743.32835;
+ref_freq = speedCvac/739.9328;
 
 % pre_file_path = 'E:/Data';                    % Lab computer
 % pre_file_path = '/Users/Chris2/Desktop/Data'; % Chris (outdated?)
@@ -76,7 +87,7 @@ numpad = 1024;  %fft prefers 2^n points
 Undersample_win = 0;
 isContourPlot = 0;
 NbContours=10;  %Sets the number of contours if using contour plots.
-CrtlFlags = [0,3,2,0,0,0];
+CrtlFlags = [1,0,1,0,0,0];
     %Flags correspond to [tau,T,t,V,aux2,aux1],  Flags used to correspond to [tau,T,t,V,aux,pwr] - CLS, 2017-10-25.
     %Value of 0 means do nothing
     %Value of 1 means plot time domain
@@ -120,6 +131,12 @@ isRemoveCW = 0;
 % S2_Demod = INPUT{4};
 
 %% Prepping
+
+if cont_scan
+    COPS_CS_Convert(file_path,scan_step_size,polar_interpolate);
+    file_path = [file_path 'Converted/'];
+    isCorrectOverallPhase = 0;
+end
 
 %Load Laser Spectrum
 %    laserspec_path = [file_path '00\absFFT_Z.txt'];

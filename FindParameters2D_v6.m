@@ -93,21 +93,21 @@ while tline ~= -1
     end
     
     
-    if contains(tline,'Axis 1 Number of steps')
+    if contains(tline,'Axis 1 Number of steps') || contains(tline,'Axis 1 number of steps')
         Num = tline;
         index = strfind(Num,'ps');
         Num_str_val = Num(1,index+2:end);
         Axis1NumberOfSteps = str2num(Num_str_val); %rate in microns
     end
     
-    if contains(tline,'Axis 2 Number of steps')
+    if contains(tline,'Axis 2 Number of steps') || contains(tline,'Axis 2 number of steps')
         Num = tline;
         index = strfind(Num,'ps');
         Num_str_val = Num(1,index+2:end);
         Axis2NumberOfSteps = str2num(Num_str_val); %rate in microns
     end
     
-    if contains(tline,'Axis 3 Number of steps')
+    if contains(tline,'Axis 3 Number of steps') || contains(tline,'Axis 3 number of steps')
         Num = tline;
         index = strfind(Num,'ps');
         Num_str_val = Num(1,index+2:end);
