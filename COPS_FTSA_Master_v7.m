@@ -56,14 +56,15 @@ speedCvac = 2.99792458e+5; % nm/ps, speed of light in vacuum. For wavemeter meas
 planck = 4.135667662e-3;  % eV*ps, or eV/THz, from NIST. Uncertainty is in the last 2 digits.
 
 year     = '2019';
-month    = '08';
-day      = '08';
-scan_num = '51';
-fig_num  = str2num(scan_num);
+month    = '11';
+day      = '15';
+scan_num = '07';
+fig_num  = str2num(scan_num)+2;
 % fig_num  = 1;
 
-cont_scan = 0;
-scan_step_size = .1;
+cont_scan = 1;
+convert_cont_scan = 0;
+scan_step_size = 20;
 polar_interpolate = 0;
 
 % ref_freq = speedCvac/736.57082;
@@ -81,13 +82,13 @@ file_path = [pre_file_path '/' year '/' year '_' month '/' year '_' month '_' da
 % file_path = '.';
 
 Delay_t0_um = 0; %um. Use this for Local oscillator measurement.
-isFFTshift = 1;
+isFFTshift = 0;
 isPadding = 2; %Pad with zeros up to numpad if set to 1. Pad by factor of 2 if set to 2.
 numpad = 1024;  %fft prefers 2^n points
 Undersample_win = 0;
 isContourPlot = 0;
 NbContours=10;  %Sets the number of contours if using contour plots.
-CrtlFlags = [1,0,1,0,0,0];
+CrtlFlags = [2,0,2,0,0,0];
     %Flags correspond to [tau,T,t,V,aux2,aux1],  Flags used to correspond to [tau,T,t,V,aux,pwr] - CLS, 2017-10-25.
     %Value of 0 means do nothing
     %Value of 1 means plot time domain
@@ -133,7 +134,9 @@ isRemoveCW = 0;
 %% Prepping
 
 if cont_scan
-    COPS_CS_Convert(file_path,scan_step_size,polar_interpolate);
+    if convert_cont_scan
+        COPS_CS_Convert(file_path,scan_step_size,polar_interpolate);
+    end
     file_path = [file_path 'Converted/'];
     isCorrectOverallPhase = 0;
 end

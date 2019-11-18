@@ -83,16 +83,19 @@ else
     dir = 0;
 end
 
-numSweeps = length(scanPos);
-
 sweepIndCheck = 1:6;
 sweepIndCheck(axNum) = [];
 
 sweepInd = find(ismember(recPos(:,sweepIndCheck), scanPos(:,sweepIndCheck),'rows') == 1);
 recPos(sweepInd,:) = [];
 
-sweepInd = sweepInd - (0:(numSweeps - 1))';
-sweepInd = [sweepInd [sweepInd(2:end) - 1; length(recPos)]];
+sweepInd = sweepInd - (0:(length(sweepInd) - 1))';
+if sweepInd(end) > length(data)
+    sweepInd(end) = [];
+end
+sweepInd = [sweepInd [sweepInd(2:end) - 1; length(data)]];
+
+numSweeps = length(sweepInd(:,1));
 
 numScanPts = 0;
 
@@ -104,8 +107,13 @@ for i = 1:numSweeps
     finish = scanPos(i,7);
     
     repInd = find(-diff(pos) > finish - start);
-    repInd = [[1; repInd + 1] [repInd; length(pos)]];
-    numReps = length(repInd);
+    if isempty(repInd)
+        repInd =[1 length(pos)];
+        numReps = 1;
+    else
+        repInd = [[1; repInd + 1] [repInd; length(pos)]];
+        numReps = length(repInd);
+    end
     
     [~,startCrd] = min(abs(newPos - start));
     [~,finishCrd] = min(abs(newPos - finish));
@@ -125,6 +133,11 @@ for i = 1:numSweeps
             currDat(:,[1 2]) = [theta r];
         end
         
+        disp([num2str(i) ' ' num2str(j)])
+        
+        [currPos,index] = unique(currPos);
+        currDat = currDat(index,:);
+        
         newDat(:,:,j) = interp1(currPos,currDat,newPosCurr);
         
         if ~polarInterpolate
@@ -138,7 +151,8 @@ for i = 1:numSweeps
         newDat(:,[1 2],j) = [x y];
     end
     
-    newDatMean = mean(newDat,3);
+    newDatMean = nanmean(newDat,3);
+    newDatMean(find(isnan(newDatMean))) = 0;
     
     newPosAll = ones(numPts,7) .* scanPos(i,:);
     newPosAll(:,7) = newPosAll(:,4);
