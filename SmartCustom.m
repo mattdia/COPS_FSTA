@@ -16,7 +16,7 @@ stepSize = [240 1 -120 1 1 1];
 inhom = 1;            % Purely inhomogeneous mask
 iso = 1;              % Isosceles mask (requires inhom)
 hom = 0;              % Purely homogeneous mask
-homOpt = 2;           % Options for homogeneous scan
+homOpt = 3;           % Options for homogeneous scan
                       %   1: Basic, slope of 1, but has odd behavior for unequal axes
                       %   2: Custom slope and rectangle of data along ax2
                       %   3: Triangle defined by end points
@@ -32,6 +32,7 @@ plusWidth = 5;        % Width of arm of plus mask (for plus)
 
 ax1 = 1;              % First SmartScan axis (typically 1)
 ax2 = 3;              % Second SmartScan axis (typically 3)
+axSw = 1;             % First axis to scan over (for continuous scanning, typically 1)
 
 final = initial + (numSteps-1) .* stepSize;
 
@@ -46,10 +47,17 @@ vec2 = initial(ax2):stepSize(ax2):final(ax2);
 % Creates matrices of the coordinates and positions for tau and t.
 stageCoordinates = zeros(prod(numSteps([ax1 ax2])),2);
 stagePositions = zeros(prod(numSteps([ax1 ax2])),2);
-stageCoordinates(:,1) = repmat(vecC1',numSteps(ax2),1);
-stageCoordinates(:,2) = repelem(vecC2,numSteps(ax1))';
-stagePositions(:,1) = repmat(vec1',numSteps(ax2),1);
-stagePositions(:,2) = repelem(vec2,numSteps(ax1))';
+if axSw == ax2
+    stageCoordinates(:,1) = repelem(vecC1,numSteps(ax2))';
+    stageCoordinates(:,2) = repmat(vecC2',numSteps(ax1),1);
+    stagePositions(:,1) = repelem(vec1,numSteps(ax2))';
+    stagePositions(:,2) = repmat(vec2',numSteps(ax1),1);
+else
+    stageCoordinates(:,1) = repmat(vecC1',numSteps(ax2),1);
+    stageCoordinates(:,2) = repelem(vecC2,numSteps(ax1))';
+    stagePositions(:,1) = repmat(vec1',numSteps(ax2),1);
+    stagePositions(:,2) = repelem(vec2,numSteps(ax1))';
+end
 
 % Removes points not in an inhomogeneous scan.
 if inhom
@@ -101,32 +109,46 @@ end
 
 %% Other parameters
 
-otherax = 1:3;
-otherax([ax1 ax2]) = [];
+axOth = 1:3;
+axOth([ax1 ax2]) = [];
 
 stagePosLen = length(stagePositions);
-coordinates = ones(stagePosLen * prod(numSteps([otherax 4:6])),7);
-positions = zeros(stagePosLen * prod(numSteps([otherax 4:6])),7);
+coordinates = ones(stagePosLen * prod(numSteps([axOth 4:6])),7);
+positions = zeros(stagePosLen * prod(numSteps([axOth 4:6])),7);
 
 % Turns the coordinate and position matrices for the stages into the final desired matrices.
-coordinates(:,[ax1 ax2]) = repmat(stageCoordinates,prod(numSteps([otherax 4:6])),1);
-positions(:,[ax1 ax2]) = repmat(stagePositions,prod(numSteps([otherax 4:6])),1);
-
 % Adds the T coordinates and positions.
-coordinates(:,otherax) = repmat(repelem(1:numSteps(otherax), ...
-    stagePosLen)', ...
-    prod(numSteps(4:end)),1);
-positions(:,otherax) = repmat(repelem(initial(otherax):stepSize(otherax):final(otherax), ...
-    stagePosLen)', ...
-    prod(numSteps(4:end)),1);
+if axSw == axOth
+    coordinates(:,[ax1 ax2]) = repmat(repelem(stageCoordinates, ...
+        numSteps(axOth),1), ...
+        prod(numSteps(4:6)),1);
+    positions(:,[ax1 ax2]) = repmat(repelem(stagePositions, ...
+        numSteps(axOth),1), ...
+        prod(numSteps(4:6)),1);
+    
+    coordinates(:,axOth) = repmat((1:numSteps(axOth))', ...
+        stagePosLen * prod(numSteps(4:end)),1);
+    positions(:,axOth) = repmat((initial(axOth):stepSize(axOth):final(axOth))', ...
+        stagePosLen * prod(numSteps(4:end)),1);
+else
+    coordinates(:,[ax1 ax2]) = repmat(stageCoordinates,prod(numSteps([axOth 4:6])),1);
+    positions(:,[ax1 ax2]) = repmat(stagePositions,prod(numSteps([axOth 4:6])),1);
+    
+    coordinates(:,axOth) = repmat(repelem(1:numSteps(axOth), ...
+        stagePosLen)', ...
+        prod(numSteps(4:end)),1);
+    positions(:,axOth) = repmat(repelem(initial(axOth):stepSize(axOth):final(axOth), ...
+        stagePosLen)', ...
+        prod(numSteps(4:end)),1);
+end
 
 % Adds the aux coordinates and positions.
 for i = 4:6
     coordinates(:,i) = repmat(repelem(1:numSteps(i), ...
-        stagePosLen * prod(numSteps([otherax 4:i-1])))', ...
+        stagePosLen * prod(numSteps([axOth 4:i-1])))', ...
         prod(numSteps(i+1:end)),1);
     positions(:,i) = repmat(repelem(initial(i):stepSize(i):final(i), ...
-        stagePosLen * prod(numSteps([otherax 4:i-1])))', ...
+        stagePosLen * prod(numSteps([axOth 4:i-1])))', ...
         prod(numSteps(i+1:end)),1);
 end
 
