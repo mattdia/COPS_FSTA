@@ -4,16 +4,15 @@
 % Inputs:
 %   filePathIn:       Directory of scan (e.g. '.../scan03/')
 %   stepSize:         Size of steps along scanned axis
-%   polarInterpolate: 0 for interpolation along x and y, 1 for
-%                     interpolation along theta and r.
 
 % Note: does not properly deal with demodulators 2 through 6.
 
-function [res] = COPS_CS_Convert(filePathIn,stepSize,polarInterpolate)
+function [res] = COPS_CS_Convert(filePathIn,stepSize)
 %% Import Data
 
-scanPos = importdata([filePathIn 'CS_scanning_positions.txt'],'\t',1);
+scanPos = importdata([filePathIn 'CS_scanning_positions.txt'],'\t',2);
 scanAx = scanPos.textdata{1}(12:end);
+sweepsPerLoc = str2num(scanPos.textdata{2}(16:end));
 scanPos = scanPos.data;
 
 if strcmp(scanAx,'tau')
@@ -61,8 +60,6 @@ fclose(FID);
 FID = fopen([filePathOut 'MD_Power_measured.txt'],'w');
 fclose(FID);
 
-% copyfile([filePathIn 'CS_parameters.txt'], [filePathOut 'MD_parameters.txt']);
-
 %% Organize and Interpolate
 
 if scanPos(1,axNum) < scanPos(1,7)
@@ -83,37 +80,24 @@ else
     dir = 0;
 end
 
-sweepIndCheck = 1:6;
-sweepIndCheck(axNum) = [];
+sweepInd = find(diff(recPos(:,1)) < 0);
+sweepInd = [[1; sweepInd + 1] [sweepInd; length(recPos)]];
 
-sweepInd = find(ismember(recPos(:,sweepIndCheck), scanPos(:,sweepIndCheck),'rows') == 1);
-recPos(sweepInd,:) = [];
-
-sweepInd = sweepInd - (0:(length(sweepInd) - 1))';
-if sweepInd(end) > length(data)
-    sweepInd(end) = [];
-end
-sweepInd = [sweepInd [sweepInd(2:end) - 1; length(data)]];
+[theta,r] = cart2pol(data(:,1),data(:,2));
+data(:,[1 2]) = [theta r];
+data(:,1) = data(:,1) - zeroTheta;
 
 numSweeps = length(sweepInd(:,1));
 
 numScanPts = 0;
 
-for i = 1:numSweeps
-    dat = data(sweepInd(i,1):sweepInd(i,2),:);
-    pos = recPos(sweepInd(i,1):sweepInd(i,2),1);
+for i = 1:floor(numSweeps / sweepsPerLoc)
+    if mod(i,10) == 0
+        disp([num2str(i/numSweeps * 100) '%']);
+    end
     
     start = scanPos(i,axNum);
     finish = scanPos(i,7);
-    
-    repInd = find(-diff(pos) > finish - start);
-    if isempty(repInd)
-        repInd =[1 length(pos)];
-        numReps = 1;
-    else
-        repInd = [[1; repInd + 1] [repInd; length(pos)]];
-        numReps = length(repInd);
-    end
     
     [~,startCrd] = min(abs(newPos - start));
     [~,finishCrd] = min(abs(newPos - finish));
@@ -122,37 +106,23 @@ for i = 1:numSweeps
     newCrdCurr = newCrd(startCrd:finishCrd);
     numPts = length(newPosCurr);
     numScanPts = numScanPts + numPts;
-    newDat = zeros(numPts,16,numReps);
+    newDat = zeros(numPts,16,sweepsPerLoc);
     
-    for j = 1:numReps
-        currPos = pos(repInd(j,1):repInd(j,2));
-        currDat = dat(repInd(j,1):repInd(j,2),:);    
-        
-        if polarInterpolate
-            [theta,r] = cart2pol(currDat(:,1),currDat(:,2));
-            currDat(:,[1 2]) = [theta r];
-        end
-        
-        disp([num2str(i) ' ' num2str(j)])
+    for j = 1:sweepsPerLoc
+        currPos = recPos(sweepInd(i + j - 1,1):sweepInd(i + j - 1,2),1);
+        currDat = data(sweepInd(i + j - 1,1):sweepInd(i + j - 1,2),:);
         
         [currPos,index] = unique(currPos);
         currDat = currDat(index,:);
         
         newDat(:,:,j) = interp1(currPos,currDat,newPosCurr);
         
-        if ~polarInterpolate
-            [theta,r] = cart2pol(newDat(:,1,j),newDat(:,2,j));
-            newDat(:,[1 2],j) = [theta r];
-        end
-        
-        newDat(:,1,j) = newDat(:,1,j) - zeroTheta;
-        
         [x,y] = pol2cart(newDat(:,1,j),newDat(:,2,j));
         newDat(:,[1 2],j) = [x y];
     end
     
     newDatMean = nanmean(newDat,3);
-    newDatMean(find(isnan(newDatMean))) = 0;
+    newDatMean(isnan(newDatMean)) = 0;
     
     newPosAll = ones(numPts,7) .* scanPos(i,:);
     newPosAll(:,7) = newPosAll(:,4);

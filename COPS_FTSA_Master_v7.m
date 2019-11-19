@@ -58,14 +58,13 @@ planck = 4.135667662e-3;  % eV*ps, or eV/THz, from NIST. Uncertainty is in the l
 year     = '2019';
 month    = '11';
 day      = '15';
-scan_num = '07';
-fig_num  = str2num(scan_num)+2;
+scan_num = '10';
+fig_num  = str2num(scan_num)+1;
 % fig_num  = 1;
 
 cont_scan = 1;
-convert_cont_scan = 0;
-scan_step_size = 20;
-polar_interpolate = 0;
+convert_cont_scan = 1;
+scan_step_size = 50;
 
 % ref_freq = speedCvac/736.57082;
 % ref_freq = speedCvac/739.93416;
@@ -135,7 +134,7 @@ isRemoveCW = 0;
 
 if cont_scan
     if convert_cont_scan
-        COPS_CS_Convert(file_path,scan_step_size,polar_interpolate);
+        COPS_CS_Convert(file_path,scan_step_size);
     end
     file_path = [file_path 'Converted/'];
     isCorrectOverallPhase = 0;
