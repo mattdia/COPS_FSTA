@@ -69,7 +69,7 @@ if scanPos(1,axNum) < scanPos(1,7)
     newPos = first:stepSize:last;
     newCrd = 1:length(newPos);
     
-    dir = 1;
+    sweepInd = find(diff(recPos(:,1)) < -1);
 else
     first = max(scanPos(:,axNum));
     last = min(scanPos(:,7));
@@ -77,10 +77,9 @@ else
     newPos = first:-stepSize:last;
     newCrd = 1:length(newPos);
     
-    dir = 0;
+    sweepInd = find(diff(recPos(:,1)) > 1);
 end
 
-sweepInd = find(diff(recPos(:,1)) < 0);
 sweepInd = [[1; sweepInd + 1] [sweepInd; length(recPos)]];
 
 [theta,r] = cart2pol(data(:,1),data(:,2));
