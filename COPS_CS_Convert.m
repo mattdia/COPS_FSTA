@@ -81,6 +81,11 @@ else
 end
 
 sweepInd = [[1; sweepInd + 1] [sweepInd; length(recPos)]];
+tooSmall = find((sweepInd(:,2) - sweepInd(:,1)) < 2);
+if ~isempty(tooSmall)
+    disp('Removing short sweeps');
+    sweepInd(tooSmall:end,:) = [];
+end
 
 [theta,r] = cart2pol(data(:,1),data(:,2));
 data(:,[1 2]) = [theta r];
@@ -92,7 +97,7 @@ numScanPts = 0;
 
 for i = 1:floor(numSweeps / sweepsPerLoc)
     if mod(i,10) == 0
-        disp([num2str(i/numSweeps * 100) '%']);
+        disp([num2str(i * sweepsPerLoc/numSweeps * 100) '%']);
     end
     
     start = scanPos(i,axNum);
