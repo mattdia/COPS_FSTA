@@ -88,7 +88,7 @@ if ~isempty(tooSmall)
 end
 
 [theta,r] = cart2pol(data(:,1),data(:,2));
-data(:,[1 2]) = [theta r];
+data(:,[1 2]) = [unwrap(theta) r];
 data(:,1) = data(:,1) - zeroTheta;
 
 numSweeps = length(sweepInd(:,1));
