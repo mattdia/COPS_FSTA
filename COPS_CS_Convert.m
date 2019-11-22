@@ -117,8 +117,9 @@ for i = 1:floor(numSweeps / sweepsPerLoc)
     newDat = zeros(numPts,16,sweepsPerLoc);
     
     for j = 1:sweepsPerLoc
-        currPos = recPos(sweepInd(i + j - 1,1):sweepInd(i + j - 1,2),1);
-        currDat = data(sweepInd(i + j - 1,1):sweepInd(i + j - 1,2),:);
+        ind = (i - 1) * sweepsPerLoc + j;
+        currPos = recPos(sweepInd(ind,1):sweepInd(ind,2),1);
+        currDat = data(sweepInd(ind,1):sweepInd(ind,2),:);
         
         [currPos,index] = unique(currPos);
         currDat = currDat(index,:);
