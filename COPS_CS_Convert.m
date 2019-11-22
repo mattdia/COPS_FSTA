@@ -95,8 +95,12 @@ numSweeps = length(sweepInd(:,1));
 
 numScanPts = 0;
 
+toWriteDat = [];
+toWritePos = [];
+toWriteCrd = [];
+
 for i = 1:floor(numSweeps / sweepsPerLoc)
-    if mod(i,10) == 0
+    if mod(i,25) == 0
         disp([num2str(i * sweepsPerLoc/numSweeps * 100) '%']);
     end
     
@@ -136,11 +140,20 @@ for i = 1:floor(numSweeps / sweepsPerLoc)
     newCrdAll(:,7) = newCrdAll(:,4);
     newCrdAll(:,axNum) = newCrdCurr;
     
-    dlmwrite(outputFile,newDatMean,'-append','delimiter','\t','precision',10);
-    dlmwrite(positionsFile,newPosAll,'-append','delimiter','\t');
-    dlmwrite(maskFile,newPosAll,'-append','delimiter','\t');
-    dlmwrite(coordinatesFile,newCrdAll,'-append','delimiter','\t');
+    toWriteDat = [toWriteDat; newDatMean];
+    toWritePos = [toWritePos; newPosAll];
+    toWriteCrd = [toWriteCrd; newCrdAll];
+    
+%     dlmwrite(outputFile,newDatMean,'-append','delimiter','\t','precision',10);
+%     dlmwrite(positionsFile,newPosAll,'-append','delimiter','\t');
+%     dlmwrite(maskFile,newPosAll,'-append','delimiter','\t');
+%     dlmwrite(coordinatesFile,newCrdAll,'-append','delimiter','\t');
 end
+
+dlmwrite(outputFile,toWriteDat,'-append','delimiter','\t','precision',10);
+dlmwrite(positionsFile,toWritePos,'-append','delimiter','\t');
+dlmwrite(maskFile,toWritePos,'-append','delimiter','\t');
+dlmwrite(coordinatesFile,toWriteCrd,'-append','delimiter','\t');
 
 parametersIn=fopen([filePathIn 'CS_parameters.txt']);
 parametersOut = fopen([filePathOut 'MD_parameters.txt'],'w');
