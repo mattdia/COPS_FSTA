@@ -33,6 +33,9 @@ zero = importdata([filePathIn 'CS_zero.txt']);
 
 zeroTheta = cart2pol(zero(1),zero(2));
 
+recPos = recPos(2:end,:);
+data = data(2:end,:);
+
 %% Output Files
 
 filePathOut = [filePathIn 'Converted/'];
