@@ -55,20 +55,20 @@ speedC = 2.99709e+5; % nm/ps, speed of light in air.
 speedCvac = 2.99792458e+5; % nm/ps, speed of light in vacuum. For wavemeter measurements.
 planck = 4.135667662e-3;  % eV*ps, or eV/THz, from NIST. Uncertainty is in the last 2 digits.
 
-year     = '2019';
-month    = '11';
-day      = '15';
-scan_num = '10';
-fig_num  = str2num(scan_num)+1;
-% fig_num  = 1;
+year     = '2020';
+month    = '01';
+day      = '20';
+scan_num = '12';
+% fig_num  = str2num(scan_num);
+fig_num  = 4;
 
 cont_scan = 1;
 convert_cont_scan = 1;
-scan_step_size = 50;
+scan_step_size = 15;
 
 % ref_freq = speedCvac/736.57082;
 % ref_freq = speedCvac/739.93416;
-ref_freq = speedCvac/739.9328;
+ref_freq = speedCvac/739.93410;
 
 % pre_file_path = 'E:/Data';                    % Lab computer
 % pre_file_path = '/Users/Chris2/Desktop/Data'; % Chris (outdated?)
@@ -81,13 +81,13 @@ file_path = [pre_file_path '/' year '/' year '_' month '/' year '_' month '_' da
 % file_path = '.';
 
 Delay_t0_um = 0; %um. Use this for Local oscillator measurement.
-isFFTshift = 0;
+isFFTshift = 1;
 isPadding = 2; %Pad with zeros up to numpad if set to 1. Pad by factor of 2 if set to 2.
 numpad = 1024;  %fft prefers 2^n points
 Undersample_win = 0;
 isContourPlot = 0;
 NbContours=10;  %Sets the number of contours if using contour plots.
-CrtlFlags = [2,0,2,0,0,0];
+CrtlFlags = [0,3,2,0,0,0];
     %Flags correspond to [tau,T,t,V,aux2,aux1],  Flags used to correspond to [tau,T,t,V,aux,pwr] - CLS, 2017-10-25.
     %Value of 0 means do nothing
     %Value of 1 means plot time domain
@@ -96,7 +96,7 @@ CrtlFlags = [2,0,2,0,0,0];
     %Value of 4 means plot ZeroQuantum (only for T)
 PlotIndx = [1,1,1,1,1,1]; %Flags correspond to the slice number extracted for elements of CrtlFlags that are not plotted.
 StepLimit = [0,0,0]; %Step limit for [tau, T, t]. Entering 0 leaves them at full length.
-isCorrectOverallPhase = 1; %Enter 1 to correct everything by the Tstep specified by PhaseCorrectionIndx, 2 to correct each Tstep independently, 0 for no correction.
+isCorrectOverallPhase = 3; %Enter 1 to correct everything by the Tstep specified by PhaseCorrectionIndx, 2 to correct each Tstep independently, 0 for no correction, 3 to read phase from a zero scan.
 PhaseCorrectionIndx = 1;
 isS1andS2 = 0; %Enter 1 if both S1 and S2 data sets were collected, 0 if only S1.
 isFrequencyUnits = 1; %Enter 1 for frequency units (THz). Enter 0 for energy units (meV).
@@ -115,7 +115,7 @@ x_offset = 0; %(right: +, left:-) (along t_axis in pixels)
 %stdev_window_time = 2.5; %in ps, t axis;
 %time_slope = 1; %in ps/ps
 %time_offset = -.5; %in ps/ps
-isSaveProcessedData =0; %Set to 1 to save processed data.
+isSaveProcessedData =1; %Set to 1 to save processed data.
 isRemoveCW = 0;
 % Eliminate the dialog box below in favor of hard-coding the values.
 % isub = [d(:).isdir];
@@ -278,6 +278,12 @@ elseif isCorrectOverallPhase == 1
     d4_phase_offset = d4_theta(idx_tau_zero,PhaseCorrectionIndx,idx_t_zero);
     disp(['Phase offset correction for D4: ',num2str(d4_phase_offset),' radians.'])
     d4_theta = d4_theta-d4_phase_offset;
+elseif isCorrectOverallPhase == 3
+    [d1_phase_offset,d4_phase_offset] = ReadZeroScan([file_path]);
+    d1_theta = d1_theta-d1_phase_offset;
+    d4_theta = d4_theta-d4_phase_offset;
+    disp(['Phase offset correction for D1: ',num2str(d1_phase_offset),' radians.'])
+    disp(['Phase offset correction for D4: ',num2str(d4_phase_offset),' radians.'])
 end
 [MatrixX1,MatrixY1]=pol2cart(d1_theta,d1_r);
 [MatrixX4,MatrixY4]=pol2cart(d4_theta,d4_r);
